@@ -1,0 +1,11 @@
+[
+    { "code": "NSW", "name": "New South Wales", "type": "jurisdiction" },
+    { "code": "VIC", "name": "Victoria", "type": "jurisdiction" },
+    { "code": "QLD", "name": "Queensland", "type": "jurisdiction" },
+    { "code": "WA", "name": "Western Australia", "type": "jurisdiction" },
+    { "code": "SA", "name": "South Australia", "type": "jurisdiction" },
+    { "code": "TAS", "name": "Tasmania", "type": "jurisdiction" },
+    { "code": "ACT", "name": "Australian Capital Territory", "type": "jurisdiction" },
+    { "code": "NT", "name": "Northern Territory", "type": "jurisdiction" },
+    { "code": "FED", "name": "Commonwealth", "type": "jurisdiction" }
+]

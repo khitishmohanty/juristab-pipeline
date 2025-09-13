@@ -1,0 +1,6 @@
+boto3
+sqlalchemy
+PyYAML
+python-dotenv
+beautifulsoup4
+mysql-connector-python

@@ -1,0 +1,1138 @@
+{
+  "1": [
+    {
+      "correlation-id": null,
+      "tag": "Header",
+      "content": "GOV.UK",
+      "clause-type": null,
+      "verification-flag": "Failed (Match 57%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Figure",
+      "content": "СМА\nCompetition & Markets Authority",
+      "clause-type": null,
+      "verification-flag": "Failed (Match 48%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Subtitle",
+      "content": "Guidance",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Title",
+      "content": "Unfair commercial practices",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Published 4 April 2025",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "Contents",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Table of Contents",
+      "content": "[\n  {\"item_text\": \"Overview\", \"page_number\": null},\n  {\"item_text\": \"Core concepts: trader, commercial practice, consumer, transactional decision\", \"page_number\": null},\n  {\"item_text\": \"Banned practices\", \"page_number\": null},\n  {\"item_text\": \"Omission of material information from an invitation to purchase\", \"page_number\": null},\n  {\"item_text\": \"Misleading actions\", \"page_number\": null},\n  {\"item_text\": \"Misleading omissions\", \"page_number\": null},\n  {\"item_text\": \"Aggressive practices\", \"page_number\": null},\n  {\"item_text\": \"Contravention of the requirements of professional diligence\", \"page_number\": null},\n  {\"item_text\": \"Promoting unfair commercial practices in codes of conduct\", \"page_number\": null},\n  {\"item_text\": \"Offences relating to unfair commercial practices\", \"page_number\": null}\n]",
+      "clause-type": null,
+      "verification-flag": "Failed (Match 67%)"
+    }
+  ],
+  "2": [
+    {
+      "correlation-id": null,
+      "tag": "Figure",
+      "content": "OGL",
+      "clause-type": null,
+      "verification-flag": "Failed (Exact Mismatch - Short)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "© Crown copyright 2025",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "This publication is licensed under the terms of the Open Government Licence v3.0 except where otherwise\nstated. To view this licence, visit nationalarchives.gov.uk/doc/open-government-licence/version/3 or write\nto the Information Policy Team, The National Archives, Kew, London TW9 4DU, or email:\npsi@nationalarchives.gov.uk.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)",
+      "hyperlinks": [
+        {
+          "text": "nationalarchives.gov.uk/doc/open-government-licence/version/3",
+          "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3"
+        },
+        {
+          "text": "psi@nationalarchives.gov.uk",
+          "url": "mailto:psi@nationalarchives.gov.uk"
+        }
+      ]
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Where we have identified any third party copyright information you will need to obtain permission from the\ncopyright holders concerned.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "This publication is available at https://www.gov.uk/government/publications/unfair-commercial-practices-\ncma207/unfair-commercial-practices",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "3": [
+    {
+      "correlation-id": null,
+      "tag": "Heading-h1",
+      "content": "Overview",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The Digital Markets, Competition and Consumers Act 2024 (DMCC Act) contains\nprovisions to protect consumers from unfair trading. [footnote 1] These provisions\nreplace and update the existing Consumer Protection from Unfair Trading\nRegulations 2008 (CPUTRs),[footnote 2] with some changes. [footnote 3]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)",
+      "hyperlinks": [
+        {
+          "text": "Consumer Protection from Unfair Trading",
+          "url": "https://www.gov.uk/government/publications/consumer-protection-from-unfair-trading-regulations-traders"
+        }
+      ]
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "These provisions of the DMCC Act apply to commercial practices which happen from\n6 April 2025 onwards. They maintain much of the scope and effect of the previous\nlaw. Traders can generally expect the same or similar requirements and prohibitions\nto apply to their commercial practices as under the previous regulations and\nconsumers can expect a similar level of protection. The DMCC Act also includes\nsome new or more detailed prohibitions of practices relating to fake consumer\nreviews[footnote 4] and 'drip pricing'.[footnote 5]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "This Guidance aims to help traders to comply with the unfair commercial practices\nprovisions in the DMCC Act.[footnote 6] It will also be of use to legal advisers, enforcers\nand consumer advisers in understanding what actions are prohibited.[footnote 7]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "This Guidance updates and replaces Consumer Protection from Unfair Trading\nRegulations: OFT1008 (https://www.gov.uk/government/publications/consumer-protection-\nfrom-unfair-trading-regulations-traders).",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)",
+      "hyperlinks": [
+        {
+          "text": "Consumer Protection from Unfair Trading",
+          "url": "https://www.gov.uk/government/publications/consumer-protection-from-unfair-trading-regulations-traders"
+        },
+        {
+          "text": "Regulations: OFT1008 (https://www.gov.uk/government/publications/consumer-protection-",
+          "url": "https://www.gov.uk/government/publications/consumer-protection-from-unfair-trading-regulations-traders"
+        },
+        {
+          "text": "from-unfair-trading-regulations-traders)",
+          "url": "https://www.gov.uk/government/publications/consumer-protection-from-unfair-trading-regulations-traders"
+        }
+      ]
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "Who do the UCP provisions apply to and what do they\nprohibit?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The UCP provisions apply to the commercial dealings that businesses, referred to in\nthe UCP provisions as 'traders', have with consumers. Such dealings are called\n'commercial practices'. They include anything traders do that could in some way\naffect consumers and the decisions they take. Chapter 2 of this Guidance explains\ncore concepts of the UCP provisions – 'trader', 'commercial practices', 'consumer',\n'average consumer' and 'transactional decisions'.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "A person is a 'trader' if they conduct activities relating to their business or on behalf\nof another person's business. The UCP provisions apply to traders' commercial\npractices if they (for example):",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• supply their own products to consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• promote or supply another trader's products to consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• buy products from consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• help consumers to sell products to others, including to other consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The UCP provisions prohibit unfair commercial practices. These are practices which\ninvolve a trader misleading consumers, behaving aggressively, or otherwise acting\nunfairly towards consumers.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "4": [
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "Overview of the prohibitions contained in the UCP provisions",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Schedule 20 of the DMCC Act covers 32 specified practices which are in all\ncircumstances considered unfair. Go to chapter 3 for more detail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Section 230 of the Act covers the prohibited conduct of omitting any information\nthat must be contained in an invitation to purchase. Go to chapter 4 for more\ndetail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Section 226 covers the following prohibited conduct:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• provision of false or misleading information",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• deceptive overall presentation",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• creating confusion with competitors' products",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• failing to comply with requirements in a code of conduct",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Go to chapter 5 for more detail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Section 227 covers the following prohibited conduct:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• omission (or unclear, untimely or obscure provision) of material information",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• omission of legally required information",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• failing to identify the commercial intent of a practice",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Go to chapter 6 for more detail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Section 228 covers the prohibited use of aggressive practices like harassment,\ncoercion or undue influence. Go to chapter 7 for more detail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Section 229 covers falling short of the requirements of professional diligence. Go\nto chapter 8 for more detail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Section 225 covers the prohibited promotion of unfair commercial practices in a\ncode of conduct by anyone responsible for the content of, or for monitoring\ncompliance with, a code of conduct. Go to chapter 9 for more detail.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "What makes a commercial practice unfair?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "There are 2 main types of unfair commercial practice:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• practices that are always considered to be unfair",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• practices that are only unfair if they are likely to cause the ‘average consumer’ to\ntake a ‘transactional decision’ they would not have otherwise taken[footnote 9]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h3",
+      "content": "Practices that are always unfair",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "5": [
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "There are 32 commercial practices listed in the DMCC Act[footnote 10] which are\nunfair in all circumstances. These include fake reviews, misuse of trust marks,\npressure selling and sales of illegal products. These are covered in chapter 3.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The omission of any information that must be contained in an invitation to purchase\nis also always considered unfair. This is covered in chapter 4.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Promoting unfair commercial practices in a code of conduct is also prohibited. This is\ndealt with in chapter 9.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "If a trader engages in any of these practices they are acting unlawfully.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Table",
+      "content": [
+        [
+          {
+            "cell": "Prohibited regardless of impact on consumers' transactional decisions"
+          }
+        ],
+        [
+          {
+            "cell": "32 banned practices"
+          },
+          {
+            "cell": "Omission of material\ninformation from an\ninvitation to purchase"
+          },
+          {
+            "cell": "Promotion of unfair\ncommercial practices\nin a code of conduct"
+          }
+        ]
+      ],
+      "clause-type": null,
+      "verification-flag": "Failed (Invalid Or Empty Content Field)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Table",
+      "content": [
+        [
+          {
+            "cell": "Unfair if they are likely to cause consumers to take a different\ntransactional decision"
+          }
+        ],
+        [
+          {
+            "cell": "Misleading practices\nActions Omissions"
+          },
+          {
+            "cell": "Aggressive\npractices"
+          },
+          {
+            "cell": "Contravention of\nthe requirements\nof professional\ndiligence"
+          }
+        ]
+      ],
+      "clause-type": null,
+      "verification-flag": "Failed (Invalid Or Empty Content Field)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Top table alt text: Practices that are prohibited regardless of impact on consumers'\ntransactional decisions include 32 banned practices, omission of material information\nfrom an invitation to purchase and the promotion of unfair commercial practices in a\ncode of conduct.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Bottom table alt text: Practices that are unfair if they are likely to cause consumers to\ntake a different transactional decision include misleading actions, misleading\nomissions, aggressive practices and the contravention of the requirements of\nprofessional diligence.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h3",
+      "content": "Practices that may be unfair if they impact on consumer decisions",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Other commercial practices are only unlawful if they are likely to cause the average\nconsumer to take a transactional decision that the consumer would not have taken\notherwise.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "For a commercial practice to be a breach of the prohibitions on misleading and\naggressive practices, or of the requirements of professional diligence, it must involve\nthe conduct specified in the prohibition and the practice must be likely to cause the\naverage consumer to take a different decision.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h3",
+      "content": "When do the UCP provisions start to apply?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "6": [
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The UCP provisions apply to practices that take place from 6 April 2025.[footnote 11]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h1",
+      "content": "Core concepts: trader, commercial practice,\nconsumer, transactional decision",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "Summary at a glance",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The UCP provisions use the following core concepts, namely:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": [
+        "trader",
+        "commercial practice",
+        "consumer",
+        "transactional decision",
+        "average consumer, vulnerable consumer and targeted consumer"
+      ],
+      "clause-type": null,
+      "verification-flag": "Failed (Invalid Or Empty Content Field)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The meaning of each of these is discussed below with examples.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The concepts discussed in this chapter are defined in the DMCC Act. They set out\nwhat and whose activities are in scope of the UCP provisions.[footnote 12]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "Who counts as a trader?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The UCP provisions define a trader as either:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": [
+        "a person (‘P’) acting for purposes relating to P’s business",
+        "a person acting in the name of, or on behalf of, P for purposes relating to P’s\nbusiness [footnote 13]"
+      ],
+      "clause-type": null,
+      "verification-flag": "Failed (Invalid Or Empty Content Field)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "‘Business’ in turn includes a trade, craft or profession (whether or not they are carried\non for gain or reward), the activities of public bodies and the activities of others\ncarried on for gain or reward. [footnote 14]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "‘Gain or reward’ is a broader concept than simply money paid for a product. It\nincludes things like offering free gifts to consumers (for example to obtain goodwill or\nreputational advantage) or providing services in exchange for personal data.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The broad definition of trader can therefore capture:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": [
+        "agents, subcontractors, representatives or other associates of the trader acting on\nbehalf of the trader. It does not matter whether someone is carrying out their own\nbusiness activities or also acting in the name of, or on behalf of, another business\nin relation to the same act or omission [footnote 15]",
+        "individuals who regularly sell goods from their homes through online marketplaces.\nWhether someone is acting as a trader depends on whether the relevant activity is"
+      ],
+      "clause-type": null,
+      "verification-flag": "Failed (Invalid Or Empty Content Field)"
+    }
+  ],
+  "7": [
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "done in the course of business. Someone who purchases items in order to resell\nthem would be likely to fall within the definition. An individual person selling\nunwanted goods on the internet from time to time, would not be likely to fall within\nthis definition",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• organisations which have charitable or ethical goals when they engage in\ncommercial activities towards consumers. This could include things like selling\nclothes in a charity shop or asking for donations\n• public bodies when they engage in commercial transactions with consumers, for\nexample charging a fee to get a passport or renew a driving licence",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Whether or not a person is a trader is assessed on a case-by-case basis. When\ndeciding if a person is acting as a trader, a number of factors are likely to be relevant.\nThese include whether the activity is being carried out for profit, the number and\nfrequency of transactions, and the time between the purchase and sale of products.\nA person may be a trader in some transactions and a consumer in other transactions.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "What is a commercial practice?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "A commercial practice is an act or omission by a trader relating to the promotion or\nsupply of either:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• the trader's product to a consumer\n• another trader's product to a consumer\n• a consumer's product to the trader or another person[footnote 16]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 96%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The definition of product covers both physical and intangible things, including\ngoods (including immovable property, rights and obligations), services and digital\ncontent. The concept of product includes:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• physical items, such as a pencil or a car\n• digital content, such as music purchased online\n• services, such as a right to use a caravan for a certain period\n• immovable property, such as the sale or lease of land to consumers\n• intangible rights such as cancellation or cashback options\n• credit rights, such as debt collection and payment demands, such as payments\ndemanded from a consumer by a trader in settlement of actual or purported\nliabilities\n• membership rights, such as membership of a club",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Any act or omission by a trader relating to the promotion or supply of a product to or\nby consumers could be a commercial practice. A commercial practice is each single\nact or omission, whether or not these are repeated or form part of a course of",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "8": [
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "conduct. It does not matter whether the acts or omissions happen before, during or\nafter the promotion or supply in question. [footnote 17] Therefore, commercial practices\ninclude advertising, the sale and supply of products and post-contractual matters,\nsuch as after-sales services and debt collection.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The act or omission must ‘relate to’ the promotion or supply of a product to or by a\nconsumer. As a general rule of thumb, if a trader supplies products or promotes\nthem, for example by providing information about them on a website, they will need\nto check they are complying with the UCP provisions. This is the case even if they\nare not selling directly to consumers themselves.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "A commercial practice includes any act or omission by a trader relating to the\npromotion or supply of another trader's product to a consumer. For example, the\nactivities of online platforms that facilitate traders to promote or supply products to or\nby consumers amount to commercial practices. They are within the scope of the UCP\nprovisions.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Commercial practices include practices by a trader that enable private individuals\n(namely, consumers) to provide products to that trader, for example where a trader\npurchases a used car or an antique from a consumer, or asks the consumer to make\na donation of unwanted clothes. They also include cases where a trader enables\nconsumers to provide their products to another person, for example, where an online\nmarketplace is used for consumer-to-consumer transactions.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "There can be several traders involved in the promotion or supply of a product to and\nfrom consumers, such as manufacturers, retailers, marketing professionals, brand\nrepresentatives etc. The practices of each of these traders would be covered by the\nUCP provisions. When deciding whether or not to investigate a suspected breach of\nthe UCP provisions, it will be relevant to consider which is the appropriate party to\ninvestigate as well as which party is best placed to remedy the issue.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "**What commercial practices fall in and out of scope of the\nUCP provisions?**",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h3",
+      "content": "**Examples of practices not covered by the UCP provisions**",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h4",
+      "content": "**Business-to-business practices with no potential to affect consumers**",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "A trader sells specialist tractor parts to businesses only. As consumers do not buy\nthe trader's products, the trader does not need to consider compliance with the\nUCP provisions. The trader should however consider the Business Protection\nfrom Misleading Marketing Regulations 2008. [footnote 18]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "A trader sells mattresses to hotels which make no specific claims on their\nwebsites in respect of the mattresses. As the trader is selling to another\nbusiness, and provided no claims are made to consumers about the mattress\nproduct, the trader does not need to consider compliance with the UCP\nprovisions. The trader should consider the Business Protection from Misleading",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "9": [
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Marketing Regulations 2008. The hotels must comply with the UCP provisions in their dealings with consumers.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h3",
+      "content": "Examples of practices covered by the UCP provisions",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Practices with the potential to affect both consumers and traders\nA trader sells spare computer parts over the internet. They sell a range of different products. The trader needs to consider compliance with the UCP provisions, if consumers may buy the products.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "A trader supplies waterproof clothing to retailers which market themselves to consumers as suppliers of sustainable 'eco-friendly' fashion products. The trader tells retailers that all its products are comprised of a specified minimum percentage of recycled material. Although the trader does not sell directly to consumers, the trader must ensure that any claims, statements or representations they make to retailers are truthful and accurate because they relate to the ultimate promotion or supply of the product to consumers.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Practices by a trader where they purchase a product from the consumer\nA trader makes statements about the value of a car they might purchase from a consumer. These statements would need to comply with the UCP provisions.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Practices by a trader where they enable consumers to sell products to other persons (including other consumers)\nAn online marketplace designs their website to highlight featured deals, including listings from consumers who wish to sell their unwanted and used household appliances. The online marketplace's own practices must comply with the UCP provisions. For example, they may be carrying out a banned practice if they falsely state that a particular featured appliance is available for a limited time only when in fact the consumer has not listed it as such.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "Who counts as a consumer?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Clause",
+      "content": "The UCP provisions define a consumer as an individual acting for purposes that are wholly or mainly outside the individual's business.[footnote 19]",
+      "clause-type": "Definition/Interpretation",
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The words 'wholly or mainly' in the definition of consumer mean that an individual is still a consumer when acting for dual purposes (a consumer purpose and a business purpose) as long as the consumer purpose is the main purpose.[footnote 20] Likewise, where a person engages in profit making activities, they may still be a consumer if the main purpose of the activity is not part of their main business. This means, for example, that:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "a person who buys a kettle for their home, works from home one day a week and uses it on the days when working from home would still be a consumer[footnote 21]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "10": [
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• an individual who occasionally sells their unwanted and used clothes on an online\nmarketplace or sells their personal vinyl record collection to a second-hand record\nshop is also likely to be a consumer[footnote 22]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• an individual who invests some of their spare money in shares or property could\nstill be a consumer where making such investments is not part of their main\nbusiness",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "paragraph",
+      "content": "Conversely, a sole trader or a partner in a firm would only benefit from the protection\nprovided by the UCP provisions where, and to the extent that, they are acting for\npurposes outside of their business. For example, a sole trader who operates from a\nprivate dwelling and buys a printer of which 95% of the intended use is for the\npurposes of their business, is unlikely to be a consumer for the purposes of this\npurchase.[footnote 23]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "heading-h2",
+      "content": "What is a transactional decision?",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "paragraph",
+      "content": "'Transactional decision' is an important concept covering a wide range of decisions\nthat have been or may be taken by consumers in relation to products. [footnote 24] This\nconcept should be considered in parallel with the concept of 'average consumer'\ndiscussed below.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "paragraph",
+      "content": "The UCP provisions define a transactional decision as any decision made by a\nconsumer relating to:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• the purchase or supply of a product (including whether, how or on what terms to\nmake the purchase or supply)",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• the retention, disposal or withdrawal of a product (including whether, how or on\nwhat terms to retain or dispose of it)",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• the exercise of contractual rights in relation to a product (including whether, how or\non what terms to exercise such rights) [footnote 25]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "paragraph",
+      "content": "There does not need to be an actual transaction between the consumer and trader\nfor there to be a transactional decision. The concept is broader and includes\ndecisions on whether to do something or not to do something. [footnote 26] The wording\nmakes clear that transactional decisions may occur before a consumer has taken\nany in-principle decision whether to purchase a product. It covers decisions taken\nbefore, during and after a contract is made or a transaction takes place.[footnote 27]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "paragraph",
+      "content": "Non-exhaustive examples of transactional decisions include:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• whether to visit a shop",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 96%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• whether to click through on a website",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• whether to agree to a sales presentation or view a property",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• whether to buy a product",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 96%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "list-l1",
+      "content": "• whether to sell a product (to a trader or another consumer)",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    }
+  ],
+  "11": [
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• whether to enter a contract",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 96%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• whether to exercise a cancellation right, a right to a refund or replacement, or a\nright in relation to an after-sales service",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• whether to pay a debt[footnote 28]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Heading-h2",
+      "content": "The average consumer",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Whether a commercial practice breaches the requirements of professional diligence\nor the prohibitions of misleading and aggressive practices will be judged by reference\n(as appropriate) to:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• the 'average consumer'",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 95%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• the 'average member' of a targeted group of consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 98%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "List-l1",
+      "content": "• the 'average member' of a vulnerable group of consumers.[footnote 29]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 97%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "The diagram below demonstrates how the effects of a commercial practice on each\nof these 3 types of consumers have to be assessed to determine if the practice may\nbe unfair.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Figure",
+      "content": "Is a group of consumers particularly\nvulnerable to a commercial practice\nor to an underlying product because\nof (one or more of) their age,\nphysical or mental health, credulity\nor the circumstances they are in?\nYes\nCould the trader\nreasonably be\nexpected to foresee\nthe impact of this\nvulnerability?\nYes\nThe test is whether the\ncommercial practice is likely\nto cause the average\nmember of this vulnerable\ngroup to take a different\ntransactional decision\nNo\nIs the commercial practice\ntargeted at a particular group?\nNo\nThe test is whether the\ncommercial practice is likely to\ncause the 'general' average\nconsumer to take a different\ntransactional decision\nYes\nThe test is whether the commercial\npractice is likely to cause the\naverage member of this targeted\ngroup to take a different\ntransactional decision",
+      "clause-type": null,
+      "verification-flag": "Failed (Match 51%)"
+    },
+    {
+      "correlation-id": null,
+      "tag": "Paragraph",
+      "content": "Alt text: This diagram describes how the effects of a commercial practice on three\ntypes of consumers, that is the average consumer, the average member of a\ntargeted group of consumers, and the average member of a vulnerable group of\nconsumers, have to be assessed to determine if the practice may be unfair.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    }
+  ],
+  "12": [
+    {
+      "correlation-id": "fdc0953f-5452-428e-bb20-0c1e17790429",
+      "tag": "Paragraph",
+      "content": "Where a practice is directed to a particular group of consumers, the ‘average consumer' refers to the average member of that group. This type of average consumer is referred to in this Guidance as the 'average targeted consumer'.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": "c3a113d3-10a2-4796-85e7-aa73b7a14e1b",
+      "tag": "Paragraph",
+      "content": "Where a group of consumers is vulnerable to a commercial practice in a way that the trader could reasonably be expected to foresee, the 'average consumer' refers to the average member of that group. Different practices, and even the same practices in different circumstances, may have different effects depending on the type of consumer they reach or affect. The provisions concerning vulnerable consumers are there to ensure that traders do not unfairly affect vulnerable people, even if their practices may not change non-vulnerable consumers' decisions.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 99%)"
+    },
+    {
+      "correlation-id": "064e072a-b457-495a-86e0-27ff245236c7",
+      "tag": "Paragraph",
+      "content": "The average consumer is a notional construct. There is no requirement to show evidence of actual consumers being affected by an unfair commercial practice. The concepts are intended to help the court and the CMA (as the case may be) decide if a practice is prohibited due to its potential impact on relevant consumers.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "81562df8-9716-4560-8d46-9657912d5f14",
+      "tag": "Heading-h3",
+      "content": "Average member of a vulnerable group of consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "3e975323-2e63-410f-899d-27838323f492",
+      "tag": "Paragraph",
+      "content": "Where:",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "e19b8040-1079-4c6d-b007-034a8e1063b2",
+      "tag": "List-l1",
+      "content": "there is a group of consumers",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "43d5a827-b27e-4106-9730-835f282464da",
+      "tag": "List-l1",
+      "content": "the group is particularly vulnerable to a commercial practice",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "1b9598c0-485e-4975-86a2-8c8e82543091",
+      "tag": "List-l1",
+      "content": "the trader could reasonably be expected to foresee that the group of consumers is vulnerable to the commercial practice",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "00f74e25-6435-4f61-9727-f322f1f460c0",
+      "tag": "Paragraph",
+      "content": "then the relevant average consumer is the average member of that group.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "61e350a2-5c6d-4c69-ba5a-4ab6235c44e8",
+      "tag": "Footnote",
+      "content": "[footnote 30]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "e040a88c-1727-4d6b-ae9e-8530990c8493",
+      "tag": "Paragraph",
+      "content": "In relation to the breaches mentioned under [the average consumer (https://www.gov.uk/government/publications/unfair-commercial-practices-cma207/unfair-commercial-practices#the-average-consumer)](https://www.gov.uk/government/publications/unfair-commercial-practices-cma207/unfair-commercial-practices#the-average-consumer), whether a commercial practice is unfair hinges on whether that vulnerability is likely to cause an average member of the group to take a transactional decision that they would not have taken otherwise.",
+      "clause-type": null,
+      "verification-flag": "Failed (Match 82%)"
+    },
+    {
+      "correlation-id": "c9911754-a8fd-438b-92c8-ef45d6dd93a0",
+      "tag": "Paragraph",
+      "content": "This protects consumers who may be particularly vulnerable either to a commercial practice (for example, to a particular selling technique or techniques) or because of the underlying product (namely, where the product may be only or mainly of interest to the vulnerable group).",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "2a7b0d89-173d-4b08-b243-f3a082c0ac7f",
+      "tag": "Footnote",
+      "content": "[footnote 31]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "f0b07a10-8281-4954-9468-a5d7a72520b8",
+      "tag": "Paragraph",
+      "content": "A commercial practice will be assessed from the perspective of an average member of that group whose vulnerability the trader could reasonably be expected to foresee. The test is objective. It is not necessary that the trader actually foresees the effect (or likely effect) on vulnerable consumers, only that they could reasonably have been expected to do so.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "3ab5eb37-8130-41de-893f-f267e222b868",
+      "tag": "Paragraph",
+      "content": "Consumers are treated as vulnerable to a practice or because of the underlying product within the meaning of the UCP provisions, if (among other things) they are vulnerable because of age, physical or mental health, credulity or the circumstances they are in.",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "c30ac7e9-1349-4ed0-acb4-1199f149acb1",
+      "tag": "Footnote",
+      "content": "[footnote 32]",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "3f9672b2-84df-470a-afb9-69231ff23777",
+      "tag": "Heading-h3",
+      "content": "Age",
+      "clause-type": null,
+      "verification-flag": "Verified (Exact Match)"
+    },
+    {
+      "correlation-id": "9ba7a398-6c65-4182-8ba7-0078d5d6632e",
+      "tag": "Paragraph",
+      "content": "It may be appropriate to consider a practice from the perspective of an older or younger consumer. For example, the elderly might be particularly vulnerable to",
+      "clause-type": null,
+      "verification-flag": "Verified (Match 100%)"
+    },
+    {
+      "correlation-id": "6b6e4d30-0e87-4508-9c2f-6e99c508808d",
+      "tag": "Footer",
+      "content": "==End of OCR for page 3==",
+      "clause-type": null,
+      "verification-flag": "Failed (Match 52%)"
+    }
+  ]
+}

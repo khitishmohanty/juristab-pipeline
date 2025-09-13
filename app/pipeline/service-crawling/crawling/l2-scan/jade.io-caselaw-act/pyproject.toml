@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "jade-io-caselaw-act"
+version = "0.1.0"
+description = "Web scraper for jade.io caselaw."
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+mysql-connector-python = "^8.4.0"
+SQLAlchemy = "^2.0.31"
+boto3 = "1.34.141"
+selenium = "^4.22.0"
+beautifulsoup4 = "^4.12.3"
+lxml = "^5.2.2"
+requests = "^2.32.3"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+pytest-cov = "^4.1.0"
+moto = "5.0.9"
+mock-alchemy = "<0.4"
+pytest-html = "^4.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=handler",
+    "--cov=utils",
+    "--cov=common",
+    "--cov-report=term-missing",
+    "--cov-report=html:reports/coverage-reports",
+    "--html=reports/test-reports/report.html",
+    "--self-contained-html",
+    "--junitxml=reports/test-reports/report.xml",
+]
+

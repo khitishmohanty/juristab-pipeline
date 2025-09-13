@@ -1,0 +1,51 @@
+[
+  {
+    "correlation-id": null,
+    "tag": "Header",
+    "content": "GOV.UK",
+    "clause-type": null,
+    "verification-flag": "Failed (Match 57%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Figure",
+    "content": "СМА\nCompetition & Markets Authority",
+    "clause-type": null,
+    "verification-flag": "Failed (Match 48%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Subtitle",
+    "content": "Guidance",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Title",
+    "content": "Unfair commercial practices",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "Published 4 April 2025",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Heading-h2",
+    "content": "Contents",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Table of Contents",
+    "content": "[\n  {\"item_text\": \"Overview\", \"page_number\": null},\n  {\"item_text\": \"Core concepts: trader, commercial practice, consumer, transactional decision\", \"page_number\": null},\n  {\"item_text\": \"Banned practices\", \"page_number\": null},\n  {\"item_text\": \"Omission of material information from an invitation to purchase\", \"page_number\": null},\n  {\"item_text\": \"Misleading actions\", \"page_number\": null},\n  {\"item_text\": \"Misleading omissions\", \"page_number\": null},\n  {\"item_text\": \"Aggressive practices\", \"page_number\": null},\n  {\"item_text\": \"Contravention of the requirements of professional diligence\", \"page_number\": null},\n  {\"item_text\": \"Promoting unfair commercial practices in codes of conduct\", \"page_number\": null},\n  {\"item_text\": \"Offences relating to unfair commercial practices\", \"page_number\": null}\n]",
+    "clause-type": null,
+    "verification-flag": "Failed (Match 67%)"
+  }
+]

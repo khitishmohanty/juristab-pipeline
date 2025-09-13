@@ -1,0 +1,40 @@
+# The version of the apprunner.yaml schema
+version: 1.0
+
+# The runtime to use for the service. We use our own Dockerfile for control.
+runtime: python
+
+# The build configuration for the service
+build:
+  # App Runner will automatically look for and use the Dockerfile in your root directory.
+  
+  # Define secrets that will be available as environment variables.
+  secrets:
+    # The 'name' is an alias we'll use in the 'run' section below.
+    - name: GOOGLE_APPLICATION_CREDENTIALS_JSON
+      # This 'valueFrom' is the full ARN of your secret in AWS Secrets Manager.
+      # I've taken this directly from your screenshot.
+      valueFrom: arn:aws:secretsmanager:ap-southeast-2:808403558610:secret:VertexSearch-GcpKey-yNXKGA
+
+# The run configuration for the service
+run:
+  # The command to start the application using Gunicorn
+  command: gunicorn --workers=1 --threads=4 --bind 0.0.0.0:8080 main:server
+  
+  # The network port that the application listens on inside the container
+  port: 8080
+  
+  # Define environment variables available to the running application
+  runtime-environment-variables:
+    # This creates an environment variable in your application.
+    - name: GOOGLE_APPLICATION_CREDENTIALS_JSON
+      # This links the environment variable to the secret alias we defined in the 'build' section.
+      # This is how the secret's value is securely passed to your code.
+      valueFrom: GOOGLE_APPLICATION_CREDENTIALS_JSON
+
+# Optional: Health check configuration to ensure your service is running correctly.
+# App Runner will send requests to this path to check the application's health.
+# health-check:
+#   path: '/'
+#   interval: 20
+#   timeout: 10

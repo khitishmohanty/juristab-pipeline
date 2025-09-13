@@ -1,0 +1,22 @@
+#Core ML and data handling
+sentence-transformers
+torch==2.3.0
+numpy
+tqdm
+
+#AWS and Database
+boto3
+SQLAlchemy
+mysql-connector-python
+
+#Configuration
+PyYAML
+python-dotenv
+
+#RunPod
+runpod
+
+#Opensearch API
+opensearch-py
+aws-requests-auth
+requests-aws4auth

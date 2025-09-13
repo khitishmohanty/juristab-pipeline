@@ -1,0 +1,123 @@
+# -- Google cloud project details --
+google_cloud:
+    project_id: "arboreal-stage-467407-i1"
+    region: "us"
+    #processor_id: "c60807664382dc8" 
+
+# -- Database connection details --
+database:
+    source:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_source"
+
+    destination:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+    
+# -- AI model configuration --
+models:
+    deepseek:
+        model: "deepseek-r1:671b"
+    
+    gemini:
+        model: "models/gemini-2.5-pro-preview-05-06"
+        base_url: "https://generativelanguage.googleapis.com/v1beta"
+        pricing:
+            input_per_million: 2.50
+            output_per_million: 15.00
+    
+    openai:
+        model_name: "gpt-4o"
+        pricing:
+            input_per_million: 2.00
+            output_per_million: 8.00
+
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_nt
+      s3_dest_folder: "case-laws/nt/"
+      audit_job_name: "ai_enrichment_service_juristree_nt"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_tas
+      s3_dest_folder: "case-laws/tas/"
+      audit_job_name: "ai_enrichment_service_juristree_tas"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_vic
+      s3_dest_folder: "case-laws/vic/"
+      audit_job_name: "ai_enrichment_service_juristree_vic"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_nsw
+      s3_dest_folder: "case-laws/nsw/"
+      audit_job_name: "ai_enrichment_service_juristree_nsw"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_wa
+      s3_dest_folder: "case-laws/wa/"
+      audit_job_name: "ai_enrichment_service_juristree_wa"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_sa
+      s3_dest_folder: "case-laws/sa/"
+      audit_job_name: "ai_enrichment_service_juristree_sa"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_qld
+      s3_dest_folder: "case-laws/qld/"
+      audit_job_name: "ai_enrichment_service_juristree_qld"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_act
+      s3_dest_folder: "case-laws/act/"
+      audit_job_name: "ai_enrichment_service_juristree_act"
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_commonwealth
+      s3_dest_folder: "case-laws/commonwealth/"
+      audit_job_name: "ai_enrichment_service_juristree_commonwealth"
+  tables_to_write:
+    - database: legal_store
+      table: caselaw_enrichment_status
+      # Add this new section to define column names
+      columns:
+        text_extract_status: "status_text_processor"
+        text_extract_duration: "duration_text_processor"
+        json_valid_status: "status_jurismap_json"
+        json_valid_duration: "duration_jurismap_json"
+        html_status: "status_jurismap_html"
+        html_duration: "duration_jurismap_html"
+        token_input: "token_input_jurismap"
+        token_output: "token_output_jurismap"
+        token_input_price: "token_input_price_jurismap"
+        token_output_price: "token_output_price_jurismap"
+        start_time: "start_time_jurismap"
+        end_time: "end_time_jurismap"
+
+# -- File naming conventions for the enrichment service --
+enrichment_filenames:
+  source_html: "miniviewer.html"
+  extracted_text: "miniviewer.txt"
+  jurismap_json: "jurismap.json"
+  jurismap_html: "jurismap.html"
+
+# -- Audit log configuration --
+audit_log:
+  text_extraction_job:
+    database: "legal_store"
+    table: "audit_log"
+    job_name: "text_extraction_service_nt"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "caselaw_registry"
+    column: "year"
+    processing_years: [2025]

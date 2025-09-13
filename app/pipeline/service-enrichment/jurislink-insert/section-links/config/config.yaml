@@ -1,0 +1,52 @@
+# -- Database connection details --
+database:
+    source:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_source"
+
+    destination:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+    
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_store
+      key: "legislation_registry"
+      table: legislation_registry
+      
+  tables_to_write:
+    - database: legal_store
+      table: legislation_enrichment_status
+      columns:
+        processing_status: "status_jurislink_section_link"
+        processing_duration: "duration_jurislink_section_link"
+        start_time: "start_time_jurislink_section_link"
+        end_time: "end_time_jurislink_section_link"
+    - database: legal_store
+      key: "juris_link"
+      table: juris_link_extract_section_link
+
+# -- File naming conventions for the enrichment service --
+enrichment_filenames:
+  source_file: "miniviewer.html"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "legislation_registry"
+    column: "year"
+    processing_years: [2025,2024]
+    jurisdiction_codes: ['ACT','VIC','NT','QLD','WA','SA','TAS','NSW','FED']

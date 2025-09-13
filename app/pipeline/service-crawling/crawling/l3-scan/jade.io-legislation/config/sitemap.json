@@ -1,0 +1,14 @@
+{
+  "content_selectors": [
+    {
+      "name": "table_of_contents",
+      "selector": "div.av2-index",
+      "type": "css"
+    },
+    {
+      "name": "content_segment",
+      "selector": "div.segment-holder",
+      "type": "css"
+    }
+  ]
+}

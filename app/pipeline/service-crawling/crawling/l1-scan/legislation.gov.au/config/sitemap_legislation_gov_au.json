@@ -1,0 +1,47 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "in_force_legislation_au",
+        "description": "Scrapes all 'In force' Acts from the Federal Register of Legislation.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Select the 'In force' filter",
+            "target": { "type": "xpath", "value": "//label[normalize-space(.)='In force']" }
+          },
+          {
+            "action": "click",
+            "description": "Check the 'Act' checkbox under Filter by collection",
+            "target": { "type": "xpath", "value": "//label[normalize-space(.)='Act']" }
+          },
+          {
+            "action": "click",
+            "description": "Click the main search button",
+            "target": { "type": "xpath", "value": "//button[text()='Search']" }
+          },
+          {
+            "action": "next_button_pagination_loop",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "target": { "type": "xpath", "value": "//ngx-datatable" },
+                "scraping_config": {
+                  "row_xpath": ".//datatable-body-row",
+                  "columns": [
+                    { "name": "title", "xpath": ".//datatable-body-cell[1]//div[contains(@class, 'title-name')]/a", "type": "text" },
+                    { "name": "link", "xpath": ".//datatable-body-cell[1]//div[contains(@class, 'title-name')]/a", "type": "href" },
+                    { "name": "version", "xpath": ".//datatable-body-cell[1]//span[contains(@class, 'title-id')]", "type": "text" },
+                    { "name": "act_no", "xpath": ".//datatable-body-cell[1]//span[contains(@class, 'title-series')]", "type": "text" },
+                    { "name": "registered_date", "xpath": ".//datatable-body-cell[1]//span[contains(., 'Registered:')]/strong", "type": "text" },
+                    { "name": "effective_date", "xpath": ".//datatable-body-cell[2]//span[contains(@class, 'date-effective-start')]", "type": "text" }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

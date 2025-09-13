@@ -1,0 +1,120 @@
+[
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "There are 32 commercial practices listed in the DMCC Act[footnote 10] which are\nunfair in all circumstances. These include fake reviews, misuse of trust marks,\npressure selling and sales of illegal products. These are covered in chapter 3.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The omission of any information that must be contained in an invitation to purchase\nis also always considered unfair. This is covered in chapter 4.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "Promoting unfair commercial practices in a code of conduct is also prohibited. This is\ndealt with in chapter 9.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "If a trader engages in any of these practices they are acting unlawfully.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Table",
+    "content": [
+      [
+        {
+          "cell": "Prohibited regardless of impact on consumers' transactional decisions"
+        }
+      ],
+      [
+        {
+          "cell": "32 banned practices"
+        },
+        {
+          "cell": "Omission of material\ninformation from an\ninvitation to purchase"
+        },
+        {
+          "cell": "Promotion of unfair\ncommercial practices\nin a code of conduct"
+        }
+      ]
+    ],
+    "clause-type": null,
+    "verification-flag": "Failed (Invalid Or Empty Content Field)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Table",
+    "content": [
+      [
+        {
+          "cell": "Unfair if they are likely to cause consumers to take a different\ntransactional decision"
+        }
+      ],
+      [
+        {
+          "cell": "Misleading practices\nActions Omissions"
+        },
+        {
+          "cell": "Aggressive\npractices"
+        },
+        {
+          "cell": "Contravention of\nthe requirements\nof professional\ndiligence"
+        }
+      ]
+    ],
+    "clause-type": null,
+    "verification-flag": "Failed (Invalid Or Empty Content Field)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "Top table alt text: Practices that are prohibited regardless of impact on consumers'\ntransactional decisions include 32 banned practices, omission of material information\nfrom an invitation to purchase and the promotion of unfair commercial practices in a\ncode of conduct.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "Bottom table alt text: Practices that are unfair if they are likely to cause consumers to\ntake a different transactional decision include misleading actions, misleading\nomissions, aggressive practices and the contravention of the requirements of\nprofessional diligence.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Heading-h3",
+    "content": "Practices that may be unfair if they impact on consumer decisions",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "Other commercial practices are only unlawful if they are likely to cause the average\nconsumer to take a transactional decision that the consumer would not have taken\notherwise.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "For a commercial practice to be a breach of the prohibitions on misleading and\naggressive practices, or of the requirements of professional diligence, it must involve\nthe conduct specified in the prohibition and the practice must be likely to cause the\naverage consumer to take a different decision.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Heading-h3",
+    "content": "When do the UCP provisions start to apply?",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  }
+]

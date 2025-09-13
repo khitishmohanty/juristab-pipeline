@@ -1,0 +1,111 @@
+# -- Google cloud project details --
+google_cloud:
+    project_id: "silver-osprey-468906-b1"
+    region: "us"
+
+# -- AI model configuration --
+models:
+    gemini:
+        model: "models/gemini-2.5-pro-preview-05-06"
+        base_url: "https://generativelanguage.googleapis.com/v1beta"
+        pricing:
+            input_per_million: 2.50
+            output_per_million: 15.00
+
+# -- Database connection details --
+database:
+    dialect: "mysql"
+    driver: "mysqlconnector"
+    host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+    port: "3306"
+    name: "legal_store"
+    user: "${DB_USER}"
+    password: "${DB_PASSWORD}"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/nt/"
+        jurisdiction_code: "NT"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/act/"
+        jurisdiction_code: "ACT"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/qld/"
+        jurisdiction_code: "QLD"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/sa/"
+        jurisdiction_code: "SA"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/tas/"
+        jurisdiction_code: "TAS"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/vic/"
+        jurisdiction_code: "VIC"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/wa/"
+        jurisdiction_code: "WA"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/nsw/"
+        jurisdiction_code: "NSW"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "legislation/commonwealth/"
+        jurisdiction_code: "FED"
+    # Credentials are now loaded from the .env file
+    access_key_id: "${AWS_ACCESS_KEY_ID}"
+    secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_store
+      table: legislation_registry
+      
+  tables_to_write:
+    - database: legal_store
+      table: legislation_enrichment_status
+      columns:
+        processing_status_ai: "status_metadataextract_ai"
+        processing_duration_ai: "duration_metadataextract_ai"
+        start_time_ai: "start_time_metadataextract_ai"
+        end_time_ai: "end_time_metadataextract_ai"
+        token_input: "token_input_metadataextract_ai"
+        token_output: "token_output_metadataextract_ai"
+        token_input_price: "token_input_price_metadataextract_ai"
+        token_output_price: "token_output_price_metadataextract_ai"
+
+    - database: legal_store
+      table: legislation_metadata
+      columns:
+        title_of_legislation: "title_of_legislation"
+        legislation_number: "legislation_number"
+        type_of_document: "type_of_document"
+        date_of_assent_or_making: "date_of_assent_or_making"
+        commencement_date: "commencement_date"
+        gazette_notification_date: "gazette_notification_date"
+        second_reading_speech_dates: "second_reading_speech_dates"
+        enabling_act: "enabling_act"
+        amended_legislation: "amended_legislation"
+        purpose_of_the_legislation: "purpose_of_the_legislation"
+        administering_agency: "administering_agency"
+        affected_sectors: "affected_sectors"
+        practice_areas: "practice_areas"
+        keywords: "keywords"
+
+# -- File to process --
+enrichment_filenames:
+  source_file: "miniviewer.txt"
+  jurismetadata_json: "jurismetadata.json"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "legislation_registry"
+    column: "year"
+    processing_years: []
+
+# -- Extraction process switches --
+extraction_switch:
+  AI_extract: true

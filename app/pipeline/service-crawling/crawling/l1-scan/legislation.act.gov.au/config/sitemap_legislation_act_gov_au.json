@@ -1,0 +1,56 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "all_legislation_act",
+        "description": "Scrapes all current legislation from the ACT legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Click the 'Browse legislation titles' button",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='toggle-browse']"
+            }
+          },
+          {
+            "action": "click",
+            "description": "Click the 'Submit' button to get all results",
+            "target": {
+              "type": "xpath",
+              "value": "//form[@id='form-browse']//button[@type='submit']"
+            }
+          },
+          {
+            "action": "process_results",
+            "description": "Scrape links from the results table",
+            "target": {
+              "type": "xpath",
+              "value": "//table[@id='results-table-current']"
+            },
+            "scraping_config": {
+              "row_xpath": ".//tbody/tr",
+              "columns": [
+                {
+                  "name": "title",
+                  "xpath": ".//td[1]//*[self::a or self::span][last()]",
+                  "type": "text"
+                },
+                {
+                  "name": "year_number",
+                  "xpath": ".//td[2]",
+                  "type": "text"
+                },
+                {
+                  "name": "link",
+                  "xpath": ".//td[1]/a",
+                  "type": "href"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+/* This rule removes the blue glow from the search box when it's clicked */
+.form-control:focus {
+    border-color: #ced4da !important;
+    box-shadow: none !important;
+}
+
+/* --- UPDATED STYLES FOR DOCUMENT VIEWER TABS --- */
+
+/* Default state for tab links */
+.nav-tabs .nav-link {
+    color: #6c757d; /* Grey color for default state */
+    border-bottom-width: 1px !important; 
+    background-color: transparent !important;
+}
+
+/* Tab link state on mouse hover */
+.nav-tabs .nav-link:hover {
+    color: black !important; /* Black text on hover */
+    border-color: #dee2e6 #dee2e6 #dee2e6;
+}
+
+/* Active (clicked) tab link state */
+.nav-tabs .nav-link.active {
+    color: black !important; /* Black text for active tab */
+    border-color: #dee2e6 #dee2e6 #fff !important;
+    border-bottom: 2px solid #003366 !important; /* Dark blue bottom border */
+}

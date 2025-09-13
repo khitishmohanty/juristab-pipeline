@@ -1,0 +1,33 @@
+<<<<<<< HEAD
+Resources:
+  ImageGeminiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app/functions/image_gemini/handler.lambda_handler
+      Runtime: python3.11
+      Events:
+        S3Upload:
+          Type: S3
+          Properties:
+            Bucket: my-input-bucket
+            Events: s3:ObjectCreated:*
+      Environment:
+        Variables:
+          GEMINI_API_KEY: ${GEMINI_API_KEY}
+=======
+Resources:
+  ImageGeminiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app/functions/image_gemini/handler.lambda_handler
+      Runtime: python3.11
+      Events:
+        S3Upload:
+          Type: S3
+          Properties:
+            Bucket: my-input-bucket
+            Events: s3:ObjectCreated:*
+      Environment:
+        Variables:
+          GEMINI_API_KEY: ${GEMINI_API_KEY}
+>>>>>>> 0a83a9c1580e560899dd70f82a8bbcb59f0dcb6f

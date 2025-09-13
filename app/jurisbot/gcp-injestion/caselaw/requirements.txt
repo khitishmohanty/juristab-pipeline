@@ -1,0 +1,5 @@
+boto3
+google-cloud-storage
+mysql-connector-python
+python-dotenv
+PyYAML

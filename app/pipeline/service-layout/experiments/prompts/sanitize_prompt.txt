@@ -1,0 +1,31 @@
+You are provided with a JSON response and the original prompt that generated it.
+Your task is to:
+
+Review the JSON response.
+Check if any part of the original prompt is present in the response.
+If the prompt text is found within the response, remove it completely.
+If any other items like field definition or element_object_schema definition are present, remove them. Only the layout and content and metadata should be present in the response.
+
+Return only the cleaned JSON response with all traces of the prompt removed.
+Ensure the original structure and content of the JSON response remains intact after cleaning.
+
+Return a **valid JSON** with the following structure:
+```json
+[
+  {
+    "correlation-id": null,
+    "tag": "figure",
+    "content": "AUTHENTICATED\nU.S. GOVERNMENT\n MATION\nGPO",
+    "clause-type": null,
+    "act-name-citations": null,
+    "url": null,
+    "issuance-date": null,
+    "compliance-date": null,
+    "effective-date": null,
+    "publication-date": null,
+    "judgment-date": null,
+    "legislative-body": null,
+    "verification-flag": "Not Verified"
+  }
+  ...
+]

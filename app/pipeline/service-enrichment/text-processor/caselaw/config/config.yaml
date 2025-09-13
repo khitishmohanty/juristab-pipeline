@@ -1,0 +1,110 @@
+# -- Database connection details --
+database:
+    source:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_source"
+
+    destination:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_nt
+      s3_folder: "case-laws/nt/"
+      audit_job_name: "ai_enrichment_service_juristree_nt"
+      jurisdiction: 'NT'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_tas
+      s3_folder: "case-laws/tas/"
+      audit_job_name: "ai_enrichment_service_juristree_tas"
+      jurisdiction: 'TAS'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_vic
+      s3_folder: "case-laws/vic/"
+      audit_job_name: "ai_enrichment_service_juristree_vic"
+      jurisdiction: 'VIC'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_nsw
+      s3_folder: "case-laws/nsw/"
+      audit_job_name: "ai_enrichment_service_juristree_nsw"
+      jurisdiction: 'NSW'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_wa
+      s3_folder: "case-laws/wa/"
+      audit_job_name: "ai_enrichment_service_juristree_wa"
+      jurisdiction: 'WA'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_sa
+      s3_folder: "case-laws/sa/"
+      audit_job_name: "ai_enrichment_service_juristree_sa"
+      jurisdiction: 'SA'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_qld
+      s3_folder: "case-laws/qld/"
+      audit_job_name: "ai_enrichment_service_juristree_qld"
+      jurisdiction: 'QLD'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_act
+      s3_folder: "case-laws/act/"
+      audit_job_name: "ai_enrichment_service_juristree_act"
+      jurisdiction: 'ACT'
+    - database: legal_source
+      table: l2_scan_jade_io_caselaw_commonwealth
+      s3_folder: "case-laws/commonwealth/"
+      audit_job_name: "ai_enrichment_service_juristree_commonwealth"
+      jurisdiction: 'FED'
+  tables_to_write:
+    - database: legal_store
+      table: caselaw_enrichment_status
+      step_columns:
+        text_extract:
+          status: "status_text_processor"
+          duration: "duration_text_processor"
+          start_time: "start_time_text_processor"
+          end_time: "end_time_text_processor"
+  audit_log_table:
+    - database: legal_store
+      table: audit_log
+      job_name: "caselaw_enrichment_nt"
+
+# -- File naming conventions for the enrichment service --
+enrichment_filenames:
+  source_html: "miniviewer.html"
+  extracted_text: "miniviewer.txt"
+
+# -- Audit log configuration --
+audit_log:
+  text_extraction_job:
+    database: "legal_store"
+    table: "audit_log"
+    job_name: "text_processor_service"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "caselaw_registry"
+    column: "year"
+    processing_years: []
+    jurisdiction_codes: []
+
+# -- Metadata details
+tables_metadata:
+    database: "legal_store"
+    table: "caselaw_metadata"
+    column_count_char: "count_char"
+    column_word_char: "count_word"

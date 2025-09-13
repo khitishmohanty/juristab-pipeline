@@ -1,0 +1,35 @@
+{
+  "fitz_extracted_text": "Guidance\nUnfair commercial practices\nPublished 4 April 2025\nContents\nOverview\nCore concepts: trader, commercial practice, consumer, transactional decision\nBanned practices\nOmission of material information from an invitation to purchase\nMisleading actions\nMisleading omissions\nAggressive practices\nContravention of the requirements of professional diligence\nPromoting unfair commercial practices in codes of conduct\nOffences relating to unfair commercial practices",
+  "extracted_hyperlinks": [
+    {
+      "text": "",
+      "url": "https://www.gov.uk/",
+      "rect": [
+        0.0,
+        4.5,
+        111.0,
+        32.25
+      ]
+    },
+    {
+      "text": "",
+      "url": "https://www.gov.uk/",
+      "rect": [
+        0.0,
+        5.25,
+        111.0,
+        27.75
+      ]
+    },
+    {
+      "text": "",
+      "url": "https://www.gov.uk/government/organisations/competition-and-markets-authority",
+      "rect": [
+        22.5,
+        68.25,
+        180.0,
+        153.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+# -- Google cloud project details --
+google_cloud:
+    project_id: "juris-tab"
+    region: "us"
+
+# -- Database connection details --
+database:
+    dialect: "mysql"
+    driver: "mysqlconnector"
+    host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+    port: "3306"
+    name: "legal_store"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+        folder_name: "case-laws/"
+        
+# -- Google Cloud Storage connection details --
+gcp:
+    storage:
+        bucket_name: "juristab-legal-store"
+        folder_name: "books-search-repo/"
+
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_store
+      table: caselaw_registry
+      
+  tables_to_write:
+    - database: legal_store
+      table: caselaw_enrichment_status
+      columns:
+        processing_status: "status_gcpingestion"
+        processing_duration: "duration_gcpingestion"
+        start_time: "start_time_gcpingestion"
+        end_time: "end_time_gcpingestion"
+
+# -- File to process --
+enrichment_filenames:
+  source_file: "miniviewer.txt"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "caselaw_registry"
+    column: "year"
+    processing_years: []
+    sub_folders: ['act','commonwealth','nsw','nt','qld','sa','tas','vic','wa']
+    jurisdiction_codes: ['ACT','FED','NSW','NT','QLD','SA','TAS','VIC','WA']
+
+# -- JSON Line file store --
+json_line:
+    storage:
+      bucket_name: "juristab-legal-store"
+      folder_name: "structured-files/"
+    chunk_size: 5000
+    # NEW: Maximum number of characters allowed per line in the JSONL file.
+    max_line_chars: 1000000
+
+# -- Output Schema Definition --
+output_schema:
+  # List of columns to select from the database.
+  # The script will dynamically build the SQL SELECT statement using these.
+  # Use the table alias (cm or cr) for clarity.
+  database_columns:
+    - "cm.id"
+    - "cm.source_id"
+    - "cm.count_char"
+    - "cm.count_word"
+    - "cm.file_no"
+    - "cm.presiding_officer"
+    - "cm.counsel"
+    - "cm.law_firm_agency"
+    - "cm.court_type"
+    - "cm.hearing_location"
+    - "cm.judgment_date"
+    - "cm.hearing_dates"
+    - "cm.incident_date"
+    - "cm.keywords"
+    - "cm.legislation_cited"
+    - "cm.affected_sectors"
+    - "cm.practice_areas"
+    - "cm.citation"
+    - "cm.key_issues"
+    - "cm.panelist"
+    - "cm.orders"
+    - "cm.decision"
+    - "cm.cases_cited"
+    - "cm.matter_type"
+    - "cm.parties"
+    - "cm.representation"
+    - "cm.category"
+    - "cm.bjs_number"
+    - "cr.neutral_citation"
+    - "cr.jurisdiction_code"
+    - "cr.decision_date"
+    - "cr.book_name"
+
+  # Fields to be added programmatically during script execution.
+  added_fields:
+    # Defines the key for the content downloaded from S3.
+    content_key: "content"
+    # Defines static key-value pairs to add to every record.
+    static_fields:
+      document_type: "caselaw"
+
+# Defines the conditions for selecting records to be ingested.
+# The script will build a WHERE clause by joining these with AND.
+ingestion_criteria:
+  alias: "ces"
+  conditions:
+    - column: "status_metadataextract"
+      operator: "="
+      value: "'pass'" # Values must be quoted if they are strings in SQL
+    - column: "status_text_processor"
+      operator: "="
+      value: "'pass'"
+    - column: "status_gcpingestion"
+      operator: "!="
+      value: "'pass'"

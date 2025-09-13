@@ -1,0 +1,128 @@
+# -- Google cloud project details --
+google_cloud:
+    project_id: "silver-osprey-468906-b1"
+    region: "us"
+
+# --- AI service provider ---
+# Set to 'gemini' or 'huggingface' to choose the AI model service
+ai_service_provider: "meta-llama/Llama-3.1-70B-Instruct"
+
+# -- AI model configuration --
+models:
+    gemini:
+        model: "models/gemini-2.5-pro-preview-05-06"
+        base_url: "https://generativelanguage.googleapis.com/v1beta"
+        pricing:
+            input_per_million: 2.50
+            output_per_million: 15.00
+    huggingface:
+        model: "meta-llama/Llama-3.1-70B-Instruct"
+        base_url: "https://router.huggingface.co/v1"
+        pricing:
+            perhour: 8
+
+extraction_switch:
+  rulebased_extract: true
+  AI_extract: true
+  
+# -- Database connection details --
+database:
+    dialect: "mysql"
+    driver: "mysqlconnector"
+    host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+    port: "3306"
+    name: "legal_store"
+    user: "${DB_USER}"
+    password: "${DB_PASSWORD}"
+    # ADDED: List of columns for the caselaw_metadata table
+    caselaw_metadata_columns:
+        - "caseTitle"
+        - "caseSubtitle"
+        - "citation"
+        - "key_issues"
+        - "keywords"
+        - "presiding_officer"
+        - "panelist"
+        - "orders"
+        - "decision"
+        - "judgment_date"
+        - "cases_cited"
+        - "legislation_cited"
+        - "file_no"
+        - "hearing_dates"
+        - "matter_type"
+        - "parties"
+        - "category"
+        - "bjs_number"
+        - "court_type"
+        - "counsel"
+        - "law_firm_agency"
+        - "hearing_location"
+        - "incident_date"
+        - "affected_sectors"
+        - "practice_areas"
+        - "representation"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/nsw/"
+        jurisdiction_code: "NSW"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/vic/"
+        jurisdiction_code: "VIC"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/qld/"
+        jurisdiction_code: "QLD"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/act/"
+        jurisdiction_code: "ACT"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/nt/"
+        jurisdiction_code: "NT"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/sa/"
+        jurisdiction_code: "SA"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/wa/"
+        jurisdiction_code: "WA"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/commonwealth/"
+        jurisdiction_code: "FED"
+      - bucket_name: "legal-store"
+        s3_dest_folder: "case-laws/tas/"
+        jurisdiction_code: "TAS"
+
+# -- Table column mapping --
+tables:
+    - database: legal_store
+      table: caselaw_enrichment_status
+      columns:
+        status_metadataextract_rulebased: "status_metadataextract_rulebased"
+        status_metadataextract_ai: "status_metadataextract_ai"
+        token_input_count: "token_input_count_metadataextract_ai"
+        token_output_count: "token_output_count_metadataextract_ai"
+        token_input_price: "token_input_price_metadataextract_ai"
+        token_output_price: "token_output_price_metadataextract_ai"
+
+    - database: legal_store
+      table: mapping_counsel_firm
+      columns:
+        counsel: "counsel"
+        law_firm_agency: "law_firm_agency"
+
+# -- File to process --
+enrichment_filenames:
+  source_file_ai: "miniviewer.txt"
+  source_file_rulebased: "summary.html"
+  jurismetadata_json: "jurismetadata.json"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "caselaw_registry"
+    column: "year"
+    processing_years: []
+

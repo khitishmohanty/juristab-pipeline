@@ -1,0 +1,44 @@
+Perform layout analysis and content extraction from the attached document image.
+
+### Your tasks:
+1. Identify and label each structural element in the **order it appears** on the page using one of these tags:
+   - 'Enum', 'Figure', 'Footnote', 'Header', 'Heading', 'List', 'Paragraph', 'Table', 'Table of Contents', 'Title', 'Subtitle', 'Footer', 'Page number', 'Endnotes', 'Glossary'
+2. For each element:
+   - Preserve styling using Markdown:
+     - **bold** for bold text
+     - *italic* for italic
+     - __underline__ for underlined text
+   - Do **not duplicate content** across tags.
+3. For **Table of Contents**:
+   - Return the entire TOC as one block.
+   - In `content`, return a JSON string representing an array of entries with fields like:
+     - `item_text`, `page_number`, and optional `sub_items` for nesting
+4. For **Tables**:
+   - In `content`, return either:
+     - a JSON array of rows and cells
+5. For each element, extract associated metadata if present:
+   - `act-name-citations`: Legal references (semicolon-separated if multiple)
+   - `issuance-date`, `compliance-date`, `effective-date`, `publication-date`: In YYYY-MM-DD
+   - `legislative-body`: Name of body mentioned
+   - If metadata is missing, return `null`
+   - Always add: `"verification-flag": "Not Verified"`
+
+### Output Format:
+Return a **valid JSON** with this structure:
+```json
+{
+  "document_elements": [
+    {
+      "correlation-id": "1",
+      "tag": "Title",
+      "content": "**Aboriginal Lands Act 1982**",
+      "act-name-citations": "Aboriginal Lands Act 1982",
+      "issuance-date": "1982-12-01",
+      "compliance-date": null,
+      "legislative-body": "Parliament of Victoria",
+      "publication-date": null,
+      "verification-flag": "Not Verified"
+    },
+    ...
+  ]
+}

@@ -1,0 +1,112 @@
+# -- Google cloud project details --
+google_cloud:
+    project_id: "juristab"
+    region: "us"
+    processor_id: "c60807664382dc8" 
+
+# -- Database connection details --
+database:
+    source:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_source"
+
+    destination:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+
+#OpenSearch Details
+vector_db:
+    host: "f4xiu02cfrb0zrwqwob5.ap-southeast-2.aoss.amazonaws.com"
+    index_name: "legal-store"
+    embedding_dimension: 1024
+    default_region: "ap-southeast-2"
+    doc_type: "legislation"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+    
+# -- AI model configuration --
+models:
+    embedding:
+        model_name: "BAAI/bge-large-en-v1.5"
+        # Using character count as a proxy for tokens. BGE model has a 512 token limit.
+        # This chunk size is a safe estimate.
+        chunk_size: 1500 
+        chunk_overlap: 200
+
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_nt
+      s3_folder: "legislation/nt/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_tas
+      s3_folder: "legislation/tas/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_vic
+      s3_folder: "legislation/vic/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_nsw
+      s3_folder: "legislation/nsw/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_wa
+      s3_folder: "legislation/wa/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_sa
+      s3_folder: "legislation/sa/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_qld
+      s3_folder: "legislation/qld/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_act
+      s3_folder: "legislation/act/"
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_commonwealth
+      s3_folder: "legislation/commonwealth/"
+
+  tables_to_write:
+    - database: legal_store
+      table: legislation_enrichment_status
+      columns:
+        processing_status: "status_text_embedding"
+        processing_duration: "duration_text_embedding"
+        start_time: "start_time_text_embedding"
+        end_time: "end_time_text_embedding"
+        price: "price_text_embedding"
+
+# -- File naming conventions for the enrichment service --
+enrichment_filenames:
+  source_text: "miniviewer.txt"
+  embedding_output: "embeddings.npy"
+
+registry:
+    # Used for filtering by year and jurisdiction
+    legislation_registry:
+        database: "legal_store"
+        table: "legislation_registry"
+        year_column: "year"
+        jurisdiction_column: "jurisdiction_code"
+        processing_years: []
+        jurisdiction_codes: ['ACT','VIC','NT','QLD','WA','SA','TAS','FED','NSW']
+    
+    # Used for the new word count pre-processing check
+    legislation_metadata:
+        database: "legal_store"
+        table: "legislation_metadata"
+        word_count_column: "count_word"
+        word_count_threshold: 5
+
+# -- Server POD price
+server_pod_price:
+    hour_price: 3.34

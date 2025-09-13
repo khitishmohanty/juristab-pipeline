@@ -1,0 +1,122 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_in_force",
+        "description": "Navigates to 'Acts in force'",
+        "steps": [
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101686']/div/div[2]/h3/a" }, "description": "Legislation in force", "is_breadcrumb": true },
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101689']/div/div/h3/a" }, "description": "Acts in force", "is_breadcrumb": true },
+          { "action": "click", "description": "Apply search filters", "target": { "type": "xpath", "value": "//button[@id='tide-search-filter-form-actions']" } },
+          {
+            "action": "numeric_pagination_loop",
+            "page_number_xpath_template": "//nav//ol//button[normalize-space()='{page_num}']",
+            "next_button_fallback_xpath": "//nav//button[last()]",
+            "loop_steps": [
+              { 
+                "action": "process_results", 
+                "target": { "type": "xpath", "value": "//*[@id='rpl-main']" },
+                "scraping_config": {
+                  "row_xpath": "//div[contains(@class, 'rpl-table')]//tbody/tr",
+                  "columns": [
+                    {"name": "title", "xpath": ".//td[1]/a", "type": "text"},
+                    {"name": "link", "xpath": ".//td[1]/a", "type": "href"},
+                    {"name": "number", "xpath": ".//td[2]", "type": "text"},
+                    {"name": "year", "xpath": ".//td[3]", "type": "text"}
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "statutory_rules_in_force",
+        "description": "Navigates to 'Statutory rules in force'",
+        "steps": [
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101686']/div/div[2]/h3/a" }, "description": "Legislation in force", "is_breadcrumb": true },
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101690']/div/div/h3/a" }, "description": "Statutory rules in force", "is_breadcrumb": true },
+          { "action": "click", "description": "Apply search filters", "target": { "type": "xpath", "value": "//button[@id='tide-search-filter-form-actions']" } },
+          {
+            "action": "numeric_pagination_loop",
+            "page_number_xpath_template": "//nav//ol//button[normalize-space()='{page_num}']",
+            "next_button_fallback_xpath": "//nav//button[last()]",
+            "loop_steps": [
+              { 
+                "action": "process_results", 
+                "target": { "type": "xpath", "value": "//*[@id='rpl-main']" },
+                "scraping_config": {
+                  "row_xpath": "//div[contains(@class, 'rpl-table')]//tbody/tr",
+                  "columns": [
+                    {"name": "title", "xpath": ".//td[1]/a", "type": "text"},
+                    {"name": "link", "xpath": ".//td[1]/a", "type": "href"},
+                    {"name": "number", "xpath": ".//td[2]", "type": "text"},
+                    {"name": "year", "xpath": ".//td[3]", "type": "text"}
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "bills_in_parliament",
+        "description": "Navigates to 'Bills in Parliament'",
+        "steps": [
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101688']/div/div[2]/h3/a" }, "description": "Bills", "is_breadcrumb": true },
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101693']/div/div/h3/a" }, "description": "Bills in Parliament", "is_breadcrumb": true },
+          { "action": "click", "description": "Apply search filters", "target": { "type": "xpath", "value": "//button[@id='tide-search-filter-form-actions']" } },
+          {
+            "action": "numeric_pagination_loop",
+            "page_number_xpath_template": "//nav//ol//button[normalize-space()='{page_num}']",
+            "next_button_fallback_xpath": "//nav//button[last()]",
+            "loop_steps": [
+              { 
+                "action": "process_results", 
+                "target": { "type": "xpath", "value": "//*[@id='rpl-main']" },
+                "scraping_config": {
+                  "row_xpath": "//div[contains(@class, 'rpl-table')]//tbody/tr",
+                  "columns": [
+                    {"name": "title", "xpath": ".//td[1]/a", "type": "text"},
+                    {"name": "link", "xpath": ".//td[1]/a", "type": "href"},
+                    {"name": "number", "xpath": ".//td[2]", "type": "text"},
+                    {"name": "year", "xpath": ".//td[3]", "type": "text"}
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "all_bills",
+        "description": "Navigates to 'All Bills'",
+        "steps": [
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101688']/div/div[2]/h3/a" }, "description": "Bills", "is_breadcrumb": true },
+          { "action": "click", "target": { "type": "xpath", "value": "//*[@id='page-component-101694']/div/div/h3/a" }, "description": "All Bills", "is_breadcrumb": true },
+          { "action": "click", "description": "Apply search filters", "target": { "type": "xpath", "value": "//button[@id='tide-search-filter-form-actions']" } },
+          {
+            "action": "numeric_pagination_loop",
+            "page_number_xpath_template": "//nav//ol//button[normalize-space()='{page_num}']",
+            "next_button_fallback_xpath": "//nav//button[last()]",
+            "loop_steps": [
+              { 
+                "action": "process_results", 
+                "target": { "type": "xpath", "value": "//*[@id='rpl-main']" },
+                "scraping_config": {
+                  "row_xpath": "//div[contains(@class, 'rpl-table')]//tbody/tr",
+                  "columns": [
+                    {"name": "title", "xpath": ".//td[1]/a", "type": "text"},
+                    {"name": "link", "xpath": ".//td[1]/a", "type": "href"},
+                    {"name": "number", "xpath": ".//td[2]", "type": "text"},
+                    {"name": "year", "xpath": ".//td[3]", "type": "text"}
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

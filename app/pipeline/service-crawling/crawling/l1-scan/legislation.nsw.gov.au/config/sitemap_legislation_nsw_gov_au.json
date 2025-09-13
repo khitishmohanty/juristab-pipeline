@@ -1,0 +1,198 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_in_force",
+        "description": "Scrapes all Acts currently in force.",
+        "steps": [
+          {
+            "action": "click",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='nav-site']/nav[2]/li[1]/a"
+            },
+            "description": "Navigate to Acts In Force",
+            "is_breadcrumb": true
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//div[@id='alpha']/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//li[@id='table_1_next' and not(contains(@class, 'disabled'))]/a",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_1']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "statutory_instruments_in_force",
+        "description": "Scrapes all Statutory Instruments currently in force.",
+        "steps": [
+          {
+            "action": "click",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='nav-site']/nav[2]/li[1]/a"
+            },
+            "description": "Navigate to Statutory Instruments In Force",
+            "is_breadcrumb": true
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//div[@id='SLalpha']/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//li[@id='table_2_next' and not(contains(@class, 'disabled'))]/a",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_2']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "epi_in_force",
+        "description": "Scrapes all Environmental Planning Instruments currently in force.",
+        "steps": [
+          {
+            "action": "click",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='nav-site']/nav[2]/li[1]/a"
+            },
+            "description": "Navigate to EPIs In Force",
+            "is_breadcrumb": true
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//div[@id='EPIalpha']/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//li[@id='table_3_next' and not(contains(@class, 'disabled'))]/a",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_3']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

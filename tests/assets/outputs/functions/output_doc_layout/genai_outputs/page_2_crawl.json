@@ -1,0 +1,25 @@
+{
+  "fitz_extracted_text": "© Crown copyright 2025\nThis publication is licensed under the terms of the Open Government Licence v3.0 except where otherwise\nstated. To view this licence, visit nationalarchives.gov.uk/doc/open-government-licence/version/3 or write\nto the Information Policy Team, The National Archives, Kew, London TW9 4DU, or email:\npsi@nationalarchives.gov.uk.\nWhere we have identified any third party copyright information you will need to obtain permission from the\ncopyright holders concerned.\nThis publication is available at https://www.gov.uk/government/publications/unfair-commercial-practices-\ncma207/unfair-commercial-practices",
+  "extracted_hyperlinks": [
+    {
+      "text": "nationalarchives.gov.uk/doc/open-government-licence/version/3",
+      "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3",
+      "rect": [
+        177.0,
+        166.5,
+        514.5,
+        180.75
+      ]
+    },
+    {
+      "text": "psi@nationalarchives.gov.uk",
+      "url": "mailto:psi@nationalarchives.gov.uk",
+      "rect": [
+        11.25,
+        195.0,
+        161.25,
+        209.25
+      ]
+    }
+  ]
+}

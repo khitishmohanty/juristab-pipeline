@@ -1,0 +1,148 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_in_force_tas",
+        "description": "Scrapes all Acts currently in force from the TAS legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Click the 'Browse' dropdown menu",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='bs-example-navbar-collapse-1']/ul/li[6]/a"
+            }
+          },
+          {
+            "action": "click",
+            "description": "Click 'In Force Legislation' from the dropdown",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='bs-example-navbar-collapse-1']/ul/li[6]/ul/li[1]/a"
+            }
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "(//h4[text()='Acts']/following-sibling::div[contains(@class, 'browse-bar')]//div[@class='btn-group'])[1]/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//li[@id='table_1_next'][not(contains(@class, 'disabled'))]/a",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_1']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "statutory_rules_in_force_tas",
+        "description": "Scrapes all Statutory Rules currently in force from the TAS legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Click the 'Browse' dropdown menu",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='bs-example-navbar-collapse-1']/ul/li[6]/a"
+            }
+          },
+          {
+            "action": "click",
+            "description": "Click 'In Force Legislation' from the dropdown",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='bs-example-navbar-collapse-1']/ul/li[6]/ul/li[1]/a"
+            }
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "(//h4[text()='Statutory Rules']/following-sibling::div[contains(@class, 'browse-bar')]//div[@class='btn-group'])[1]/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//li[@id='table_1_next'][not(contains(@class, 'disabled'))]/a",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_1']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

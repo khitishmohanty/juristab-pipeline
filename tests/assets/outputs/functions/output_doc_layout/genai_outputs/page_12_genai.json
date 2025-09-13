@@ -1,0 +1,135 @@
+[
+  {
+    "correlation-id": "fdc0953f-5452-428e-bb20-0c1e17790429",
+    "tag": "Paragraph",
+    "content": "Where a practice is directed to a particular group of consumers, the ‘average consumer' refers to the average member of that group. This type of average consumer is referred to in this Guidance as the 'average targeted consumer'.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "c3a113d3-10a2-4796-85e7-aa73b7a14e1b",
+    "tag": "Paragraph",
+    "content": "Where a group of consumers is vulnerable to a commercial practice in a way that the trader could reasonably be expected to foresee, the 'average consumer' refers to the average member of that group. Different practices, and even the same practices in different circumstances, may have different effects depending on the type of consumer they reach or affect. The provisions concerning vulnerable consumers are there to ensure that traders do not unfairly affect vulnerable people, even if their practices may not change non-vulnerable consumers' decisions.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "064e072a-b457-495a-86e0-27ff245236c7",
+    "tag": "Paragraph",
+    "content": "The average consumer is a notional construct. There is no requirement to show evidence of actual consumers being affected by an unfair commercial practice. The concepts are intended to help the court and the CMA (as the case may be) decide if a practice is prohibited due to its potential impact on relevant consumers.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "81562df8-9716-4560-8d46-9657912d5f14",
+    "tag": "Heading-h3",
+    "content": "Average member of a vulnerable group of consumers",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "3e975323-2e63-410f-899d-27838323f492",
+    "tag": "Paragraph",
+    "content": "Where:",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "e19b8040-1079-4c6d-b007-034a8e1063b2",
+    "tag": "List-l1",
+    "content": "there is a group of consumers",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "43d5a827-b27e-4106-9730-835f282464da",
+    "tag": "List-l1",
+    "content": "the group is particularly vulnerable to a commercial practice",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "1b9598c0-485e-4975-86a2-8c8e82543091",
+    "tag": "List-l1",
+    "content": "the trader could reasonably be expected to foresee that the group of consumers is vulnerable to the commercial practice",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "00f74e25-6435-4f61-9727-f322f1f460c0",
+    "tag": "Paragraph",
+    "content": "then the relevant average consumer is the average member of that group.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "61e350a2-5c6d-4c69-ba5a-4ab6235c44e8",
+    "tag": "Footnote",
+    "content": "[footnote 30]",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "e040a88c-1727-4d6b-ae9e-8530990c8493",
+    "tag": "Paragraph",
+    "content": "In relation to the breaches mentioned under [the average consumer (https://www.gov.uk/government/publications/unfair-commercial-practices-cma207/unfair-commercial-practices#the-average-consumer)](https://www.gov.uk/government/publications/unfair-commercial-practices-cma207/unfair-commercial-practices#the-average-consumer), whether a commercial practice is unfair hinges on whether that vulnerability is likely to cause an average member of the group to take a transactional decision that they would not have taken otherwise.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "c9911754-a8fd-438b-92c8-ef45d6dd93a0",
+    "tag": "Paragraph",
+    "content": "This protects consumers who may be particularly vulnerable either to a commercial practice (for example, to a particular selling technique or techniques) or because of the underlying product (namely, where the product may be only or mainly of interest to the vulnerable group).",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "2a7b0d89-173d-4b08-b243-f3a082c0ac7f",
+    "tag": "Footnote",
+    "content": "[footnote 31]",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "f0b07a10-8281-4954-9468-a5d7a72520b8",
+    "tag": "Paragraph",
+    "content": "A commercial practice will be assessed from the perspective of an average member of that group whose vulnerability the trader could reasonably be expected to foresee. The test is objective. It is not necessary that the trader actually foresees the effect (or likely effect) on vulnerable consumers, only that they could reasonably have been expected to do so.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "3ab5eb37-8130-41de-893f-f267e222b868",
+    "tag": "Paragraph",
+    "content": "Consumers are treated as vulnerable to a practice or because of the underlying product within the meaning of the UCP provisions, if (among other things) they are vulnerable because of age, physical or mental health, credulity or the circumstances they are in.",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "c30ac7e9-1349-4ed0-acb4-1199f149acb1",
+    "tag": "Footnote",
+    "content": "[footnote 32]",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "3f9672b2-84df-470a-afb9-69231ff23777",
+    "tag": "Heading-h3",
+    "content": "Age",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "9ba7a398-6c65-4182-8ba7-0078d5d6632e",
+    "tag": "Paragraph",
+    "content": "It may be appropriate to consider a practice from the perspective of an older or younger consumer. For example, the elderly might be particularly vulnerable to",
+    "clause-type": null,
+    "page_number": 12
+  },
+  {
+    "correlation-id": "6b6e4d30-0e87-4508-9c2f-6e99c508808d",
+    "tag": "Footer",
+    "content": "==End of OCR for page 3==",
+    "clause-type": null,
+    "page_number": 12
+  }
+]

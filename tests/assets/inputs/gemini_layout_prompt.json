@@ -1,0 +1,71 @@
+{
+  "prompt_details": {
+    "task_description": "Perform document layout analysis and content extraction from the provided document image. Identify structural elements sequentially as they appear on the page. Preserve text styling (bold, italic, underline) within the extracted content. Extract specified legal and publication-related entities associated with each text segment. Ensure that once a piece of text is assigned to a structural tag, it is not reassigned or duplicated under another tag. For any Table of Contents, the entire content should be captured within a single block element.",
+    "output_format_instructions": {
+      "format": "JSON",
+      "schema_description": "The output should be a JSON object containing a single key, 'document_elements', which is an array of objects. Each object in the array represents a distinct structural element found in the document image.",
+      "element_object_schema": {
+        "fields": [
+          {
+            "name": "correlation-id",
+            "description": "A unique identifier for the element. For a 'Table of Contents' block, this should be a single unique ID for the entire table (e.g., 'toc-1', '6.1'). For other elements that might have hierarchical structures (like lists), this field can be used to represent the hierarchy (e.g., '1', '1.1', '1.1.a'). For simple elements like paragraphs not part of a structured list, this can be a sequential number or a unique ID. Leave blank or use a generic sequential ID if not applicable.",
+            "type": "String or Null"
+          },
+          {
+            "name": "tag",
+            "description": "The type of the structural element. Must be one of the following: 'Enum', 'Figure', 'Footnote', 'Header', 'Heading', 'List', 'Paragraph', 'Table', 'Table of Contents', 'Title', 'Subtitle', 'Footer', 'Page number', 'Endnotes', 'Glossary'.",
+            "type": "String"
+          },
+          {
+            "name": "content",
+            "description": "The extracted text content of the element. Preserve text styling using Markdown-like syntax: **bold text** for bold, *italic text* for italic, and __underline text__ for underline. \nFor elements tagged as 'Table of Contents', this field must contain a JSON string representing the entire Table of Contents. The JSON structure should capture all items, their page numbers (or other locators), and any hierarchical relationships. For example, an array of objects, where each object has keys like 'item_text', 'page_number', and an optional 'sub_items' array for nested entries. \nFor elements tagged as 'Table', represent the table content as a nested JSON array of arrays (rows and cells) or a Markdown formatted table within this string. \nFor all other elements, this field contains their direct text content.",
+            "type": "String"
+          },
+          {
+            "name": "act-name-citations",
+            "description": "Any act names or legal citations mentioned within this text segment. If multiple, separate them with a semicolon. Leave blank if none.",
+            "type": "String or Null"
+          },
+          {
+            "name": "issuance-date",
+            "description": "The issuance date mentioned in or relevant to this text segment (e.g., YYYY-MM-DD). Leave blank if none.",
+            "type": "String or Null"
+          },
+          {
+            "name": "compliance-date",
+            "description": "The compliance date mentioned in or relevant to this text segment (e.g., YYYY-MM-DD). Leave blank if none.",
+            "type": "String or Null"
+          },
+          {
+            "name": "effective-date",
+            "description": "The effective date mentioned in or relevant to this text segment (e.g., YYYY-MM-DD). Leave blank if none.",
+            "type": "String or Null"
+          },
+          {
+            "name": "legislative-body",
+            "description": "The legislative body mentioned in or relevant to this text segment. Leave blank if none.",
+            "type": "String or Null"
+          },
+          {
+            "name": "publication-date",
+            "description": "The publication date of the document or section, if identifiable within or associated with this text segment (e.g., YYYY-MM-DD). Leave blank if none.",
+            "type": "String or Null"
+          },
+          {
+            "name": "verification-flag",
+            "description": "Set this to 'Not Verified' for all extracted elements.",
+            "type": "String",
+            "default_value": "Not Verified"
+          }
+        ]
+      },
+      "special_handling": {
+        "table_of_contents": "If a 'Table of Contents' is identified, it should be represented as a single element object with the 'tag' set to 'Table of Contents'. The 'correlation-id' should be a unique identifier for the entire ToC block. The 'content' field for this element must be a JSON formatted string. This JSON string should accurately represent the structure and all entries of the Table of Contents, including item descriptions, page numbers, and any hierarchical nesting. For example, the JSON content could be an array of entry objects, where each object might contain fields like 'text', 'page', 'level', and 'children' (an array of sub-entry objects) to represent the hierarchy. This will be nested under the main json response",
+        "tables": "For elements tagged as 'Table', the 'content' field should contain the table data. Prefer a structured representation like a JSON array of arrays (representing rows and cells) or a well-formatted Markdown table string.",
+        "empty_fields": "If any of the specific entity fields ('act-name-citations', 'issuance-date', 'compliance-date', 'effective-date', 'legislative-body', 'publication-date') are not present for a given element, their value should be null."
+      }
+    },
+    "input_image_description": "This is an image of a single page of a document."
+  },
+  "document_image": "Input image is jpeg format passed as base64 encoded string"
+}

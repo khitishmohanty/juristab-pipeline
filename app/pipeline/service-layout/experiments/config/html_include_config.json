@@ -1,0 +1,26 @@
+{
+  "include_tags": [
+    "Title", 
+    "Subtitle", 
+    "Heading", 
+    "Heading-h1", 
+    "Heading-h2",
+    "Heading-h3", 
+    "Heading-h4", 
+    "Heading-h5",  
+    "Heading-h6",
+    "Paragraph", 
+    "Enum",
+    "List",
+    "List-l1",
+    "List-l2",
+    "List-l3",
+    "List-l4",
+    "List", 
+    "Table",
+    "Clause",
+    "Endnotes",
+    "Glossary",
+    "Footnote"
+  ]
+}

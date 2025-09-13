@@ -1,0 +1,15 @@
+#DB
+mysql-connector-python
+PyMySQL
+SQLAlchemy
+
+#Application-logic
+beautifulsoup4
+pyyaml
+pandas
+boto3
+
+#Unittest
+pytest
+pytest-mock
+python-dotenv

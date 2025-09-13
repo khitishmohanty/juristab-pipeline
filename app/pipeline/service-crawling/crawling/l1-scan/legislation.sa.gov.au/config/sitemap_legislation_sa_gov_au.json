@@ -1,0 +1,92 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_sa",
+        "description": "Scrapes all Acts from the SA legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Navigate to 'Acts' browse page",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='main']/div[2]/div/div[2]/ul/li[1]/a"
+            }
+          },
+          {
+            "action": "url_loop",
+            "description": "Collect all letter URLs and visit each one to scrape results.",
+            "target_xpath": "//h3[contains(text(), 'Browse current and historical versions')]/following-sibling::div[contains(@class, 'search-listing__az-tabs')]//a",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "target": {
+                  "type": "xpath",
+                  "value": "//*[@id='search-listing__results-list--consolidated']/table"
+                },
+                "scraping_config": {
+                  "row_xpath": "./tbody/tr",
+                  "columns": [
+                    {
+                      "name": "title",
+                      "xpath": "./td[1]/a",
+                      "type": "textContent"
+                    },
+                    {
+                      "name": "link",
+                      "xpath": "./td[1]/a",
+                      "type": "href"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "regulations_rules_sa",
+        "description": "Scrapes all Regulations and Rules from the SA legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Navigate to 'Regulations & Rules' browse page",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='main']/div[2]/div/div[2]/ul/li[3]/a"
+            }
+          },
+          {
+            "action": "url_loop",
+            "description": "Collect all letter URLs and visit each one to scrape results.",
+            "target_xpath": "//h3[contains(text(), 'Browse current and historical versions')]/following-sibling::div[contains(@class, 'search-listing__az-tabs')]//a",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "target": {
+                  "type": "xpath",
+                  "value": "//*[@id='search-listing__results-list--consolidated']/table"
+                },
+                "scraping_config": {
+                  "row_xpath": "./tbody/tr",
+                  "columns": [
+                    {
+                      "name": "title",
+                      "xpath": "./td[1]/a",
+                      "type": "textContent"
+                    },
+                    {
+                      "name": "link",
+                      "xpath": "./td[1]/a",
+                      "type": "href"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_in_force_wa",
+        "description": "Scrapes all Acts currently in force from the WA legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Navigate to 'in force' Acts page",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='index']/p[1]/a"
+            }
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//*[@id='letters']/div/a",
+            "breadcrumb_xpath": "//*[@id='outer']/nav[1]/div/a[2]",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "target": {
+                  "type": "xpath",
+                  "value": "//*[@id='actsbyletter']/table"
+                },
+                "scraping_config": {
+                  "row_xpath": "./tbody/tr",
+                  "columns": [
+                    {
+                      "name": "title",
+                      "xpath": "./td[1]/a",
+                      "type": "text"
+                    },
+                    {
+                      "name": "link",
+                      "xpath": "./td[1]/a",
+                      "type": "href"
+                    },
+                    {
+                      "name": "book_act_number",
+                      "xpath": "./td[2]",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "subsidiary_legislation_in_force_wa",
+        "description": "Scrapes all Subsidiary Legislation currently in force from the WA legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Navigate to 'in force' Subsidiary Legislation page",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='index']/p[6]/a"
+            }
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//*[@id='letters']/div/a",
+            "breadcrumb_xpath": "//*[@id='outer']/nav[1]/div/a[2]",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "target": {
+                  "type": "xpath",
+                  "value": "//*[@id='subsbyletter']/table"
+                },
+                "scraping_config": {
+                  "row_xpath": "./tbody/tr",
+                  "columns": [
+                    {
+                      "name": "title",
+                      "xpath": "./td[1]/a",
+                      "type": "text"
+                    },
+                    {
+                      "name": "link",
+                      "xpath": "./td[1]/a",
+                      "type": "href"
+                    },
+                    {
+                      "name": "book_type",
+                      "xpath": "./td[2]",
+                      "type": "text"
+                    },
+                    {
+                      "name": "book_reference",
+                      "xpath": "./td[3]",
+                      "type": "text"
+                    },
+                    {
+                      "name": "book_reference_hyperlink",
+                      "xpath": "./td[3]/a",
+                      "type": "href"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

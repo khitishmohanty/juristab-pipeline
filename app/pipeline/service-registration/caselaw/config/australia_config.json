@@ -1,0 +1,20 @@
+[
+    { "code": "NSW", "name": "New South Wales", "type": "jurisdiction" },
+    { "code": "VIC", "name": "Victoria", "type": "jurisdiction" },
+    { "code": "QLD", "name": "Queensland", "type": "jurisdiction" },
+    { "code": "WA", "name": "Western Australia", "type": "jurisdiction" },
+    { "code": "SA", "name": "South Australia", "type": "jurisdiction" },
+    { "code": "TAS", "name": "Tasmania", "type": "jurisdiction" },
+    { "code": "ACT", "name": "Australian Capital Territory", "type": "jurisdiction" },
+    { "code": "NT", "name": "Northern Territory", "type": "jurisdiction" },
+    { "code": "FED", "name": "Commonwealth", "type": "jurisdiction" },
+    { "code": "HCA", "name": "High Court of Australia", "type": "tribunal" },
+    { "code": "FCA", "name": "Federal Court of Australia", "type": "tribunal" },
+    { "code": "AAT", "name": "Administrative Appeals Tribunal", "type": "tribunal" },
+    { "code": "CAT", "name": "Civil and Administrative Tribunal", "type": "tribunal" },
+    { "code": "SC", "name": "Supreme Court", "type": "tribunal" },
+    { "code": "DC", "name": "District Court", "type": "tribunal" },
+    { "code": "MC", "name": "Magistrates Court", "type": "tribunal" },
+    { "code": "AP", "name": "Appeal Panel", "type": "panel_or_division" },
+    { "code": "FC", "name": "Full Court", "type": "panel_or_division" }
+]

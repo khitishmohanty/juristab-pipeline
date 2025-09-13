@@ -1,0 +1,33 @@
+# Docker ignore file for the Caselaw ETL project
+
+# Git version control files
+.git
+.gitignore
+
+# Docker-related files
+Dockerfile
+.dockerignore
+
+# Python virtual environments
+venv/
+.venv/
+env/
+*.env
+
+# Environment files containing secrets
+# This is crucial for security.
+.env
+.env.*
+
+# Python cache files and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE and editor configuration folders
+.idea/
+.vscode/
+
+# Editor swap files
+*.swp

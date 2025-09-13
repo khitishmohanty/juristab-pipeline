@@ -1,0 +1,47 @@
+[
+  {
+    "correlation-id": null,
+    "tag": "Figure",
+    "content": "OGL",
+    "clause-type": null,
+    "verification-flag": "Failed (Exact Mismatch - Short)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "© Crown copyright 2025",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "This publication is licensed under the terms of the Open Government Licence v3.0 except where otherwise\nstated. To view this licence, visit nationalarchives.gov.uk/doc/open-government-licence/version/3 or write\nto the Information Policy Team, The National Archives, Kew, London TW9 4DU, or email:\npsi@nationalarchives.gov.uk.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)",
+    "hyperlinks": [
+      {
+        "text": "nationalarchives.gov.uk/doc/open-government-licence/version/3",
+        "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3"
+      },
+      {
+        "text": "psi@nationalarchives.gov.uk",
+        "url": "mailto:psi@nationalarchives.gov.uk"
+      }
+    ]
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "Where we have identified any third party copyright information you will need to obtain permission from the\ncopyright holders concerned.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "This publication is available at https://www.gov.uk/government/publications/unfair-commercial-practices-\ncma207/unfair-commercial-practices",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  }
+]

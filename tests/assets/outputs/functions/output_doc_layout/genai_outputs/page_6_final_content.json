@@ -1,0 +1,112 @@
+[
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The UCP provisions apply to practices that take place from 6 April 2025.[footnote 11]",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Heading-h1",
+    "content": "Core concepts: trader, commercial practice,\nconsumer, transactional decision",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Heading-h2",
+    "content": "Summary at a glance",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The UCP provisions use the following core concepts, namely:",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "List-l1",
+    "content": [
+      "trader",
+      "commercial practice",
+      "consumer",
+      "transactional decision",
+      "average consumer, vulnerable consumer and targeted consumer"
+    ],
+    "clause-type": null,
+    "verification-flag": "Failed (Invalid Or Empty Content Field)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The meaning of each of these is discussed below with examples.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The concepts discussed in this chapter are defined in the DMCC Act. They set out\nwhat and whose activities are in scope of the UCP provisions.[footnote 12]",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Heading-h2",
+    "content": "Who counts as a trader?",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The UCP provisions define a trader as either:",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "List-l1",
+    "content": [
+      "a person (‘P’) acting for purposes relating to P’s business",
+      "a person acting in the name of, or on behalf of, P for purposes relating to P’s\nbusiness [footnote 13]"
+    ],
+    "clause-type": null,
+    "verification-flag": "Failed (Invalid Or Empty Content Field)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "‘Business’ in turn includes a trade, craft or profession (whether or not they are carried\non for gain or reward), the activities of public bodies and the activities of others\ncarried on for gain or reward. [footnote 14]",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "‘Gain or reward’ is a broader concept than simply money paid for a product. It\nincludes things like offering free gifts to consumers (for example to obtain goodwill or\nreputational advantage) or providing services in exchange for personal data.",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "Paragraph",
+    "content": "The broad definition of trader can therefore capture:",
+    "clause-type": null,
+    "verification-flag": "Verified (Match 100%)"
+  },
+  {
+    "correlation-id": null,
+    "tag": "List-l1",
+    "content": [
+      "agents, subcontractors, representatives or other associates of the trader acting on\nbehalf of the trader. It does not matter whether someone is carrying out their own\nbusiness activities or also acting in the name of, or on behalf of, another business\nin relation to the same act or omission [footnote 15]",
+      "individuals who regularly sell goods from their homes through online marketplaces.\nWhether someone is acting as a trader depends on whether the relevant activity is"
+    ],
+    "clause-type": null,
+    "verification-flag": "Failed (Invalid Or Empty Content Field)"
+  }
+]

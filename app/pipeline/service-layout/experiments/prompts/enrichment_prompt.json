@@ -1,0 +1,93 @@
+{
+  "prompt_details": {
+    "task_description": "Extract specific information from the provided PDF document, which belongs to the regulatory/legal and compliance domain. The output must be a single JSON object. **Crucially, only include a key in the output JSON if its corresponding information is explicitly found in the PDF document.** Omit keys entirely if the information is not present. Do not include keys with null or empty values for information not found. **Important: Your response must consist exclusively of the JSON object as defined in 'output_format_instructions'. Do not repeat or include any part of this prompt, nor any other text, in the response.**",
+    "input_description": "The input is a PDF document from the regulatory/legal and compliance domain. The actual PDF data will be provided separately.",
+    "output_format_instructions": {
+      "format": "JSON",
+      "schema_description": "Return a single JSON object. Each key in this object corresponds to a specific piece of information extracted from the PDF. A key should only be present if the information it represents is found in the document.",
+      "fields_schema": [
+        {
+          "name": "AmendmentHistory",
+          "type": "String",
+          "description": "Details of any amendments, versions, or changes to the document or legislation it discusses. Omit if not found."
+        },
+        {
+          "name": "PenaltiesOffences",
+          "type": "String",
+          "description": "Specific penalties, fines, or descriptions of offences mentioned. Omit if not found."
+        },
+        {
+          "name": "Recommendations",
+          "type": "Array of Strings or String",
+          "description": "Any explicit recommendations made within the document. Omit if not found."
+        },
+        {
+          "name": "ConsultationIssues",
+          "type": "String",
+          "description": "Issues, questions, or topics raised for consultation. Omit if not found."
+        },
+        {
+          "name": "DraftBillProposals",
+          "type": "String",
+          "description": "Specific proposals for new laws or amendments to existing bills. Omit if not found."
+        },
+        {
+          "name": "StakeholderSubmissions",
+          "type": "String",
+          "description": "Summaries or mentions of submissions made by stakeholders. Omit if not found."
+        },
+        {
+          "name": "AffectedSectors",
+          "type": "Array of Strings or String",
+          "description": "Industries, groups, or areas impacted by the content of the PDF. Omit if not found."
+        },
+        {
+          "name": "SummarisationOfJudgments",
+          "type": "String",
+          "description": "A summary of any legal judgments discussed. Omit if not found."
+        },
+        {
+          "name": "JudgmentDate",
+          "type": "String",
+          "description": "The date(s) of any judgments mentioned, ideally in YYYY-MM-DD format. Use original string if YYYY-MM-DD conversion is ambiguous. Omit if not found."
+        },
+        {
+          "name": "EffectiveDate",
+          "type": "String",
+          "description": "The date when rules, laws, or provisions discussed come into effect, ideally in YYYY-MM-DD format. Use original string if YYYY-MM-DD conversion is ambiguous. Omit if not found."
+        },
+        {
+          "name": "ComplianceDate",
+          "type": "String",
+          "description": "The deadline by which compliance with new rules or regulations is required, ideally in YYYY-MM-DD format. Use original string if YYYY-MM-DD conversion is ambiguous. Omit if not found."
+        },
+        {
+          "name": "IssuingDate",
+          "type": "String",
+          "description": "The date the document itself was issued or published, ideally in YYYY-MM-DD format. Use original string if YYYY-MM-DD conversion is ambiguous. Omit if not found."
+        },
+        {
+          "name": "PartiesInvolved",
+          "type": "Array of Strings or String",
+          "description": "Names of plaintiffs, defendants, appellants, respondents, or other key parties in any legal cases or significant discussions. Omit if not found."
+        },
+        {
+          "name": "PresidingJudges",
+          "type": "Array of Strings or String",
+          "description": "Name(s) of the judge(s) who presided over any legal cases mentioned. Omit if not found."
+        },
+        {
+          "name": "LegalIssuesQuestions",
+          "type": "Array of Strings or String",
+          "description": "Specific legal questions, points of law, or issues addressed or debated. Omit if not found."
+        },
+        {
+          "name": "FilingProceduresDeadlines",
+          "type": "String",
+          "description": "Information regarding procedures for filing documents, applications, or submissions, including any relevant deadlines. Omit if not found."
+        }
+      ]
+    }
+  },
+  "pdf_document_input": "Placeholder for the actual PDF document content (e.g., base64 encoded string, or a variable that will be populated with the PDF data when the prompt is used)."
+}

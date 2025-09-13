@@ -1,0 +1,31 @@
+Task:
+You are an intelligent document parser. Your job is to analyze the content from a document and extract all instances where hyperlinked text appears. Return your findings in a structured JSON format.
+
+Instructions:
+
+For each piece of text that contains a hyperlink:
+Extract the visible text.
+Extract the URL associated with it.
+If the text is part of a sentence or paragraph, include the full surrounding sentence as context.
+
+Output the result in a valid JSON array, where each element contains:
+
+text: the exact hyperlinked text
+url: the hyperlink URL
+context: the full sentence or paragraph where the hyperlink is embedded
+
+If no hyperlinks are found, return an empty JSON array: [].
+
+Example Output Format:
+[
+  {
+    "text": "2022 In Case You Missed It",
+    "url": "https://singlefamily.fanniemae.com/media/document/pdf/case-you-missed-it-summary-2022-selling-guide-servicing-guide-policy-updates",
+    "context": "For a list of Servicing Guide policy changes and updates, see 2022 In Case You Missed It."
+  },
+  {
+    "text": "Guide Forms and Legal Documents",
+    "url": "https://singlefamily.fanniemae.com/legal-docs",
+    "context": "Servicers can access the actual forms on Fannie Mae’s website via the Guide Forms and Legal Documents pages."
+  }
+]

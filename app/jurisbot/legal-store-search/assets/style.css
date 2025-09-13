@@ -1,0 +1,52 @@
+/* This rule removes the blue glow from the search box when it's clicked */
+.form-control:focus {
+    border-color: #ced4da !important;
+    box-shadow: none !important;
+}
+
+/* --- UPDATED STYLES FOR DOCUMENT VIEWER TABS --- */
+
+/* Default state for tab links */
+.nav-tabs .nav-link {
+    color: #6c757d; /* Grey color for default state */
+    border-bottom-width: 1px !important;
+    background-color: transparent !important;
+}
+
+/* Tab link state on mouse hover */
+.nav-tabs .nav-link:hover {
+    color: black !important; /* Black text on hover */
+    border-color: #dee2e6 #dee2e6 #dee2e6;
+}
+
+/* Active (clicked) tab link state */
+.nav-tabs .nav-link.active {
+    color: black !important; /* Black text for active tab */
+    border-color: #dee2e6 #dee2e6 #fff !important;
+    border-bottom: 2px solid #003366 !important; /* Dark blue bottom border */
+}
+
+/* --- NEW: RESULT CARD HOVER EFFECT (Corrected) --- */
+/* This rule applies a light grey background when you mouse over any result card. */
+.result-card:hover, .result-card:hover .card-body {
+    background-color: #f8f9fa !important;
+}
+
+/* --- NEW: MOBILE RESPONSIVE STYLES --- */
+
+/* Styles for screens smaller than 768px (Bootstrap's 'md' breakpoint) */
+@media (max-width: 767.98px) {
+    /*
+     On mobile, the results and viewer stack vertically. We remove the fixed
+     viewport height to allow for natural scrolling through all content.
+    */
+    #results-output, #doc-viewer-container {
+        max-height: none;
+        height: auto;
+    }
+
+    /* Add space between the results list and the viewer when they are stacked */
+    #results-output {
+        margin-bottom: 2rem;
+    }
+}

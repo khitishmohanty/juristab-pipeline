@@ -1,0 +1,21 @@
+# .dockerignore
+
+# Git files
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local development environment files
+.env
+venv/
+*.venv
+
+# Test files
+tests/
+
+# IDE files
+.idea/
+.vscode/

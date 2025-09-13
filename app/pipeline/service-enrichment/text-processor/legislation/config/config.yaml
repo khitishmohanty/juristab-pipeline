@@ -1,0 +1,111 @@
+# -- Database connection details --
+database:
+    source:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_source"
+
+    destination:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+
+# List of tables to be read by the connector
+tables:
+  tables_to_read:
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_nt
+      s3_folder: "legislation/nt/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_nt"
+      jurisdiction: 'NT'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_tas
+      s3_folder: "legislation/tas/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_tas"
+      jurisdiction: 'TAS'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_vic
+      s3_folder: "legislation/vic/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_vic"
+      jurisdiction: 'VIC'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_nsw
+      s3_folder: "legislation/nsw/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_nsw"
+      jurisdiction: 'NSW'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_wa
+      s3_folder: "legislation/wa/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_wa"
+      jurisdiction: 'WA'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_sa
+      s3_folder: "legislation/sa/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_sa"
+      jurisdiction: 'SA'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_qld
+      s3_folder: "legislation/qld/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_qld"
+      jurisdiction: 'QLD'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_act
+      s3_folder: "legislation/act/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_act"
+      jurisdiction: 'ACT'
+    - database: legal_source
+      table: l2_scan_jade_io_legislation_commonwealth
+      s3_folder: "legislation/commonwealth/"
+      audit_job_name: "ai_enrichment_service_text_processing_legislation_juristree_commonwealth"
+      jurisdiction: 'FED'
+  tables_to_write:
+    - database: legal_store
+      table: legislation_enrichment_status
+      step_columns:
+        text_extract:
+          status: "status_text_processor"
+          duration: "duration_text_processor"
+          start_time: "start_time_text_processor"
+          end_time: "end_time_text_processor"
+  audit_log_table:
+    - database: legal_store
+      table: audit_log
+      job_name: "legislation_enrichment_textprocessing"
+
+
+# -- File naming conventions for the enrichment service --
+enrichment_filenames:
+  source_html: "miniviewer.html"
+  extracted_text: "miniviewer.txt"
+
+# -- Audit log configuration --
+audit_log:
+  text_extraction_job:
+    database: "legal_store"
+    table: "audit_log"
+    job_name: "legislation_enrichment_textprocessing"
+
+# -- Registry details
+tables_registry:
+    database: "legal_store"
+    table: "legislation_registry"
+    column: "year"
+    processing_years: []
+    jurisdiction_codes: []
+
+# -- Metadata details
+tables_metadata:
+    database: "legal_store"
+    table: "legislation_metadata"
+    column_count_char: "count_char"
+    column_word_char: "count_word"

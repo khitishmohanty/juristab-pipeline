@@ -1,0 +1,94 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_in_force_nt",
+        "description": "Scrapes all Acts currently in force from the NT legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Click the 'Acts' button on the home page",
+            "target": {
+              "type": "xpath",
+              "value": "//a[.//h3[text()='Acts']]"
+            }
+          },
+          {
+            "action": "alphabet_loop",
+            "description": "Iterate through each letter for Acts.",
+            "target_xpath": "//div[contains(@class, 'legislation-category-panel')]//div[contains(@class, 'panel-heading')]/h4/a",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "description": "Scrape links from the expanded panel",
+                "target": {
+                  "type": "xpath",
+                  "value": "//div[contains(@class, 'legislation-category-panel')]"
+                },
+                "scraping_config": {
+                  "row_xpath": "(//div[contains(@class, 'panel-collapse') and contains(@class, 'in')])[last()]//div[@class='panel-body']/p/a",
+                  "columns": [
+                    {
+                      "name": "title",
+                      "xpath": ".",
+                      "type": "text"
+                    },
+                    {
+                      "name": "link",
+                      "xpath": ".",
+                      "type": "href"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "subordinate_legislation_in_force_nt",
+        "description": "Scrapes all Subordinate Legislation in force from the NT legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "description": "Click the 'Subordinate Legislation' button on the home page",
+            "target": {
+              "type": "xpath",
+              "value": "//a[.//h3[text()='Subordinate Legislation']]"
+            }
+          },
+          {
+            "action": "alphabet_loop",
+            "description": "Iterate through each letter for Subordinate Legislation.",
+            "target_xpath": "//div[contains(@class, 'legislation-category-panel')]//div[contains(@class, 'panel-heading')]/h4/a",
+            "loop_steps": [
+              {
+                "action": "process_results",
+                "description": "Scrape links from the expanded panel",
+                "target": {
+                  "type": "xpath",
+                  "value": "//div[contains(@class, 'legislation-category-panel')]"
+                },
+                "scraping_config": {
+                  "row_xpath": "(//div[contains(@class, 'panel-collapse') and contains(@class, 'in')])[last()]//div[@class='panel-body']/p/a",
+                  "columns": [
+                    {
+                      "name": "title",
+                      "xpath": ".",
+                      "type": "text"
+                    },
+                    {
+                      "name": "link",
+                      "xpath": ".",
+                      "type": "href"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+Perform layout analysis and content extraction from the attached document.
+
+### Your tasks:
+1. Identify and label each structural element in the **order it appears** on the page using one of these tags:
+   - 'Enum', 'Figure', 'Footnote', 'Header', 'Heading-h1', 'Heading-h2', 'Heading-h3', 'Heading-h4', 'Heading-h5', 'Heading-h6', 'List-l1', 'List-l2', 'List-l3', 'List-l4', 'Paragraph', 'Table', 'Table of Contents', 'Title', 'Subtitle', 'Footer', 'Page number', 'Endnotes', 'Glossary', 'Clause', 'Line number'
+2. For each element:
+   - Preserve styling using Markdown:
+     - **bold** for bold text
+     - *italic* for italic text
+     - __underline__ for underlined text
+   - Do **not duplicate content** across tags.
+3. If the element is a **Clause**, classify it using the field `clause-type`:
+   - Valid values: `"Definition/Interpretation"`, `"Obligation/Requirement"`, `"Judgment Date"`, or `null` if classification is unclear.
+4. For **Table of Contents**:
+   - Return the entire TOC as a single block.
+   - In `content`, return a JSON string representing an array of entries with fields:
+     - `item_text`, `page_number`, and optional `sub_items` (for nesting)
+5. For **Tables**:
+   - In `content`, return either:
+     - A JSON array of rows and cells
+     - Or a Markdown formatted table
+     - or if the content has hyperlink, return the content with the hyperlink information
+
+### Output Format:
+Return a **valid JSON** with the following structure:
+```json
+{
+  "Page1": [
+    {
+      "correlation-id": null,
+      "tag": "figure",
+      "content": "AUTHENTICATED\nU.S. GOVERNMENT\n MATION\nGPO",
+      "clause-type": null
+    },
+    {
+      "correlation-id": null,
+      "tag": "heading",
+      "content": "AUTHENTICATED\nU.S. GOVERNMENT\n MATION\nGPO",
+      "clause-type": null
+    }
+  ],
+  "Page2": [
+    {
+      "correlation-id": null,
+      "tag": "some_other_tag",
+      "content": "Content from page 2",
+      "clause-type": null
+    }
+  ]
+}

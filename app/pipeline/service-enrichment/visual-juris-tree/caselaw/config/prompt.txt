@@ -1,0 +1,47 @@
+You are an expert legal analyst and data structurer. Your task is to analyze the provided legal judgment for Kalidonis NT Pty Ltd v Work Health Authority and convert its logical flow into a structured JSON object. This JSON will be used by another program to render an interactive flowchart.
+
+The output must be only the raw JSON object, with no surrounding text or markdown formatting.
+
+Input Text:
+attached file
+
+JSON Output Instructions:
+Generate a single JSON object with a root key flowchart. The structure must follow the schema detailed below.
+
+Schema Details:
+
+flowchart object:
+title: (string) "JuriTree Interactive Flowchart"
+subtitle: (string) "Kalidonis NT Pty Ltd v Work Health Authority [2025] NTSC 28"
+rootNode: (object) The starting point of the flowchart.
+finalOutcome: (object) The final decision node.
+
+Node Object Structure (for rootNode, finalOutcome, and all nested nodes):
+id: (string) A unique, descriptive, kebab-case identifier (e.g., "main-issue", "conviction-appeal-branch").
+type: (string) A category for styling. Use one of: "node-main-issue", "node-primary-branch", "node-question", "node-fact", "node-finding-no".
+title: (string) A concise summary of the point for display on the node.
+tooltip: (object) An analysis of the point with three keys:
+what: (string) A brief description of the event or legal point.
+who: (string) The key parties involved in this specific point.
+why: (string) An explanation of why this point was legally significant.
+
+reference: (object) A citation with two keys:
+refText: (string) The visible reference text, citing the item number from the judgment (e.g., "See Judgment [2], [4]").
+
+refPopupText: (string) A direct, concise quote from the corresponding item number in the source text.
+children: (array) An array of nested node objects. This can be empty if it's a leaf node.
+
+Content Extraction Logic:
+Hierarchy: Structure the JSON to reflect the judgment's hierarchy:
+Start with the rootNode representing the main appeal.
+Create two primary child branches: one for the "Appeal Against Conviction" and one for the "Appeal Against Sentence".
+Within the conviction branch, nest the grounds of appeal (e.g., Ground 2), the specific counts, the facts, and the findings.
+Follow a similar nested structure for the sentence appeal.
+
+Tooltips: For each node, populate the tooltip by carefully answering the "What, Who, Why" questions based on the text.
+
+References: For each node, find the most relevant item number [X] in the text. Use this number for the refText and extract a short, impactful quote for the refPopupText.
+
+Final Outcome: The finalOutcome node should summarize the court's ultimate decision.
+
+Begin the analysis now and generate the complete JSON object.

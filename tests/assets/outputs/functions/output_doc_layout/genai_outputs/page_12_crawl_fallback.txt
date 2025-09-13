@@ -1,0 +1,44 @@
+--- Page 12 ---
+Where a practice is directed to a particular group of consumers, the ‘average
+consumer’ refers to the average member of that group. This type of average
+consumer is referred to in this Guidance as the ‘average targeted consumer’.
+Where a group of consumers is vulnerable to a commercial practice in a way that the
+trader could reasonably be expected to foresee, the ‘average consumer’ refers to the
+average member of that group. Different practices, and even the same practices in
+different circumstances, may have different effects depending on the type of
+consumer they reach or affect. The provisions concerning vulnerable consumers are
+there to ensure that traders do not unfairly affect vulnerable people, even if their
+practices may not change non-vulnerable consumers’ decisions.
+The average consumer is a notional construct. There is no requirement to show
+evidence of actual consumers being affected by an unfair commercial practice. The
+concepts are intended to help the court and the CMA (as the case may be) decide if
+a practice is prohibited due to its potential impact on relevant consumers.
+Average member of a vulnerable group of consumers
+Where:
+there is a group of consumers
+the group is particularly vulnerable to a commercial practice
+the trader could reasonably be expected to foresee that the group of consumers is
+vulnerable to the commercial practice
+then the relevant average consumer is the average member of that group.[footnote 30]
+In relation to the breaches mentioned under the average consumer
+(https://www.gov.uk/government/publications/unfair-commercial-practices-cma207/unfair-
+commercial-practices#the-average-consumer), whether a commercial practice is unfair
+hinges on whether that vulnerability is likely to cause an average member of the
+group to take a transactional decision that they would not have taken otherwise.
+This protects consumers who may be particularly vulnerable either to a commercial
+practice (for example, to a particular selling technique or techniques) or because of
+the underlying product (namely, where the product may be only or mainly of interest
+to the vulnerable group).[footnote 31]
+A commercial practice will be assessed from the perspective of an average member
+of that group whose vulnerability the trader could reasonably be expected to foresee.
+The test is objective. It is not necessary that the trader actually foresees the effect (or
+likely effect) on vulnerable consumers, only that they could reasonably have been
+expected to do so.
+Consumers are treated as vulnerable to a practice or because of the underlying
+product within the meaning of the UCP provisions, if (among other things) they are
+vulnerable because of age, physical or mental health, credulity or the circumstances
+they are in.[footnote 32]
+Age
+It may be appropriate to consider a practice from the perspective of an older or
+younger consumer. For example, the elderly might be particularly vulnerable to
+

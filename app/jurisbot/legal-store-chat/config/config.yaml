@@ -1,0 +1,38 @@
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+      - jurisdiction_code: "NSW"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/nsw"
+      - jurisdiction_code: "VIC"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/vic"
+      - jurisdiction_code: "SA"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/sa"
+      - jurisdiction_code: "TAS"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/tas"
+      - jurisdiction_code: "WA"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/wa"
+      - jurisdiction_code: "FED"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/commonwealth"
+      - jurisdiction_code: "NT"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/nt"
+      - jurisdiction_code: "ACT"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/act"
+      - jurisdiction_code: "QLD"
+        bucket_name: "legal-store"
+        folder_name: "case-laws/qld"
+        
+# -- File to process --
+enrichment_filenames:
+  source_file: "miniviewer.html"
+  juris_map: "jurismap.html"
+  juris_tree: "juristree.html"
+  juris_summary: "jurissummary.html"

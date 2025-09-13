@@ -1,0 +1,132 @@
+{
+  "crawler_config": {
+    "journeys": [
+      {
+        "journey_id": "acts_in_force_qld",
+        "description": "Scrapes all Acts currently in force from the QLD legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='nav-site']/ul/li[2]/a"
+            },
+            "description": "Navigate to In force legislation page"
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//*[@id='main']/div[2]/div[1]/div/div/div/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//a[@id='table_1_next'][not(ancestor::li[contains(@class, 'disabled')])]",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_1']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "journey_id": "subordinate_legislation_in_force_qld",
+        "description": "Scrapes all Subordinate Legislation currently in force from the QLD legislation website.",
+        "steps": [
+          {
+            "action": "click",
+            "target": {
+              "type": "xpath",
+              "value": "//*[@id='nav-site']/ul/li[2]/a"
+            },
+            "description": "Navigate to In force legislation page"
+          },
+          {
+            "action": "alphabet_loop",
+            "target_xpath": "//*[@id='main']/div[2]/div[3]/div/div/div/a",
+            "loop_steps": [
+              {
+                "action": "next_button_pagination_loop",
+                "next_button_xpath": "//a[@id='table_1_next'][not(ancestor::li[contains(@class, 'disabled')])]",
+                "loop_steps": [
+                  {
+                    "action": "process_results",
+                    "target": {
+                      "type": "xpath",
+                      "value": "//*[@id='table_1']"
+                    },
+                    "scraping_config": {
+                      "row_xpath": "./tbody/tr",
+                      "columns": [
+                        {
+                          "name": "title",
+                          "xpath": ".//td[1]/a",
+                          "type": "text"
+                        },
+                        {
+                          "name": "link",
+                          "xpath": ".//td[1]/a",
+                          "type": "href"
+                        },
+                        {
+                          "name": "effective_date",
+                          "xpath": ".//td[2]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "year",
+                          "xpath": ".//td[3]",
+                          "type": "text"
+                        },
+                        {
+                          "name": "number",
+                          "xpath": ".//td[4]",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

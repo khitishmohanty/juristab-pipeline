@@ -1,0 +1,9 @@
+python-dotenv
+PyYAML
+SQLAlchemy
+mysql-connector-python
+boto3
+opensearch-py
+aws-requests-auth
+numpy
+tqdm

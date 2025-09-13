@@ -1,0 +1,53 @@
+# Database connection details
+database:
+  host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+  port: "3306"
+  name: "legal_source"
+  dialect: "mysql"
+  driver: "mysqlconnector"
+
+# S3 bucket configuration
+s3:
+  bucket_name: "legal-store"
+  output_filename: "full_book_content.html"
+  baseline_filename: "miniviewer.html"
+  validate_content_size: false
+
+# List of tables to be crawled with their corresponding S3 subfolder names
+tables_to_crawl:
+  - table_name: "l2_scan_jade_io_legislation_commonwealth"
+    subfolder_name: "legislation/commonwealth"
+    jurisdiction: "FED"
+    enabled: true
+  - table_name: "l2_scan_jade_io_legislation_nsw"
+    subfolder_name: "legislation/nsw"
+    jurisdiction: "NSW"
+    enabled: true
+  - table_name: "l2_scan_jade_io_legislation_act"
+    subfolder_name: "legislation/act"
+    jurisdiction: "ACT"
+    enabled: true
+  - table_name: "l2_scan_jade_io_legislation_vic"
+    subfolder_name: "legislation/vic"
+    jurisdiction: "VIC"
+    enabled: false
+  - table_name: "l2_scan_jade_io_legislation_qld"
+    subfolder_name: "legislation/qld"
+    jurisdiction: "QLD"
+    enabled: false
+  - table_name: "l2_scan_jade_io_legislation_sa"
+    subfolder_name: "legislation/sa"
+    jurisdiction: "SA"
+    enabled: false
+  - table_name: "l2_scan_jade_io_legislation_wa"
+    subfolder_name: "legislation/wa"
+    jurisdiction: "WA"
+    enabled: false
+  - table_name: "l2_scan_jade_io_legislation_tas"
+    subfolder_name: "legislation/tas"
+    jurisdiction: "TAS"
+    enabled: false
+  - table_name: "l2_scan_jade_io_legislation_nt"
+    subfolder_name: "legislation/nt"
+    jurisdiction: "NT"
+    enabled: false
