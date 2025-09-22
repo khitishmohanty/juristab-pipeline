@@ -27,30 +27,39 @@ def get_pending_documents(engine, doc_type: str):
         engine: The SQLAlchemy engine instance.
         doc_type: The type of document to process ('caselaw' or 'legislation').
     """
-    # Dynamically set table names based on doc_type
-    registry_table = f"{doc_type}_registry"
-    status_table = f"{doc_type}_enrichment_status"
-
-    query = text(f"""
-        SELECT
-            ces.source_id,
-            cr.file_path
-        FROM
-            legal_store.{status_table} AS ces
-        JOIN
-            legal_store.{registry_table} AS cr ON ces.source_id = cr.source_id
-        WHERE
-            ces.status_text_embedding = 'pass';
-    """)
-    
-    pending_files = []
     try:
+        # --- MODIFIED SECTION ---
+        # Dynamically get table names from the config file
+        registry_table_key = f"table_{doc_type}"  # Creates 'table_caselaw' or 'table_legislation'
+        registry_table = config['tables_registry'][registry_table_key]
+        
+        # This part remains the same, assuming the pattern holds for status tables
+        status_table = f"{doc_type}_enrichment_status"
+        # --- END MODIFICATION ---
+
+        query = text(f"""
+            SELECT
+                ces.source_id,
+                cr.file_path
+            FROM
+                legal_store.{status_table} AS ces
+            JOIN
+                legal_store.{registry_table} AS cr ON ces.source_id = cr.source_id
+            WHERE
+                ces.status_text_embedding = 'pass';
+        """)
+        
+        pending_files = []
         with engine.connect() as connection:
             result = connection.execute(query)
             for row in result:
                 pending_files.append(dict(row._mapping))
         print(f"Found {len(pending_files)} {doc_type} documents pending ingestion.")
         return pending_files
+
+    except KeyError:
+        print(f"Error: Table key '{registry_table_key}' not found in config.yaml under 'tables_registry'.")
+        return []
     except Exception as e:
         print(f"Error fetching pending {doc_type} documents: {e}")
         return []

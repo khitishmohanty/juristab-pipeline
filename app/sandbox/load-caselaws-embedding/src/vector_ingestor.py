@@ -81,7 +81,7 @@ class VectorIngestor:
                     "_source": {
                         "doc_id": source_id,
                         "doc_type": "case-law",
-                        "caselaw_embedding": embedding
+                        "legal_document_embedding": embedding
                     }
                 }
             except self.s3_client.exceptions.NoSuchKey: #

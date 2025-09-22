@@ -37,7 +37,13 @@ enrichment_filenames:
 # -- Registry details
 tables_registry:
     database: "legal_store"
-    table: "legislation_registry"
+    table_caselaw: "caselaw_registry"
+    table_legislation: "legislation_registry"
     column: "year"
     processing_years: []
     jurisdiction_codes: ['ACT','VIC','NT','QLD','WA','SA','TAS','FED','NSW']
+
+# -- Embedding switch
+embedding:
+    caselaw: true
+    legislation: true
