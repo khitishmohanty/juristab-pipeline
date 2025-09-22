@@ -45,5 +45,5 @@ tables_registry:
 
 # -- Embedding switch
 embedding:
-    caselaw: true
+    caselaw: false
     legislation: true
