@@ -91,6 +91,7 @@ class VectorIngestor:
                 print(f"Error processing source_id {source_id}: {e}") #
                 continue
 
+
     def run_pipeline(self, pending_caselaws):
         """
         Executes the full data ingestion pipeline from S3 to OpenSearch.
@@ -100,18 +101,35 @@ class VectorIngestor:
             return
 
         total_docs = len(pending_caselaws)
-        print(f"\nStarting bulk ingestion of {total_docs} documents to OpenSearch...")
+        print(f"\nPreparing {total_docs} documents for ingestion...")
+
+        # --- START CHANGES ---
+
+        # 1. Generate all actions and store them in a list first.
+        #    The tqdm progress bar is moved here to show progress during preparation.
+        actions = list(tqdm(self._generate_bulk_actions(pending_caselaws), 
+                            total=total_docs, 
+                            desc="Preparing bulk actions"))
+        
+        if not actions:
+            print("No valid actions were generated. Halting ingestion.")
+            return
+
+        print(f"\nStarting bulk ingestion of {len(actions)} documents to OpenSearch...")
         
         try:
             success_count, failed_items = bulk(
                 self.os_client,
-                self._generate_bulk_actions(pending_caselaws),
+                actions,  # 2. Pass the list of actions here instead of the generator.
                 chunk_size=500,
                 request_timeout=60,
                 max_retries=3,
                 initial_backoff=2,
                 refresh=False
             )
+            
+        # --- END CHANGES ---
+
             print(f"\nIngestion complete. Success: {success_count}, Failed: {len(failed_items)}")
             if failed_items:
                 print("First 5 failed items:", failed_items[:5])
