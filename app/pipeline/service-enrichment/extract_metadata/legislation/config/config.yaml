@@ -1,6 +1,6 @@
 # -- Google cloud project details --
 google_cloud:
-    project_id: "silver-osprey-468906-b1"
+    project_id: "pelagic-script-473802-s8"
     region: "us"
 
 # -- AI model configuration --
