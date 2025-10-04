@@ -1,4 +1,17 @@
+# Core dependencies
 dash
 dash-bootstrap-components
 openai
 gunicorn
+
+# File processing dependencies
+beautifulsoup4  # For HTML processing
+chardet  # For encoding detection
+
+# Background callback dependencies
+diskcache  # For background callback management
+
+# Optional dependencies for additional file types
+# Uncomment these as needed:
+# PyPDF2  # For PDF files
+# python-docx  # For DOCX files

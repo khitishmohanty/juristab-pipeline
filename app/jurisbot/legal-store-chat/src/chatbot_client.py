@@ -38,7 +38,7 @@ def get_chatbot_response(question: str, history: list):
         
     # Each interaction consists of a user message and an assistant message.
     # To get the last 2 interactions, we need the last 4 messages.
-    context_messages = history[-4:]
+    context_messages = history[-10:]
 
     # Add the user's current question to the message list to be sent to the model
     messages_to_send = context_messages + [{"role": "user", "content": question}]

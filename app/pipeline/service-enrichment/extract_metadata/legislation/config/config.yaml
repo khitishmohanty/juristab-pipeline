@@ -1,6 +1,6 @@
 # -- Google cloud project details --
 google_cloud:
-    project_id: "pelagic-script-473802-s8"
+    project_id: "carbide-anvil-474111-k0"
     region: "us"
 
 # -- AI model configuration --
