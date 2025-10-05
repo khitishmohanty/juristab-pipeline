@@ -48,5 +48,5 @@ tables_registry:
     database: "legal_store"
     table: "legislation_registry"
     column: "year"
-    processing_years: [2017,2018]
+    processing_years: [2010,2011,2012]
     jurisdiction_codes: ['ACT','VIC','NT','QLD','WA','SA','TAS','NSW','FED']
