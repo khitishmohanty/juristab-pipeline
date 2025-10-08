@@ -108,34 +108,49 @@ class JurisLinkExtractor:
                 config = yaml.safe_load(file)
             registry_config = config['tables_registry']
             
-            years = registry_config['processing_years']
+            years = registry_config.get('processing_years', [])
             jurisdictions = registry_config['jurisdiction_codes']
             
             # Get the specific status column name from the config
             status_column = self.enrichment_cols['processing_status']
 
-            self.logger.info(f"Querying for records with years: {years} and jurisdictions: {jurisdictions} that have not passed processing.")
-
-            # MODIFIED QUERY:
-            # - LEFT JOINs caselaw_enrichment_status to check the processing status.
-            # - WHERE clause now also checks if the status is NOT 'pass'.
-            #   Records not in caselaw_enrichment_status will have a NULL status and be included.
-            query = text(f"""
-                SELECT cr.source_id, cr.file_path 
-                FROM {self.caselaw_registry_table} cr
-                LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
-                WHERE cr.{registry_config['column']} IN :years 
-                AND cr.jurisdiction_code IN :jurisdiction_codes
-                AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
-            """)
-
-            result = self.db_session.execute(query.bindparams(
-                bindparam('years', expanding=True),
-                bindparam('jurisdiction_codes', expanding=True)
-            ), {
-                'years': years,
-                'jurisdiction_codes': jurisdictions
-            })
+            # Build the query dynamically based on whether years filter is needed
+            if years:  # If years list is not empty
+                self.logger.info(f"Querying for records with years: {years} and jurisdictions: {jurisdictions} that have not passed processing.")
+                
+                query = text(f"""
+                    SELECT cr.source_id, cr.file_path 
+                    FROM {self.caselaw_registry_table} cr
+                    LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
+                    WHERE cr.{registry_config['column']} IN :years 
+                    AND cr.jurisdiction_code IN :jurisdiction_codes
+                    AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
+                """)
+                
+                result = self.db_session.execute(query.bindparams(
+                    bindparam('years', expanding=True),
+                    bindparam('jurisdiction_codes', expanding=True)
+                ), {
+                    'years': years,
+                    'jurisdiction_codes': jurisdictions
+                })
+            else:  # If years list is empty, don't filter by year
+                self.logger.info(f"Querying for records with jurisdictions: {jurisdictions} that have not passed processing (no year filter).")
+                
+                query = text(f"""
+                    SELECT cr.source_id, cr.file_path 
+                    FROM {self.caselaw_registry_table} cr
+                    LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
+                    WHERE cr.jurisdiction_code IN :jurisdiction_codes
+                    AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
+                """)
+                
+                result = self.db_session.execute(query.bindparams(
+                    bindparam('jurisdiction_codes', expanding=True)
+                ), {
+                    'jurisdiction_codes': jurisdictions
+                })
+            
             return result.fetchall()
         except SQLAlchemyError as e:
             self.logger.error(f"Database error while fetching source IDs: {e}", exc_info=True)
@@ -157,7 +172,7 @@ class JurisLinkExtractor:
 
     def _process_and_store_links(self, source_id, links):
         """
-        Processes extracted links, finds related_source_id, and stores them.
+        Processes extracted links and stores them.
         """
         for link in links:
             jurislink = link['href']
@@ -167,27 +182,17 @@ class JurisLinkExtractor:
 
             # Proceed if we found at least a parent ID
             if book_parent_id:
-                related_source_id = self._get_related_source_id(jurislink)
+                # REMOVED: No longer looking up related_source_id
+                # Simply pass None for related_source_id
                 self._insert_juris_link(
                     source_id, 
                     jurislink, 
-                    related_source_id, 
+                    None,  # related_source_id is now always None
                     book_parent_id, 
                     book_section_id
                 )
 
-    def _get_related_source_id(self, jurislink):
-        """
-        Looks up the related_source_id from the caselaw_registry table based on the URL.
-        """
-        try:
-            query = text(f"SELECT source_id FROM {self.caselaw_registry_table} WHERE source_url = :jurislink")
-            result = self.db_session.execute(query, {'jurislink': jurislink}).fetchone()
-            return result[0] if result else None
-        except SQLAlchemyError as e:
-            self.logger.error(f"Database error looking up related_source_id for {jurislink}: {e}")
-            return None
-
+    # REMOVED: _get_related_source_id method is no longer needed
 
     def _insert_juris_link(self, source_id, jurislink, related_source_id, book_parent_id, book_section_id):
         """
@@ -267,9 +272,9 @@ class JurisLinkExtractor:
                     'end_time': end_time, 'source_id': source_id
                 })
             else:
-                # Insert new record
+                # Insert new record (fixed typo: end_col -> end_time_col)
                 insert_query = text(f"""
-                    INSERT INTO {self.enrichment_status_table} (source_id, {status_col}, {duration_col}, {start_time_col}, {end_col}) 
+                    INSERT INTO {self.enrichment_status_table} (source_id, {status_col}, {duration_col}, {start_time_col}, {end_time_col}) 
                     VALUES (:source_id, :status, :duration, :start_time, :end_time)
                 """)
                 self.db_session.execute(insert_query, {

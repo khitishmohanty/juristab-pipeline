@@ -101,25 +101,45 @@ class JurisLinkExtractor:
             
             status_column = self.enrichment_cols['processing_status']
 
-            self.logger.info(f"Querying for records with years: {years} and jurisdictions: {jurisdictions} that have not passed processing.")
-
-            query = text(f"""
-                SELECT cr.source_id, cr.file_path 
-                FROM {self.caselaw_registry_table} cr
-                LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
-                WHERE cr.{registry_config['column']} IN :years 
-                AND cr.jurisdiction_code IN :jurisdiction_codes
-                AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
-            """)
-
-            result = self.db_session.execute(query.bindparams(
-                bindparam('years', expanding=True),
-                bindparam('jurisdiction_codes', expanding=True)
-            ), {
-                'years': years,
-                'jurisdiction_codes': jurisdictions
-            })
+            # Build the query conditionally based on whether years list is empty
+            if years:  # If years list is not empty, include year filter
+                self.logger.info(f"Querying for records with years: {years} and jurisdictions: {jurisdictions} that have not passed processing.")
+                
+                query = text(f"""
+                    SELECT cr.source_id, cr.file_path 
+                    FROM {self.caselaw_registry_table} cr
+                    LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
+                    WHERE cr.{registry_config['column']} IN :years 
+                    AND cr.jurisdiction_code IN :jurisdiction_codes
+                    AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
+                """)
+                
+                result = self.db_session.execute(query.bindparams(
+                    bindparam('years', expanding=True),
+                    bindparam('jurisdiction_codes', expanding=True)
+                ), {
+                    'years': years,
+                    'jurisdiction_codes': jurisdictions
+                })
+            else:  # If years list is empty, omit year filter entirely
+                self.logger.info(f"Querying for records with ALL years and jurisdictions: {jurisdictions} that have not passed processing.")
+                
+                query = text(f"""
+                    SELECT cr.source_id, cr.file_path 
+                    FROM {self.caselaw_registry_table} cr
+                    LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
+                    WHERE cr.jurisdiction_code IN :jurisdiction_codes
+                    AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
+                """)
+                
+                result = self.db_session.execute(query.bindparams(
+                    bindparam('jurisdiction_codes', expanding=True)
+                ), {
+                    'jurisdiction_codes': jurisdictions
+                })
+            
             return result.fetchall()
+            
         except SQLAlchemyError as e:
             self.logger.error(f"Database error while fetching source IDs: {e}", exc_info=True)
             return []

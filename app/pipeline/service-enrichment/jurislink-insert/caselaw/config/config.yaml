@@ -53,5 +53,5 @@ tables_registry:
     database: "legal_store"
     table: "caselaw_registry"
     column: "year"
-    processing_years: [2025,2024]
+    processing_years: [2014,2013,2012,2011,2010,2009,2008,2007,2006,2005,2004,2003,2002,2001,2000]
     jurisdiction_codes: ['ACT','VIC','NT','QLD','WA','SA','TAS','NSW','FED']
