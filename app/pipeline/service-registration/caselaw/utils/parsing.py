@@ -105,6 +105,8 @@ def deconstruct_citation_code(combined_code, all_codes, jurisdiction_hint=None):
     """
     Deconstructs a combined code (e.g., 'NSWCATAP', 'WASAT', 'FamCA') into its parts.
     Returns jurisdiction code, tribunal code, and any panel/division suffix.
+    
+    IMPROVED VERSION: Checks for tribunal codes FIRST to avoid mis-parsing.
     """
     code_details = {
         'jurisdiction_code': None,
@@ -112,90 +114,179 @@ def deconstruct_citation_code(combined_code, all_codes, jurisdiction_hint=None):
         'panel_or_division': None
     }
     
-    remaining_code = combined_code
+    # Get all tribunal codes, sorted by length (longest first)
+    tribunals = all_codes[all_codes['type'] == 'tribunal'].copy()
+    tribunals['code_len'] = tribunals['code'].str.len()
+    tribunals = tribunals.sort_values(by='code_len', ascending=False)
     
-    # First, check if the entire code is a known tribunal (for federal courts like FamCA, FCA, etc.)
-    tribunals = all_codes[all_codes['type'] == 'tribunal']
+    # STRATEGY 1: Check if the entire code is a known tribunal
     if combined_code in tribunals['code'].values:
-        # It's a standalone federal tribunal
         code_details['tribunal_code'] = combined_code
-        code_details['jurisdiction_code'] = 'FED'  # Default to federal jurisdiction
+        # Try to infer jurisdiction from the tribunal code
+        code_details['jurisdiction_code'] = infer_jurisdiction_from_tribunal(combined_code, jurisdiction_hint)
         return code_details
     
-    # Check for special federal court patterns
-    federal_patterns = ['Fed', 'Fam', 'FCA', 'FC', 'AAT', 'HCA']
-    for pattern in federal_patterns:
-        if combined_code.startswith(pattern):
-            # Try to match the longest possible tribunal code
-            tribunals_sorted = tribunals.copy()
-            tribunals_sorted['code_len'] = tribunals_sorted['code'].str.len()
-            tribunals_sorted = tribunals_sorted.sort_values(by='code_len', ascending=False)
+    # STRATEGY 2: Check if the code starts with a known tribunal code
+    for _, tribunal_row in tribunals.iterrows():
+        tribunal_code = tribunal_row['code']
+        if combined_code.startswith(tribunal_code):
+            code_details['tribunal_code'] = tribunal_code
+            remaining_code = combined_code[len(tribunal_code):]
             
-            for _, row in tribunals_sorted.iterrows():
-                if combined_code.startswith(row['code']):
-                    code_details['tribunal_code'] = row['code']
-                    code_details['jurisdiction_code'] = 'FED'
-                    remaining_code = combined_code[len(row['code']):]
+            # Try to infer jurisdiction
+            code_details['jurisdiction_code'] = infer_jurisdiction_from_tribunal(tribunal_code, jurisdiction_hint)
+            
+            # Check if remainder is a panel/division
+            if remaining_code:
+                panels = all_codes[all_codes['type'] == 'panel_or_division']
+                if remaining_code in panels['code'].values:
+                    code_details['panel_or_division'] = remaining_code
+            
+            return code_details
+    
+    # STRATEGY 3: Check if code ends with known tribunal code (after removing jurisdiction prefix)
+    jurisdictions = all_codes[all_codes['type'] == 'jurisdiction'].copy()
+    jurisdictions['code_len'] = jurisdictions['code'].str.len()
+    jurisdictions = jurisdictions.sort_values(by='code_len', ascending=False)
+    
+    for _, juris_row in jurisdictions.iterrows():
+        juris_code = juris_row['code']
+        if combined_code.startswith(juris_code):
+            code_details['jurisdiction_code'] = juris_code
+            remaining_code = combined_code[len(juris_code):]
+            
+            # Now check if remainder is a tribunal (possibly with panel/division)
+            for _, tribunal_row in tribunals.iterrows():
+                tribunal_code = tribunal_row['code']
+                if remaining_code == tribunal_code:
+                    code_details['tribunal_code'] = tribunal_code
+                    return code_details
+                elif remaining_code.startswith(tribunal_code):
+                    code_details['tribunal_code'] = tribunal_code
+                    panel_part = remaining_code[len(tribunal_code):]
                     
-                    # Check if there's a panel/division code
-                    if remaining_code:
-                        panels = all_codes[all_codes['type'] == 'panel_or_division']
-                        if remaining_code in panels['code'].values:
-                            code_details['panel_or_division'] = remaining_code
-                        else:
-                            # It might be part of the tribunal code
-                            code_details['tribunal_code'] = combined_code
-                            remaining_code = ''
+                    # Check if the rest is a panel/division
+                    panels = all_codes[all_codes['type'] == 'panel_or_division']
+                    if panel_part in panels['code'].values:
+                        code_details['panel_or_division'] = panel_part
                     return code_details
     
-    # Standard processing for state-based codes
-    # 1. Determine Jurisdiction using the hint if provided
+    # STRATEGY 4: Common patterns for state-based tribunals not in config
+    # This handles cases like NSWADT, VCAT, QIRC, VCC, VSCA
+    state_tribunal_patterns = {
+        'NSW': ['ADT', 'CTT', 'IRComm', 'WCC'],  # NSW specific tribunals
+        'VIC': ['CAT', 'CC', 'SCA'],  # Victorian tribunals (VCAT, VCC, VSCA)
+        'QLD': ['IRC', 'QCAT', 'QIRC'],  # Queensland tribunals
+        'WA': ['SAT', 'IRC'],  # WA tribunals
+        'SA': ['SAT', 'ERD'],  # SA tribunals
+        'TAS': ['RAT'],  # Tasmania tribunals
+        'ACT': ['AAT'],  # ACT tribunals
+    }
+    
+    # Check for state prefixes in known patterns
+    for state_code, tribunal_suffixes in state_tribunal_patterns.items():
+        if combined_code.startswith(state_code):
+            remaining = combined_code[len(state_code):]
+            for suffix in tribunal_suffixes:
+                if remaining == suffix or remaining.startswith(suffix):
+                    code_details['jurisdiction_code'] = state_code
+                    code_details['tribunal_code'] = remaining[:len(suffix)]
+                    
+                    # Check for any panel/division after the tribunal code
+                    if len(remaining) > len(suffix):
+                        panel_part = remaining[len(suffix):]
+                        panels = all_codes[all_codes['type'] == 'panel_or_division']
+                        if panel_part in panels['code'].values:
+                            code_details['panel_or_division'] = panel_part
+                    return code_details
+    
+    # STRATEGY 5: Check for single letter state abbreviations (V for VIC, Q for QLD)
+    single_letter_mapping = {
+        'V': 'VIC',
+        'Q': 'QLD',
+        'N': 'NSW',
+        'S': 'SA',
+        'W': 'WA',
+        'T': 'TAS'
+    }
+    
+    if combined_code[0] in single_letter_mapping:
+        potential_jurisdiction = single_letter_mapping[combined_code[0]]
+        remaining = combined_code[1:]
+        
+        # Check if remaining part could be a tribunal
+        if remaining:
+            # First check if it's a known tribunal
+            if remaining in tribunals['code'].values:
+                code_details['jurisdiction_code'] = potential_jurisdiction
+                code_details['tribunal_code'] = remaining
+                return code_details
+            
+            # Check common patterns
+            common_tribunal_codes = ['CAT', 'CC', 'SCA', 'IRC', 'SAT', 'DC', 'SC', 'MC']
+            for tribunal in common_tribunal_codes:
+                if remaining == tribunal or remaining.startswith(tribunal):
+                    code_details['jurisdiction_code'] = potential_jurisdiction
+                    code_details['tribunal_code'] = tribunal
+                    
+                    if len(remaining) > len(tribunal):
+                        panel_part = remaining[len(tribunal):]
+                        panels = all_codes[all_codes['type'] == 'panel_or_division']
+                        if panel_part in panels['code'].values:
+                            code_details['panel_or_division'] = panel_part
+                    return code_details
+    
+    # FALLBACK: If nothing worked, use the hint if available
     if jurisdiction_hint:
         code_details['jurisdiction_code'] = jurisdiction_hint
-        if remaining_code.startswith(jurisdiction_hint):
-            remaining_code = remaining_code[len(jurisdiction_hint):]
+        # Assume the entire code is the tribunal
+        code_details['tribunal_code'] = combined_code
     else:
-        # Look for jurisdiction codes at the start
-        jurisdictions = all_codes[all_codes['type'] == 'jurisdiction'].copy()
-        jurisdictions['code_len'] = jurisdictions['code'].str.len()
-        jurisdictions = jurisdictions.sort_values(by='code_len', ascending=False)
-        
-        for _, row in jurisdictions.iterrows():
-            if remaining_code.startswith(row['code']):
-                code_details['jurisdiction_code'] = row['code']
-                remaining_code = remaining_code[len(row['code']):]
-                break
-    
-    # 2. Find Tribunal from the remaining part of the code
-    if remaining_code:
-        tribunals = all_codes[all_codes['type'] == 'tribunal'].copy()
-        tribunals['code_len'] = tribunals['code'].str.len()
-        tribunals = tribunals.sort_values(by='code_len', ascending=False)
-        
-        for _, row in tribunals.iterrows():
-            if remaining_code.startswith(row['code']):
-                code_details['tribunal_code'] = row['code']
-                remaining_code = remaining_code[len(row['code']):]
-                break
-        
-        # If no tribunal found but there's still code, it might be a composite tribunal code
-        if not code_details['tribunal_code'] and remaining_code:
-            # Check if the entire remaining code might be a tribunal
-            if remaining_code in tribunals['code'].values:
-                code_details['tribunal_code'] = remaining_code
-                remaining_code = ''
-    
-    # 3. The rest is the panel/division
-    if remaining_code:
-        panels = all_codes[all_codes['type'] == 'panel_or_division']
-        if remaining_code in panels['code'].values:
-            code_details['panel_or_division'] = remaining_code
-        else:
-            # Log unrecognized panel/division codes for debugging
-            logging.debug(f"Unrecognized panel/division code: {remaining_code} from {combined_code}")
-            code_details['panel_or_division'] = remaining_code
+        # Last resort: log warning and return what we can
+        logging.warning(f"Could not fully parse citation code: {combined_code}")
+        code_details['tribunal_code'] = combined_code  # Assume it's all tribunal code
     
     return code_details
+
+def infer_jurisdiction_from_tribunal(tribunal_code, jurisdiction_hint=None):
+    """
+    Helper function to infer jurisdiction from tribunal code.
+    """
+    # Federal/Commonwealth tribunals
+    federal_tribunals = ['HCA', 'FCA', 'FCAFC', 'FamCA', 'FamCAFC', 
+                         'FedCFamC1F', 'FedCFamC2F', 'FCCA', 'AAT', 'AATA', 'FWC', 'AIRC',
+                         'NNTT', 'DFDAT', 'CTA']
+    if tribunal_code in federal_tribunals:
+        return 'FED'
+    
+    # New Zealand tribunals
+    if tribunal_code.startswith('NZ') or tribunal_code in ['SC', 'CA', 'HC', 'DC', 'FC', 'YC', 
+                                                            'EC', 'EmpC', 'ERA', 'MLC', 'MaoriLC',
+                                                            'MACA', 'MaoriAC', 'CC', 'CSC', 'WT', 
+                                                            'HRRT', 'DT', 'TT', 'MVDT', 'LVT', 'IPT',
+                                                            'RSAA', 'SSAA', 'SAA', 'TRA', 'LCRO']:
+        return 'NZ'
+    
+    # State-specific patterns in tribunal codes
+    if tribunal_code.startswith('NSW') or tribunal_code in ['ADT', 'NSWADT', 'MHRT']:
+        return 'NSW'
+    elif tribunal_code.startswith('VIC') or tribunal_code in ['VCAT', 'VCC', 'VSCA', 'VSC', 'VMC', 'VMHT', 'VOCAT']:
+        return 'VIC'
+    elif tribunal_code.startswith('QLD') or tribunal_code in ['QIRC', 'QCAT', 'QSC', 'QCA', 'QDC', 'QLC', 'QMHRT']:
+        return 'QLD'
+    elif tribunal_code.startswith('WA') or tribunal_code in ['WASAT', 'WASC', 'WADC', 'WAMC', 'WAMHRT']:
+        return 'WA'
+    elif tribunal_code.startswith('SA') or tribunal_code in ['SASAT', 'SASC', 'SADC']:
+        return 'SA'
+    elif tribunal_code.startswith('TAS') or tribunal_code in ['TASCAT', 'TASC']:
+        return 'TAS'
+    elif tribunal_code.startswith('ACT') or tribunal_code in ['ACAT', 'ACTSC', 'ACTCA', 'ACTMC']:
+        return 'ACT'
+    elif tribunal_code.startswith('NT') or tribunal_code in ['NTCAT', 'NTSC', 'NTLC']:
+        return 'NT'
+    
+    # Use hint if available
+    return jurisdiction_hint
 
 def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
     """
@@ -216,30 +307,66 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
         'jurisdiction_code': None, 
         'tribunal_code': None,
         'panel_or_division': None, 
-        'decision_number': None,  # Now capturing this
+        'decision_number': None,
         'decision_date': None, 
         'members': None,
-        'member_info': None  # Structured member data
+        'member_info': None
     }
 
     if not citation_str:
         return details
-
-    # Updated pattern to CAPTURE the decision number
-    pattern = re.compile(
-        r'\[(\d{4})\]\s+'           # Group 1: Year in brackets
-        r'([A-Z][A-Za-z0-9]+)\s+'   # Group 2: Tribunal/Court code
-        r'(\d+)\s*'                  # Group 3: Decision number (NOW CAPTURED)
-        r'(?:\((.*?)\))'             # Group 4: Decision date
-        r'(?:\s*\((.*?)\))?'         # Group 5: Optional members/judges
-    )
     
-    match = pattern.match(citation_str)
+    # Quick check for known bad data patterns
+    if ' null ' in citation_str.lower():
+        logging.warning(f"Citation contains 'null' values, likely bad source data: {citation_str}")
+        # Return empty details to mark as failed
+        return details
+
+    # Try multiple patterns to handle different citation formats
+    patterns = [
+        # Standard pattern: [Year] TRIBUNAL NUMBER (Date)
+        re.compile(
+            r'\[{1,2}(\d{4})\]{1,2}\s+'  # Group 1: Year in single or double brackets
+            r'([A-Z][A-Za-z0-9]+)\s+'    # Group 2: Tribunal/Court code
+            r'(\d+)\s*'                   # Group 3: Decision number
+            r'(?:\((.*?)\))'              # Group 4: Decision date
+            r'(?:\s*\((.*?)\))?'          # Group 5: Optional members/judges
+        ),
+        # Reversed pattern: [Year] NUMBER TRIBUNAL (Date)
+        re.compile(
+            r'\[{1,2}(\d{4})\]{1,2}\s+'  # Group 1: Year
+            r'(\d+)\s+'                   # Group 2: Decision number (comes first)
+            r'([A-Z][A-Za-z0-9]+)\s*'    # Group 3: Tribunal/Court code (comes second)
+            r'(?:\((.*?)\))'              # Group 4: Decision date
+            r'(?:\s*\((.*?)\))?'          # Group 5: Optional members/judges
+        ),
+        # Pattern without decision number: [Year] TRIBUNAL ... (Date with year)
+        re.compile(
+            r'\[{1,2}(\d{4})\]{1,2}\s+'  # Group 1: Year
+            r'([A-Z][A-Za-z0-9]+)\s+'    # Group 2: Tribunal/Court code
+            r'.*?'                        # Match any characters (non-greedy)
+            r'\((\d{1,2}\s+\w+\s+\d{4})\)' # Group 3: Date pattern (DD Month YYYY)
+            r'(?:\s*\((.*?)\))?'          # Group 4: Optional members/judges
+        )
+    ]
+    
+    match = None
+    pattern_used = None
+    
+    # Try each pattern
+    for idx, pattern in enumerate(patterns):
+        match = pattern.match(citation_str)
+        if match:
+            pattern_used = idx
+            break
+    
     if not match:
         logging.warning(f"Could not parse citation format: {citation_str}")
         return details
 
-    year_str, tribunal_code, decision_num, date_str, members_str = match.groups()
+    # Process based on which pattern matched
+    if pattern_used == 0:  # Standard pattern
+        year_str, tribunal_code, decision_num, date_str, members_str = match.groups()
 
     # Extract all components
     details['year'] = int(year_str)

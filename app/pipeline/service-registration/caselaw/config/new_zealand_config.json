@@ -1,9 +1,123 @@
 [
     { "code": "NZ", "name": "New Zealand", "type": "jurisdiction" },
+    
     { "code": "SC", "name": "Supreme Court", "type": "tribunal" },
+    { "code": "NZSC", "name": "Supreme Court of New Zealand", "type": "tribunal" },
+    
     { "code": "CA", "name": "Court of Appeal", "type": "tribunal" },
+    { "code": "NZCA", "name": "Court of Appeal of New Zealand", "type": "tribunal" },
+    
     { "code": "HC", "name": "High Court", "type": "tribunal" },
+    { "code": "NZHC", "name": "High Court of New Zealand", "type": "tribunal" },
+    
     { "code": "DC", "name": "District Court", "type": "tribunal" },
-    { "code": "MaoriLC", "name": "Maori Land Court", "type": "tribunal" },
-    { "code": "ERA", "name": "Employment Relations Authority", "type": "tribunal" }
+    { "code": "NZDC", "name": "District Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "FC", "name": "Family Court", "type": "tribunal" },
+    { "code": "NZFC", "name": "Family Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "YC", "name": "Youth Court", "type": "tribunal" },
+    { "code": "NZYC", "name": "Youth Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "EC", "name": "Environment Court", "type": "tribunal" },
+    { "code": "NZEnvC", "name": "Environment Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "EmpC", "name": "Employment Court", "type": "tribunal" },
+    { "code": "NZEmpC", "name": "Employment Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "ERA", "name": "Employment Relations Authority", "type": "tribunal" },
+    { "code": "NZERA", "name": "Employment Relations Authority of New Zealand", "type": "tribunal" },
+    
+    { "code": "MLC", "name": "Māori Land Court", "type": "tribunal" },
+    { "code": "MaoriLC", "name": "Māori Land Court", "type": "tribunal" },
+    { "code": "NZMLC", "name": "Māori Land Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "MACA", "name": "Māori Appellate Court", "type": "tribunal" },
+    { "code": "MaoriAC", "name": "Māori Appellate Court", "type": "tribunal" },
+    { "code": "NZMACA", "name": "Māori Appellate Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "CC", "name": "Coroners Court", "type": "tribunal" },
+    { "code": "NZCC", "name": "Coroners Court of New Zealand", "type": "tribunal" },
+    { "code": "CSC", "name": "Coroners Court", "type": "tribunal" },
+    { "code": "NZCSC", "name": "Coroners Court of New Zealand", "type": "tribunal" },
+    
+    { "code": "WT", "name": "Waitangi Tribunal", "type": "tribunal" },
+    { "code": "NZWT", "name": "Waitangi Tribunal", "type": "tribunal" },
+    
+    { "code": "HRRT", "name": "Human Rights Review Tribunal", "type": "tribunal" },
+    { "code": "NZHRRT", "name": "Human Rights Review Tribunal", "type": "tribunal" },
+    
+    { "code": "DT", "name": "Disputes Tribunal", "type": "tribunal" },
+    { "code": "NZDT", "name": "Disputes Tribunal of New Zealand", "type": "tribunal" },
+    
+    { "code": "TT", "name": "Tenancy Tribunal", "type": "tribunal" },
+    { "code": "NZTT", "name": "Tenancy Tribunal of New Zealand", "type": "tribunal" },
+    
+    { "code": "MVDT", "name": "Motor Vehicle Disputes Tribunal", "type": "tribunal" },
+    { "code": "NZMVDT", "name": "Motor Vehicle Disputes Tribunal", "type": "tribunal" },
+    
+    { "code": "LVT", "name": "Land Valuation Tribunal", "type": "tribunal" },
+    { "code": "NZLVT", "name": "Land Valuation Tribunal", "type": "tribunal" },
+    
+    { "code": "TTDT", "name": "Trans-Tasman Proceedings Tribunal", "type": "tribunal" },
+    
+    { "code": "IPT", "name": "Immigration and Protection Tribunal", "type": "tribunal" },
+    { "code": "NZIPT", "name": "Immigration and Protection Tribunal of New Zealand", "type": "tribunal" },
+    
+    { "code": "RSAA", "name": "Refugee Status Appeals Authority", "type": "tribunal" },
+    { "code": "NZRSAA", "name": "Refugee Status Appeals Authority", "type": "tribunal" },
+    
+    { "code": "SSAA", "name": "Social Security Appeal Authority", "type": "tribunal" },
+    { "code": "NZSSAA", "name": "Social Security Appeal Authority", "type": "tribunal" },
+    
+    { "code": "SAA", "name": "Student Allowance Appeal Authority", "type": "tribunal" },
+    { "code": "NZSAA", "name": "Student Allowance Appeal Authority", "type": "tribunal" },
+    
+    { "code": "TRA", "name": "Taxation Review Authority", "type": "tribunal" },
+    { "code": "NZTRA", "name": "Taxation Review Authority", "type": "tribunal" },
+    
+    { "code": "LCRO", "name": "Legal Complaints Review Officer", "type": "tribunal" },
+    { "code": "NZLCRO", "name": "Legal Complaints Review Officer", "type": "tribunal" },
+    
+    { "code": "LT", "name": "Licensing Tribunal", "type": "tribunal" },
+    { "code": "NZLT", "name": "Licensing Tribunal", "type": "tribunal" },
+    
+    { "code": "ARLA", "name": "Alcohol Regulatory and Licensing Authority", "type": "tribunal" },
+    { "code": "NZARLA", "name": "Alcohol Regulatory and Licensing Authority", "type": "tribunal" },
+    { "code": "LLA", "name": "Liquor Licensing Authority", "type": "tribunal" },
+    { "code": "NZLLA", "name": "Liquor Licensing Authority", "type": "tribunal" },
+    
+    { "code": "READT", "name": "Real Estate Agents Disciplinary Tribunal", "type": "tribunal" },
+    { "code": "NZREADT", "name": "Real Estate Agents Disciplinary Tribunal", "type": "tribunal" },
+    
+    { "code": "HPDT", "name": "Health Practitioners Disciplinary Tribunal", "type": "tribunal" },
+    { "code": "NZHPDT", "name": "Health Practitioners Disciplinary Tribunal", "type": "tribunal" },
+    
+    { "code": "LCDT", "name": "Lawyers and Conveyancers Disciplinary Tribunal", "type": "tribunal" },
+    { "code": "NZLCDT", "name": "Lawyers and Conveyancers Disciplinary Tribunal", "type": "tribunal" },
+    
+    { "code": "TDSAT", "name": "Teachers Disciplinary Tribunal", "type": "tribunal" },
+    { "code": "NZTDSAT", "name": "Teachers Disciplinary Tribunal", "type": "tribunal" },
+    
+    { "code": "ComCom", "name": "Commerce Commission", "type": "tribunal" },
+    { "code": "NZComCom", "name": "Commerce Commission of New Zealand", "type": "tribunal" },
+    
+    { "code": "PrivCmr", "name": "Privacy Commissioner", "type": "tribunal" },
+    { "code": "NZPrivCmr", "name": "Privacy Commissioner of New Zealand", "type": "tribunal" },
+    
+    { "code": "ACC", "name": "Accident Compensation Corporation Appeals", "type": "tribunal" },
+    { "code": "NZACC", "name": "Accident Compensation Corporation Appeals", "type": "tribunal" },
+    { "code": "ACAA", "name": "Accident Compensation Appeal Authority", "type": "tribunal" },
+    { "code": "NZACAA", "name": "Accident Compensation Appeal Authority", "type": "tribunal" },
+    
+    { "code": "NZIACDT", "name": "Immigration Advisers Complaints and Disciplinary Tribunal", "type": "tribunal" },
+    { "code": "IACDT", "name": "Immigration Advisers Complaints and Disciplinary Tribunal", "type": "tribunal" },
+    
+    { "code": "NZPSPLA", "name": "Private Security Personnel Licensing Authority", "type": "tribunal" },
+    { "code": "PSPLA", "name": "Private Security Personnel Licensing Authority", "type": "tribunal" },
+    
+    { "code": "NZCAA", "name": "Customs Appeal Authority", "type": "tribunal" },
+    { "code": "CAA", "name": "Customs Appeal Authority", "type": "tribunal" },
+    
+    { "code": "COC", "name": "Court of Competent Jurisdiction", "type": "tribunal" }
 ]
