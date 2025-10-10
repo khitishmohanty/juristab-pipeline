@@ -101,6 +101,45 @@ def parse_member_info(members_str):
     
     return member_info
 
+def is_valid_tribunal_code(code):
+    """
+    Basic validation to check if a string could be a valid tribunal code.
+    Filters out obvious bad data.
+    """
+    if not code or not isinstance(code, str):
+        return False
+    
+    # Reject single letters except specific valid ones
+    if len(code) == 1 and code not in ['O']:
+        return False
+    
+    # Reject common words that are clearly not tribunal codes
+    invalid_words = [
+        'JULY', 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
+        'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+        'SUPREME', 'COURT', 'TRIBUNAL', 'PARTIESWHERE', 'NCE', 'UMBER', 
+        'CASSINI', 'QD'
+    ]
+    
+    # Don't reject jurisdiction codes here - they might be valid in some contexts
+    # Let the deconstruct_citation_code function handle them
+    
+    if code.upper() in invalid_words:
+        return False
+    
+    # Must contain at least 2 characters (except for special cases like 'O')
+    if len(code) < 2 and code not in ['O']:
+        return False
+    
+    # Should start with a letter and contain only letters and numbers
+    if not code[0].isalpha():
+        return False
+    
+    if not code.replace('_', '').isalnum():
+        return False
+    
+    return True
+
 def deconstruct_citation_code(combined_code, all_codes, jurisdiction_hint=None):
     """
     Deconstructs a combined code (e.g., 'NSWCATAP', 'WASAT', 'FamCA') into its parts.
@@ -255,7 +294,8 @@ def infer_jurisdiction_from_tribunal(tribunal_code, jurisdiction_hint=None):
     # Federal/Commonwealth tribunals
     federal_tribunals = ['HCA', 'FCA', 'FCAFC', 'FamCA', 'FamCAFC', 
                          'FedCFamC1F', 'FedCFamC2F', 'FCCA', 'AAT', 'AATA', 'FWC', 'AIRC',
-                         'NNTT', 'DFDAT', 'CTA']
+                         'NNTT', 'DFDAT', 'CTA', 'FMCA', 'FMCAfam', 'FedCFamC1A', 'FedCFamC2G',
+                         'FedCFamCG2', 'FEDCFAMC1F', 'FamCa']
     if tribunal_code in federal_tribunals:
         return 'FED'
     
@@ -272,17 +312,17 @@ def infer_jurisdiction_from_tribunal(tribunal_code, jurisdiction_hint=None):
         return 'NSW'
     elif tribunal_code.startswith('VIC') or tribunal_code in ['VCAT', 'VCC', 'VSCA', 'VSC', 'VMC', 'VMHT', 'VOCAT']:
         return 'VIC'
-    elif tribunal_code.startswith('QLD') or tribunal_code in ['QIRC', 'QCAT', 'QSC', 'QCA', 'QDC', 'QLC', 'QMHRT']:
+    elif tribunal_code.startswith('QLD') or tribunal_code in ['QIRC', 'QCAT', 'QSC', 'QCA', 'QDC', 'QLC', 'QMHRT', 'QMC']:
         return 'QLD'
     elif tribunal_code.startswith('WA') or tribunal_code in ['WASAT', 'WASC', 'WADC', 'WAMC', 'WAMHRT']:
         return 'WA'
-    elif tribunal_code.startswith('SA') or tribunal_code in ['SASAT', 'SASC', 'SADC']:
+    elif tribunal_code.startswith('SA') or tribunal_code in ['SASAT', 'SASC', 'SADC', 'SAMC', 'SAEOT', 'ERD', 'SAWC']:
         return 'SA'
-    elif tribunal_code.startswith('TAS') or tribunal_code in ['TASCAT', 'TASC']:
+    elif tribunal_code.startswith('TAS') or tribunal_code in ['TASCAT', 'TASC', 'TASSC', 'TASMC', 'TASGAB', 'TSGAB']:
         return 'TAS'
     elif tribunal_code.startswith('ACT') or tribunal_code in ['ACAT', 'ACTSC', 'ACTCA', 'ACTMC']:
         return 'ACT'
-    elif tribunal_code.startswith('NT') or tribunal_code in ['NTCAT', 'NTSC', 'NTLC']:
+    elif tribunal_code.startswith('NT') or tribunal_code in ['NTCAT', 'NTSC', 'NTLC', 'NTMC', 'NTCCA']:
         return 'NT'
     
     # Use hint if available
@@ -358,24 +398,41 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
         match = pattern.match(citation_str)
         if match:
             pattern_used = idx
+            logging.debug(f"Pattern {idx} matched for citation: {citation_str}")
             break
     
     if not match:
         logging.warning(f"Could not parse citation format: {citation_str}")
+        # Add more detail about what patterns were tried
+        logging.debug(f"Citation that failed all patterns: {citation_str}")
         return details
 
     # Process based on which pattern matched
     if pattern_used == 0:  # Standard pattern
         year_str, tribunal_code, decision_num, date_str, members_str = match.groups()
-
-    # Extract all components
-    details['year'] = int(year_str)
-    details['decision_number'] = int(decision_num)
-    details['members'] = members_str.strip() if members_str else None
+        details['year'] = int(year_str)
+        details['decision_number'] = int(decision_num) if decision_num else None
+        details['members'] = members_str.strip() if members_str else None
+        
+    elif pattern_used == 1:  # Reversed pattern (number before tribunal)
+        year_str, decision_num, tribunal_code, date_str, members_str = match.groups()
+        details['year'] = int(year_str)
+        details['decision_number'] = int(decision_num) if decision_num else None
+        details['members'] = members_str.strip() if members_str else None
+        
+    elif pattern_used == 2:  # Pattern without decision number
+        groups = match.groups()
+        year_str = groups[0]
+        tribunal_code = groups[1]
+        date_str = groups[2] if len(groups) > 2 else None
+        members_str = groups[3] if len(groups) > 3 else None
+        details['year'] = int(year_str)
+        details['decision_number'] = None  # No decision number in this format
+        details['members'] = members_str.strip() if members_str else None
     
     # Parse member information into structured format
-    if members_str:
-        details['member_info'] = parse_member_info(members_str)
+    if details['members']:
+        details['member_info'] = parse_member_info(details['members'])
     
     # Parse the date with multiple possible formats
     if date_str:
@@ -388,9 +445,12 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
         
         for fmt in date_formats:
             try:
-                details['decision_date'] = datetime.strptime(date_str.strip(), fmt).date()
+                parsed_date = datetime.strptime(date_str.strip(), fmt).date()
+                details['decision_date'] = parsed_date
+                logging.debug(f"Successfully parsed date '{date_str}' as {parsed_date}")
                 break
-            except ValueError:
+            except ValueError as e:
+                logging.debug(f"Failed to parse date '{date_str}' with format '{fmt}': {e}")
                 continue
         
         if not details['decision_date']:
@@ -398,15 +458,27 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
 
     # Deconstruct the tribunal code to get jurisdiction and panel info
     code_details = deconstruct_citation_code(tribunal_code, all_codes, jurisdiction_hint)
+    
+    # Validate the tribunal code
+    if code_details['tribunal_code'] and not is_valid_tribunal_code(code_details['tribunal_code']):
+        logging.warning(f"Invalid tribunal code detected: '{code_details['tribunal_code']}' in citation: {citation_str}")
+        code_details['tribunal_code'] = None
+    
     details.update(code_details)
     
     # Log successful parsing with all components
     if details['jurisdiction_code'] and details['tribunal_code']:
-        logging.debug(f"Successfully parsed citation '{citation_str}': "
-                     f"Year={details['year']}, "
-                     f"Tribunal={details['tribunal_code']}, "
-                     f"Decision#={details['decision_number']}, "
-                     f"Jurisdiction={details['jurisdiction_code']}")
+        if details['decision_number']:
+            logging.debug(f"Successfully parsed citation '{citation_str}': "
+                         f"Year={details['year']}, "
+                         f"Tribunal={details['tribunal_code']}, "
+                         f"Decision#={details['decision_number']}, "
+                         f"Jurisdiction={details['jurisdiction_code']}")
+        else:
+            logging.debug(f"Parsed citation without decision number '{citation_str}': "
+                         f"Year={details['year']}, "
+                         f"Tribunal={details['tribunal_code']}, "
+                         f"Jurisdiction={details['jurisdiction_code']}")
     else:
         logging.info(f"Partial parsing for citation '{citation_str}': "
                     f"jurisdiction={details['jurisdiction_code']}, "
