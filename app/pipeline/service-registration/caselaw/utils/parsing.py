@@ -194,7 +194,13 @@ def deconstruct_citation_code(combined_code, all_codes, jurisdiction_hint=None):
             code_details['jurisdiction_code'] = juris_code
             remaining_code = combined_code[len(juris_code):]
             
-            # Now check if remainder is a tribunal (possibly with panel/division)
+            # Special handling for codes like "NSWWCCPD" or with spaces "NSW WCC PD"
+            # First check if the entire remainder is a known tribunal
+            if remaining_code in tribunals['code'].values:
+                code_details['tribunal_code'] = remaining_code
+                return code_details
+            
+            # Now check if remainder starts with a tribunal (possibly with panel/division)
             for _, tribunal_row in tribunals.iterrows():
                 tribunal_code = tribunal_row['code']
                 if remaining_code == tribunal_code:
@@ -372,6 +378,16 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
             r'(?:\((.*?)\))'              # Group 4: Decision date
             r'(?:\s*\((.*?)\))?'          # Group 5: Optional members/judges
         ),
+        # Multi-part tribunal code: [Year] JURISDICTION TRIBUNAL DIVISION NUMBER (Date)
+        re.compile(
+            r'\[{1,2}(\d{4})\]{1,2}\s+'  # Group 1: Year
+            r'([A-Z]+)\s+'                # Group 2: Jurisdiction (NSW, VIC, etc.)
+            r'([A-Z]+)\s+'                # Group 3: Tribunal code (WCC, CAT, etc.)
+            r'([A-Z]+)\s+'                # Group 4: Division/Panel (PD, AP, etc.)
+            r'(\d+)\s*'                   # Group 5: Decision number
+            r'(?:\((.*?)\))'              # Group 6: Decision date
+            r'(?:\s*\((.*?)\))?'          # Group 7: Optional members/judges
+        ),
         # Reversed pattern: [Year] NUMBER TRIBUNAL (Date)
         re.compile(
             r'\[{1,2}(\d{4})\]{1,2}\s+'  # Group 1: Year
@@ -414,13 +430,25 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
         details['decision_number'] = int(decision_num) if decision_num else None
         details['members'] = members_str.strip() if members_str else None
         
-    elif pattern_used == 1:  # Reversed pattern (number before tribunal)
+    elif pattern_used == 1:  # Multi-part pattern: NSW WCC PD format
+        year_str, jurisdiction_code, tribunal_code_part, panel_code, decision_num, date_str, members_str = match.groups()
+        details['year'] = int(year_str)
+        details['decision_number'] = int(decision_num) if decision_num else None
+        details['members'] = members_str.strip() if members_str else None
+        # For multi-part codes, we need to handle them specially
+        # The jurisdiction is explicit, tribunal is the middle part
+        tribunal_code = tribunal_code_part  # Just the tribunal part (WCC)
+        # Store the jurisdiction and panel separately
+        details['jurisdiction_code'] = jurisdiction_code
+        details['panel_or_division'] = panel_code
+        
+    elif pattern_used == 2:  # Reversed pattern (number before tribunal)
         year_str, decision_num, tribunal_code, date_str, members_str = match.groups()
         details['year'] = int(year_str)
         details['decision_number'] = int(decision_num) if decision_num else None
         details['members'] = members_str.strip() if members_str else None
         
-    elif pattern_used == 2:  # Pattern without decision number
+    elif pattern_used == 3:  # Pattern without decision number
         groups = match.groups()
         year_str = groups[0]
         tribunal_code = groups[1]
@@ -457,14 +485,24 @@ def parse_citation(citation_str, all_codes, jurisdiction_hint=None):
             logging.warning(f"Could not parse date '{date_str}' in citation: {citation_str}")
 
     # Deconstruct the tribunal code to get jurisdiction and panel info
-    code_details = deconstruct_citation_code(tribunal_code, all_codes, jurisdiction_hint)
-    
-    # Validate the tribunal code
-    if code_details['tribunal_code'] and not is_valid_tribunal_code(code_details['tribunal_code']):
-        logging.warning(f"Invalid tribunal code detected: '{code_details['tribunal_code']}' in citation: {citation_str}")
-        code_details['tribunal_code'] = None
-    
-    details.update(code_details)
+    # Skip this if we already have jurisdiction and panel from multi-part pattern
+    if pattern_used == 1:  # Multi-part pattern already set these
+        # Just need to validate the tribunal code
+        if tribunal_code and not is_valid_tribunal_code(tribunal_code):
+            logging.warning(f"Invalid tribunal code detected: '{tribunal_code}' in citation: {citation_str}")
+            details['tribunal_code'] = None
+        else:
+            details['tribunal_code'] = tribunal_code
+    else:
+        # Normal processing for other patterns
+        code_details = deconstruct_citation_code(tribunal_code, all_codes, jurisdiction_hint)
+        
+        # Validate the tribunal code
+        if code_details['tribunal_code'] and not is_valid_tribunal_code(code_details['tribunal_code']):
+            logging.warning(f"Invalid tribunal code detected: '{code_details['tribunal_code']}' in citation: {citation_str}")
+            code_details['tribunal_code'] = None
+        
+        details.update(code_details)
     
     # Log successful parsing with all components
     if details['jurisdiction_code'] and details['tribunal_code']:

@@ -69,6 +69,8 @@
     { "code": "NSWLEC", "name": "NSW Land and Environment Court", "type": "tribunal" },
     { "code": "NSWIRC", "name": "NSW Industrial Relations Commission", "type": "tribunal" },
     { "code": "NSWCCC", "name": "NSW Coroners Court", "type": "tribunal" },
+    { "code": "NSWWCC", "name": "NSW Workers Compensation Commission", "type": "tribunal" },
+    { "code": "WCC", "name": "Workers Compensation Commission", "type": "tribunal" },
     { "code": "MHRT", "name": "Mental Health Review Tribunal (NSW)", "type": "tribunal" },
     
     { "code": "NTCAT", "name": "Northern Territory Civil and Administrative Tribunal", "type": "tribunal" },
@@ -166,5 +168,6 @@
     { "code": "AD", "name": "Administrative Division", "type": "panel_or_division" },
     { "code": "ED", "name": "Equal Opportunity Division", "type": "panel_or_division" },
     { "code": "GD", "name": "Guardianship Division", "type": "panel_or_division" },
-    { "code": "CD", "name": "Consumer Division", "type": "panel_or_division" }
+    { "code": "CD", "name": "Consumer Division", "type": "panel_or_division" },
+    { "code": "PD", "name": "Presidential Decision", "type": "panel_or_division" }
 ]

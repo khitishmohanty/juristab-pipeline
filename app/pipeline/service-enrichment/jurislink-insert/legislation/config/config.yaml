@@ -54,6 +54,6 @@ tables_registry:
     database: "legal_store"
     table: "legislation_registry"
     column: "year"
-    processing_years: [2025,2024,2023,2022,2021,2020,2019,2018,2017,2016,2015]
+    processing_years: [2006,2005,2004,2003]
     jurisdiction_codes: ['ACT','VIC','NT','QLD','WA','SA','TAS','NSW','FED']
     required_status_column: "status_content_download"

@@ -111,46 +111,68 @@ class JurisLinkExtractor:
             years = registry_config['processing_years']
             jurisdictions = registry_config['jurisdiction_codes']
             
-            # --- MODIFICATION START ---
-
-            # 1. Read the new required status column from the config
+            # Read the new required status column from the config
             required_status_column = registry_config.get('required_status_column')
 
             # Get the specific status column name for this script's processing
             status_column = self.enrichment_cols['processing_status']
 
-            self.logger.info(f"Querying for records with years: {years} and jurisdictions: {jurisdictions}.")
-
-            # 2. Build the query dynamically
+            # Start building the base query
             query_sql = f"""
                 SELECT cr.source_id, cr.file_path 
                 FROM {self.caselaw_registry_table} cr
                 LEFT JOIN {self.enrichment_status_table} ces ON cr.source_id = ces.source_id
-                WHERE cr.{registry_config['column']} IN :years 
-                AND cr.jurisdiction_code IN :jurisdiction_codes
-                AND (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
+                WHERE (ces.{status_column} IS NULL OR ces.{status_column} != 'pass')
             """
-
-            # 3. Add the new condition if it's defined in the config
+            
+            # Build the parameters dictionary
+            params = {}
+            
+            # Only add year condition if years list is not empty
+            if years:
+                self.logger.info(f"Querying for records with years: {years}")
+                query_sql += f" AND cr.{registry_config['column']} IN :years"
+                params['years'] = years
+            else:
+                self.logger.info("No year filter applied (processing_years is empty)")
+            
+            # Only add jurisdiction condition if jurisdictions list is not empty
+            if jurisdictions:
+                self.logger.info(f"Querying for records with jurisdictions: {jurisdictions}")
+                query_sql += " AND cr.jurisdiction_code IN :jurisdiction_codes"
+                params['jurisdiction_codes'] = jurisdictions
+            else:
+                self.logger.info("No jurisdiction filter applied (jurisdiction_codes is empty)")
+            
+            # Add the required status condition if it's defined in the config
             if required_status_column:
                 self.logger.info(f"Adding prerequisite: Records must have '{required_status_column}' status as 'pass'.")
                 query_sql += f" AND cr.{required_status_column} = 'pass'"
             
-            query = text(query_sql)
+            # Prepare the query with appropriate bind parameters
+            if years and jurisdictions:
+                query = text(query_sql).bindparams(
+                    bindparam('years', expanding=True),
+                    bindparam('jurisdiction_codes', expanding=True)
+                )
+            elif years:
+                query = text(query_sql).bindparams(
+                    bindparam('years', expanding=True)
+                )
+            elif jurisdictions:
+                query = text(query_sql).bindparams(
+                    bindparam('jurisdiction_codes', expanding=True)
+                )
+            else:
+                query = text(query_sql)
             
-            # --- MODIFICATION END ---
-
-            result = self.db_session.execute(query.bindparams(
-                bindparam('years', expanding=True),
-                bindparam('jurisdiction_codes', expanding=True)
-            ), {
-                'years': years,
-                'jurisdiction_codes': jurisdictions
-            })
+            # Execute the query with parameters
+            result = self.db_session.execute(query, params)
             return result.fetchall()
+            
         except SQLAlchemyError as e:
             self.logger.error(f"Database error while fetching source IDs: {e}", exc_info=True)
-            return [] # Return empty list on error to prevent crash
+            return []  # Return empty list on error to prevent crash
         except Exception as e:
             self.logger.error(f"An unexpected error occurred in _get_source_ids_from_registry: {e}", exc_info=True)
             return []
