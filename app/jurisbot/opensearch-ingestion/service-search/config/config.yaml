@@ -1,6 +1,6 @@
 # -- Ingestion Service Switches --
 caselaw_ingestion: true    # Set to false to disable caselaw ingestion
-legislation_ingestion: true # Set to false to disable legislation ingestion
+legislation_ingestion: false # Set to false to disable legislation ingestion
 
 # -- Google cloud project details --
 google_cloud:

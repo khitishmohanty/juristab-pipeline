@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from src.models import CaselawDocument
 from src.services import DatabaseService, S3Service, OpenSearchService
 from utils import get_logger
@@ -18,9 +18,11 @@ class CaselawIngestion:
         
         try:
             self.opensearch_service = OpenSearchService(config)
+            self.opensearch_available = True
         except Exception as e:
             self.logger.warning(f"OpenSearch initialization failed: {e}")
             self.opensearch_service = None
+            self.opensearch_available = False
         
         self.batch_size = config['ingestion']['caselaw'].get('batch_size', 100)
     
@@ -74,10 +76,13 @@ class CaselawIngestion:
         # Process in batches
         total_success = 0
         total_errors = 0
+        total_indexing_errors = 0
         
         for i in range(0, len(records), self.batch_size):
             batch = records.iloc[i:i+self.batch_size]
-            documents = []
+            documents_to_index = []
+            successful_source_ids = []  # Track which documents were successfully prepared
+            failed_source_ids = []      # Track which documents failed preparation
             
             for _, row in batch.iterrows():
                 source_id = row['source_id']
@@ -102,9 +107,6 @@ class CaselawIngestion:
                     # Read content from S3
                     content = self.s3_service.read_file(file_path)
                     
-                    end_time = datetime.now()
-                    duration = (end_time - start_time).total_seconds()
-                    
                     if content:
                         # Create document
                         doc = CaselawDocument(
@@ -113,19 +115,16 @@ class CaselawIngestion:
                             neutral_citation=row['neutral_citation'],
                             content=content
                         )
-                        documents.append(doc.to_dict())
-                        
-                        # Update status to pass
-                        self.db_service.update_ingestion_status(
-                            source_id=source_id,
-                            status='pass',
-                            end_time=end_time,
-                            duration=duration,
-                            doc_type='caselaw'
-                        )
-                        total_success += 1
+                        documents_to_index.append(doc.to_dict())
+                        successful_source_ids.append({
+                            'source_id': source_id,
+                            'start_time': start_time
+                        })
                     else:
-                        # Update status to failed
+                        # No content found - mark as failed
+                        end_time = datetime.now()
+                        duration = (end_time - start_time).total_seconds()
+                        
                         self.logger.warning(f"No content found for source_id: {source_id}")
                         self.db_service.update_ingestion_status(
                             source_id=source_id,
@@ -134,6 +133,7 @@ class CaselawIngestion:
                             duration=duration,
                             doc_type='caselaw'
                         )
+                        failed_source_ids.append(source_id)
                         total_errors += 1
                         
                 except Exception as e:
@@ -148,26 +148,74 @@ class CaselawIngestion:
                         duration=duration,
                         doc_type='caselaw'
                     )
+                    failed_source_ids.append(source_id)
                     total_errors += 1
             
-            # Bulk index documents if OpenSearch is available
-            if documents and self.opensearch_service:
+            # Bulk index documents if OpenSearch is available and we have documents
+            indexing_succeeded = False
+            if documents_to_index and self.opensearch_available and self.opensearch_service:
                 try:
-                    success, errors = self.opensearch_service.bulk_index_documents(documents)
-                    self.logger.info(f"Indexed {success} documents to OpenSearch, {errors} errors")
+                    success_count, error_count = self.opensearch_service.bulk_index_documents(documents_to_index)
+                    self.logger.info(f"Indexed {success_count} documents to OpenSearch, {error_count} errors")
+                    
+                    # Check if indexing was successful
+                    if success_count > 0 and error_count == 0:
+                        indexing_succeeded = True
+                    elif success_count > 0:
+                        # Partial success - we'll need more sophisticated handling
+                        indexing_succeeded = True
+                        self.logger.warning(f"Partial indexing success: {success_count} succeeded, {error_count} failed")
+                    else:
+                        indexing_succeeded = False
+                        self.logger.error(f"All {error_count} documents failed to index to OpenSearch")
+                        
                 except Exception as e:
                     self.logger.error(f"Error indexing to OpenSearch: {e}")
+                    indexing_succeeded = False
+                    total_indexing_errors += len(documents_to_index)
+            elif documents_to_index and not self.opensearch_available:
+                self.logger.warning("OpenSearch not available, cannot index documents")
+                indexing_succeeded = False
+            
+            # Update status based on indexing result
+            for doc_info in successful_source_ids:
+                end_time = datetime.now()
+                duration = (end_time - doc_info['start_time']).total_seconds()
+                
+                if indexing_succeeded:
+                    # Mark as pass only if indexing succeeded
+                    self.db_service.update_ingestion_status(
+                        source_id=doc_info['source_id'],
+                        status='pass',
+                        end_time=end_time,
+                        duration=duration,
+                        doc_type='caselaw'
+                    )
+                    total_success += 1
+                else:
+                    # Mark as failed if indexing failed
+                    self.db_service.update_ingestion_status(
+                        source_id=doc_info['source_id'],
+                        status='failed',
+                        end_time=end_time,
+                        duration=duration,
+                        doc_type='caselaw'
+                    )
+                    total_indexing_errors += 1
+                    self.logger.error(f"Marking {doc_info['source_id']} as failed due to OpenSearch indexing failure")
             
             self.logger.info(
                 f"Processed batch {i//self.batch_size + 1}/{(len(records)-1)//self.batch_size + 1}: "
-                f"{len(documents)} successful, {len(batch) - len(documents)} failed"
+                f"{len(successful_source_ids) if indexing_succeeded else 0} successful, "
+                f"{len(failed_source_ids) + (len(successful_source_ids) if not indexing_succeeded else 0)} failed"
             )
         
         # Final summary
         self.logger.info("="*50)
         self.logger.info(f"Caselaw ingestion completed:")
-        self.logger.info(f"  - Newly successful: {total_success}")
-        self.logger.info(f"  - Failed: {total_errors}")
+        self.logger.info(f"  - Successfully indexed: {total_success}")
+        self.logger.info(f"  - Failed (S3/processing): {total_errors}")
+        self.logger.info(f"  - Failed (OpenSearch indexing): {total_indexing_errors}")
         
         # Get updated status summary
         updated_summary = self.db_service.get_ingestion_status_summary('caselaw')
@@ -176,3 +224,10 @@ class CaselawIngestion:
         self.logger.info(f"  - Failed: {updated_summary.get('failed', 0)}")
         self.logger.info(f"  - Started: {updated_summary.get('started', 0)}")
         self.logger.info(f"  - Not Started: {updated_summary.get('not started', 0)}")
+        
+        if total_indexing_errors > 0:
+            self.logger.warning(
+                f"\n*** IMPORTANT: {total_indexing_errors} documents failed to index to OpenSearch. ***\n"
+                f"These are marked as 'failed' in the database and will be retried on the next run.\n"
+                f"Check OpenSearch configuration and connectivity."
+            )
