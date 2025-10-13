@@ -1,0 +1,101 @@
+# -- Ingestion Service Switches --
+caselaw_ingestion: true    # Set to false to disable caselaw ingestion
+legislation_ingestion: false # Set to false to disable legislation ingestion
+
+# -- Google cloud project details --
+google_cloud:
+    project_id: "juristab"
+    region: "us"
+    processor_id: "c60807664382dc8"
+
+# -- Database connection details --
+database:
+    source:
+        dialect: "mysql"
+        driver: "pymysql"  # Using pymysql for pure Python (no system dependencies)
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_source"
+    
+    destination:
+        dialect: "mysql"
+        driver: "pymysql"  # Using pymysql for pure Python (no system dependencies)
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+# -- AWS connection details --
+aws:
+    default_region: "ap-southeast-2"
+    s3:
+        bucket_name: "legal-store"
+
+# -- OpenSearch connection details --
+opensearch:
+    host: "5cl8kkjvy51ykbngl8oe6j.ap-southeast-2.aoss.amazonaws.com"
+    port: 443
+    index_name: "legal-store-search"
+    use_ssl: true
+    verify_certs: true
+    ssl_assert_hostname: false
+    ssl_show_warn: false
+    region: "ap-southeast-2"  # Added for AWS4Auth
+
+# -- Ingestion settings --
+ingestion:
+    caselaw:
+        batch_size: 100
+        years: []  # Empty means all years, e.g., [2023, 2024] for specific years
+        jurisdiction_codes: ['ACT', 'VIC', 'NT', 'QLD', 'WA', 'SA', 'TAS', 'NSW', 'FED']
+    
+    legislation:
+        batch_size: 100
+        years: []  # Empty means all years, e.g., [2023, 2024] for specific years
+        jurisdiction_codes: ['ACT', 'VIC', 'NT', 'QLD', 'WA', 'SA', 'TAS', 'NSW', 'FED']
+
+# -- Table mappings --
+tables:
+    caselaw:
+        registry_table: "caselaw_registry"
+        enrichment_status_table: "caselaw_enrichment_status"
+        registry_fields:
+            source_id: "source_id"
+            book_name: "book_name"
+            neutral_citation: "neutral_citation"
+            file_path: "file_path"
+            status_registration: "status_registration"
+            year: "year"
+            jurisdiction_code: "jurisdiction_code"
+        enrichment_fields:
+            source_id: "source_id"
+            status_text_processor: "status_text_processor"
+        source_file: "miniviewer.txt"
+    
+    legislation:
+        registry_table: "legislation_registry"
+        enrichment_status_table: "legislation_enrichment_status"
+        metadata_table: "legislation_metadata"
+        content_table: "legislation_content"
+        registry_fields:
+            source_id: "source_id"
+            book_name: "book_name"
+            file_path: "file_path"
+            status_registration: "status_registration"
+            year: "year"
+            jurisdiction_code: "jurisdiction_code"
+        enrichment_fields:
+            source_id: "source_id"
+            status_text_processor: "status_text_processor"
+        metadata_fields:
+            source_id: "source_id"
+            type_of_document: "type_of_document"
+        content_fields:
+            source_id: "source_id"
+            section_id: "section_id"
+            section_name: "section_name"
+        source_file_pattern: "miniviewer_{section_id}.txt"
+
+# -- Logging configuration --
+logging:
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
