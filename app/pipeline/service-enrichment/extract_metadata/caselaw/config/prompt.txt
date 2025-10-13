@@ -73,4 +73,8 @@ representation: A combined string of the counsel and law firms representing each
 category: A high-level categorization of the case, such as "Criminal", "Civil", "Coronial", or "Family".
 bjs_number: Any unique identifier or reference number used by a specific database or service, if present.
 
+CRITICAL: Every value in the filter_tags object MUST be a plain string. 
+   Do not use arrays, objects, or nested structures. 
+   If multiple values exist, combine them into a single comma-separated string.
+   
 Final Output Requirement: Produce only the JSON object as your response. Do not include any explanatory text before or after the JSON.

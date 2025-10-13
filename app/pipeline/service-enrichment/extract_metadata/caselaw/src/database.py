@@ -1,6 +1,7 @@
 import mysql.connector
 from uuid import uuid4
 import logging
+import json
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -47,6 +48,35 @@ class DatabaseManager:
             self.conn.close()
             logging.info("Database connection closed.")
     
+    def _convert_value_to_string(self, value):
+        """
+        Converts various Python types to string format suitable for database storage.
+        
+        Args:
+            value: Any Python value that needs to be stored in the database.
+            
+        Returns:
+            str or None: The string representation of the value, or None if the value is None.
+        """
+        if value is None:
+            return None
+        elif isinstance(value, dict):
+            # Convert dictionary to JSON string
+            return json.dumps(value)
+        elif isinstance(value, list):
+            # Convert list to comma-separated string if it contains strings,
+            # or to JSON string if it contains complex objects
+            if all(isinstance(item, str) for item in value):
+                return ", ".join(value)
+            else:
+                return json.dumps(value)
+        elif isinstance(value, bool):
+            # Convert boolean to string
+            return str(value).lower()
+        else:
+            # For all other types, convert to string
+            return str(value)
+    
     def check_and_upsert_caselaw_metadata(self, metadata, source_id, expected_columns):
         """
         Checks if a record exists for a given source_id and either updates it
@@ -72,7 +102,13 @@ class DatabaseManager:
             record_exists = cursor.fetchone()[0] > 0
 
             record_id = str(uuid4())
-            filtered_metadata = {key.lower(): metadata[key] for key in expected_columns if key in metadata}
+            
+            # Filter and convert metadata values to strings
+            filtered_metadata = {}
+            for key in expected_columns:
+                if key in metadata:
+                    # Convert the value to a string format suitable for database
+                    filtered_metadata[key.lower()] = self._convert_value_to_string(metadata[key])
             
             columns = filtered_metadata.keys()
             values = list(filtered_metadata.values())
@@ -123,6 +159,12 @@ class DatabaseManager:
                 counsel = mapping.get('counsel')
                 law_firm = mapping.get('law_firm_agency')
                 
+                # Convert any non-string values to strings
+                if counsel is not None:
+                    counsel = self._convert_value_to_string(counsel)
+                if law_firm is not None:
+                    law_firm = self._convert_value_to_string(law_firm)
+                
                 if not counsel and not law_firm:
                     continue
 
@@ -163,7 +205,11 @@ class DatabaseManager:
         
         try:
             # Prepare data for insertion, including a new UUID for the 'id' column
-            insert_data = updates.copy()
+            insert_data = {}
+            for key, value in updates.items():
+                # Convert any complex values to appropriate database format
+                insert_data[key] = self._convert_value_to_string(value) if isinstance(value, (dict, list)) else value
+            
             insert_data['source_id'] = source_id
             insert_data['id'] = str(uuid4())
 

@@ -15,6 +15,36 @@ import mysql.connector
 # Configure root logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+def validate_and_flatten_metadata(metadata):
+    """
+    Validates and flattens metadata to ensure all values are database-compatible.
+    
+    Args:
+        metadata (dict): The metadata dictionary to validate
+        
+    Returns:
+        dict: A flattened metadata dictionary with all values as strings or None
+    """
+    flattened = {}
+    for key, value in metadata.items():
+        if value is None:
+            flattened[key] = None
+        elif isinstance(value, dict):
+            # Log warning about nested dict and convert to JSON string
+            logging.warning(f"Field '{key}' contains a dictionary value. Converting to JSON string.")
+            flattened[key] = json.dumps(value)
+        elif isinstance(value, list):
+            # Convert list to comma-separated string
+            if all(isinstance(item, (str, int, float)) for item in value):
+                flattened[key] = ", ".join(str(v) for v in value)
+            else:
+                flattened[key] = json.dumps(value)
+        elif isinstance(value, bool):
+            flattened[key] = str(value).lower()
+        else:
+            flattened[key] = str(value)
+    return flattened
+
 def get_records_to_process(db_manager, registry_config, jurisdiction_codes, years):
     """
     Retrieves records from the caselaw_registry table that need processing.
@@ -186,8 +216,21 @@ def process_record(record, config, field_mapping, db_columns, use_ai_extraction,
                     json_filename = config.get('enrichment_filenames', 'jurismetadata_json')
                     json_s3_key = os.path.join(os.path.dirname(s3_file_key_ai), json_filename) # Use AI key for path
                     s3_manager.save_json_file(bucket_name, json_s3_key, raw_json)
+                    
+                    # Enhanced validation for AI data before adding to metadata
                     for key, value in ai_data.items():
                         if not metadata.get(key) and value:
+                            # Ensure the value is not a complex type
+                            if isinstance(value, (dict, list)):
+                                logging.warning(f"AI extraction returned complex type for field '{key}': {type(value).__name__}")
+                                if isinstance(value, dict):
+                                    value = json.dumps(value)
+                                elif isinstance(value, list):
+                                    # Check if list contains simple types
+                                    if all(isinstance(v, (str, int, float, bool)) for v in value):
+                                        value = ", ".join(str(v) for v in value)
+                                    else:
+                                        value = json.dumps(value)
                             metadata[key] = value
                 else:
                     ai_status = 'failed'
@@ -207,10 +250,12 @@ def process_record(record, config, field_mapping, db_columns, use_ai_extraction,
                 total_price = (ai_duration / 3600) * hourly_rate
     
     # --- Step 3: Database Operations ---
-    # This part of the function remains the same as before
     db_manager = DatabaseManager(config.get('database'))
     try:
         if metadata:
+            # Validate and flatten metadata before database operations
+            metadata = validate_and_flatten_metadata(metadata)
+            
             if db_manager.check_and_upsert_caselaw_metadata(metadata, source_id, db_columns):
                 # Counsel mapping is tied to the rule-based step
                 if needs_rulebased_processing and counsel_firm_mappings:
@@ -239,6 +284,18 @@ def process_record(record, config, field_mapping, db_columns, use_ai_extraction,
         
         if status_updates:
             db_manager.update_enrichment_status(source_id, status_updates)
+            
+    except Exception as e:
+        logging.error(f"Database operation error for source_id {source_id}: {e}")
+        # Mark as failed if database operations throw an exception
+        if needs_rulebased_processing:
+            status_updates["status_metadataextract_rulebased"] = 'failed'
+        if needs_ai_processing:
+            status_updates["status_metadataextract_ai"] = 'failed'
+        try:
+            db_manager.update_enrichment_status(source_id, status_updates)
+        except:
+            logging.error(f"Failed to update enrichment status for source_id {source_id}")
     
     finally:
         db_manager.close_connection()
@@ -342,11 +399,15 @@ def main():
         logging.info("No records to process. Exiting.")
         return
 
+    # Process records with error handling to continue even if one fails
     for record in records_to_process:
-        process_record(record, config, field_mapping, db_columns, use_ai_extraction, prompt_content, ai_provider)
+        try:
+            process_record(record, config, field_mapping, db_columns, use_ai_extraction, prompt_content, ai_provider)
+        except Exception as e:
+            logging.error(f"Failed to process record {record.get('source_id', 'unknown')}: {e}")
+            # Continue with the next record instead of stopping
 
     logging.info("All records processed.")
 
 if __name__ == "__main__":
     main()
-
