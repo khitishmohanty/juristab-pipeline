@@ -66,8 +66,6 @@ class DatabaseService:
                 # Convert result to dictionary
                 summary = {}
                 for row in result:
-                    # Access by index since rows are tuples
-                    # Index 0 is status, Index 1 is count
                     status = row[0]
                     count = row[1]
                     summary[status] = count
@@ -94,8 +92,6 @@ class DatabaseService:
     ) -> bool:
         """
         Update or insert ingestion status for a source_id.
-        This will UPDATE if the record exists with the exact source_id,
-        otherwise it won't do anything (since record should already exist from text processing).
         
         Args:
             source_id: Source identifier
@@ -113,7 +109,7 @@ class DatabaseService:
             table_name = table_config['enrichment_status_table']
             fields = table_config['status_tracking_fields']
             
-            # Build update query - we know the record exists because we got it from the join query
+            # Build update query
             update_parts = [f"{fields['status_field']} = :status"]
             params = {'source_id': source_id, 'status': status}
             
@@ -135,10 +131,9 @@ class DatabaseService:
                 WHERE {fields['source_id']} = :source_id
             """)
             
-            with self.dest_engine.begin() as conn:  # Use begin() for automatic transaction handling
+            with self.dest_engine.begin() as conn:
                 result = conn.execute(update_query, params)
                 
-                # Check if any rows were updated
                 if result.rowcount > 0:
                     self.logger.debug(f"Updated status for {source_id}: {status}")
                     return True
@@ -148,7 +143,6 @@ class DatabaseService:
                 
         except Exception as e:
             self.logger.error(f"Error updating status for {source_id}: {str(e)}")
-            self.logger.error(f"Query was: UPDATE {table_name} SET ... WHERE {fields['source_id']} = '{source_id}'")
             return False
     
     def get_caselaw_for_ingestion(
@@ -158,7 +152,7 @@ class DatabaseService:
         exclude_pass: bool = True
     ) -> pd.DataFrame:
         """
-        Get caselaw records ready for ingestion (excluding already processed).
+        Get caselaw records with ALL metadata ready for ingestion.
         
         Args:
             years: Filter by years (optional)
@@ -166,26 +160,76 @@ class DatabaseService:
             exclude_pass: If True, exclude records with status='pass'
         
         Returns:
-            DataFrame with caselaw records
+            DataFrame with caselaw records and full metadata
         """
         table_config = self.config['tables']['caselaw']
         status_field = table_config['status_tracking_fields']['status_field']
         
+        # Query to get ALL fields from caselaw_metadata table (matching your screenshot)
         query = f"""
         SELECT 
-            cr.{table_config['registry_fields']['source_id']} as source_id,
-            cr.{table_config['registry_fields']['book_name']} as book_name,
-            cr.{table_config['registry_fields']['neutral_citation']} as neutral_citation,
-            cr.{table_config['registry_fields']['file_path']} as file_path,
+            -- Registry fields (from caselaw_registry)
+            cr.source_id,
+            cr.book_name,
+            cr.neutral_citation as registry_neutral_citation,
+            cr.file_path,
+            cr.year as registry_year,
+            cr.jurisdiction_code as registry_jurisdiction,
+            
+            -- All metadata fields from caselaw_metadata (as per your screenshot)
+            cm.count_char,
+            cm.count_word,
+            cm.file_no,
+            cm.presiding_officer,
+            cm.counsel,  -- Note: It's 'counsel' not 'counsels' in the DB
+            cm.law_firm_agency,
+            cm.court_type,
+            cm.hearing_location,
+            cm.judgment_date,
+            cm.hearing_dates,
+            cm.incident_date,
+            cm.keywords,
+            cm.legislation_cited,
+            cm.affected_sectors,
+            cm.practice_areas,
+            cm.citation,
+            cm.key_issues,
+            cm.panelist,
+            cm.orders,
+            cm.decision,
+            cm.cases_cited,
+            cm.matter_type,
+            cm.parties,
+            cm.representation,
+            cm.category,
+            cm.bjs_number,
+            cm.tribunal_name,
+            cm.panel_or_division_name,
+            cm.jurisdiction_code,
+            cm.tribunal_code,
+            cm.panel_or_division,
+            cm.year,
+            cm.decision_number,
+            cm.decision_date,
+            cm.primary_party,
+            cm.secondary_party,
+            cm.members,
+            cm.member_info_json,
+            cm.neutral_citation,
+            
+            -- Status field
             COALESCE(ces.{status_field}, 'not started') as current_status
         FROM 
             {table_config['registry_table']} cr
         INNER JOIN 
             {table_config['enrichment_status_table']} ces 
-            ON cr.{table_config['registry_fields']['source_id']} = ces.{table_config['enrichment_fields']['source_id']}
+            ON cr.source_id = ces.source_id
+        LEFT JOIN 
+            caselaw_metadata cm
+            ON cr.source_id = cm.source_id
         WHERE 
-            cr.{table_config['registry_fields']['status_registration']} = 'pass'
-            AND ces.{table_config['enrichment_fields']['status_text_processor']} = 'pass'
+            cr.status_registration = 'pass'
+            AND ces.status_text_processor = 'pass'
         """
         
         # Add status filter
@@ -195,19 +239,29 @@ class DatabaseService:
         conditions = []
         if years:
             years_str = ','.join(map(str, years))
-            conditions.append(f"cr.{table_config['registry_fields']['year']} IN ({years_str})")
+            conditions.append(f"cr.year IN ({years_str})")
         
         if jurisdiction_codes:
             codes_str = ','.join([f"'{code}'" for code in jurisdiction_codes])
-            conditions.append(f"cr.{table_config['registry_fields']['jurisdiction_code']} IN ({codes_str})")
+            conditions.append(f"cr.jurisdiction_code IN ({codes_str})")
         
         if conditions:
             query += " AND " + " AND ".join(conditions)
         
-        self.logger.info(f"Executing caselaw query with filters: years={years}, jurisdictions={jurisdiction_codes}, exclude_pass={exclude_pass}")
+        self.logger.info(f"Executing caselaw query with ALL metadata fields")
         
         with self.dest_engine.connect() as conn:
-            return pd.read_sql(query, conn)
+            df = pd.read_sql(query, conn)
+            
+            # Use registry values where metadata is missing
+            if 'neutral_citation' not in df.columns or df['neutral_citation'].isna().all():
+                df['neutral_citation'] = df['registry_neutral_citation']
+            if 'year' not in df.columns or df['year'].isna().all():
+                df['year'] = df['registry_year']
+            if 'jurisdiction_code' not in df.columns or df['jurisdiction_code'].isna().all():
+                df['jurisdiction_code'] = df['registry_jurisdiction']
+                
+            return df
     
     def get_legislation_for_ingestion(
         self,
@@ -216,7 +270,7 @@ class DatabaseService:
         exclude_pass: bool = True
     ) -> pd.DataFrame:
         """
-        Get legislation records ready for ingestion (excluding already processed).
+        Get legislation records with ALL metadata ready for ingestion.
         
         Args:
             years: Filter by years (optional)
@@ -224,34 +278,60 @@ class DatabaseService:
             exclude_pass: If True, exclude records with status='pass'
         
         Returns:
-            DataFrame with legislation records
+            DataFrame with legislation records and full metadata
         """
         table_config = self.config['tables']['legislation']
         status_field = table_config['status_tracking_fields']['status_field']
         
+        # Query to get ALL fields from legislation_metadata table (matching your screenshot)
         query = f"""
         SELECT 
-            lr.{table_config['registry_fields']['source_id']} as source_id,
-            lr.{table_config['registry_fields']['book_name']} as book_name,
-            lr.{table_config['registry_fields']['file_path']} as file_path,
-            lc.{table_config['content_fields']['section_id']} as section_id,
-            lc.{table_config['content_fields']['section_name']} as section_name,
-            lm.{table_config['metadata_fields']['type_of_document']} as type_of_document,
+            -- Registry fields (from legislation_registry)
+            lr.source_id,
+            lr.book_name,
+            lr.file_path,
+            lr.year as registry_year,
+            lr.jurisdiction_code as registry_jurisdiction,
+            
+            -- Content fields (from legislation_content)
+            lc.section_id,
+            lc.section_name,
+            
+            -- All metadata fields from legislation_metadata (as per your screenshot)
+            lm.id,
+            lm.count_char,
+            lm.count_word,
+            lm.title_of_legislation,
+            lm.legislation_number,
+            lm.type_of_document,
+            lm.date_of_assent_or_making,
+            lm.commencement_date,
+            lm.gazette_notification_date,
+            lm.second_reading_speech_dates,
+            lm.enabling_act,
+            lm.amended_legislation,
+            lm.purpose_of_the_legislation,
+            lm.administering_agency,
+            lm.affected_sectors,
+            lm.practice_areas,
+            lm.keywords,
+            
+            -- Status field
             COALESCE(les.{status_field}, 'not started') as current_status
         FROM 
             {table_config['registry_table']} lr
         INNER JOIN 
             {table_config['enrichment_status_table']} les 
-            ON lr.{table_config['registry_fields']['source_id']} = les.{table_config['enrichment_fields']['source_id']}
+            ON lr.source_id = les.source_id
         INNER JOIN 
             {table_config['content_table']} lc
-            ON lr.{table_config['registry_fields']['source_id']} = lc.{table_config['content_fields']['source_id']}
-        INNER JOIN 
+            ON lr.source_id = lc.source_id
+        LEFT JOIN 
             {table_config['metadata_table']} lm
-            ON lr.{table_config['registry_fields']['source_id']} = lm.{table_config['metadata_fields']['source_id']}
+            ON lr.source_id = lm.source_id
         WHERE 
-            lr.{table_config['registry_fields']['status_registration']} = 'pass'
-            AND les.{table_config['enrichment_fields']['status_text_processor']} = 'pass'
+            lr.status_registration = 'pass'
+            AND les.status_text_processor = 'pass'
         """
         
         # Add status filter
@@ -261,16 +341,24 @@ class DatabaseService:
         conditions = []
         if years:
             years_str = ','.join(map(str, years))
-            conditions.append(f"lr.{table_config['registry_fields']['year']} IN ({years_str})")
+            conditions.append(f"lr.year IN ({years_str})")
         
         if jurisdiction_codes:
             codes_str = ','.join([f"'{code}'" for code in jurisdiction_codes])
-            conditions.append(f"lr.{table_config['registry_fields']['jurisdiction_code']} IN ({codes_str})")
+            conditions.append(f"lr.jurisdiction_code IN ({codes_str})")
         
         if conditions:
             query += " AND " + " AND ".join(conditions)
         
-        self.logger.info(f"Executing legislation query with filters: years={years}, jurisdictions={jurisdiction_codes}, exclude_pass={exclude_pass}")
+        self.logger.info(f"Executing legislation query with ALL metadata fields")
         
         with self.dest_engine.connect() as conn:
-            return pd.read_sql(query, conn)
+            df = pd.read_sql(query, conn)
+            
+            # Use registry values where metadata is missing
+            if 'year' not in df.columns or df['year'].isna().all():
+                df['year'] = df['registry_year']
+            if 'jurisdiction_code' not in df.columns or df['jurisdiction_code'].isna().all():
+                df['jurisdiction_code'] = df['registry_jurisdiction']
+                
+            return df

@@ -114,21 +114,48 @@ class LegislationIngestion:
                     content = self.s3_service.read_file(file_path)
                     
                     if content:
-                        # Create document
+                        # Create document with ONLY the requested metadata fields
                         doc = LegislationDocument(
+                            # Required fields
                             source_id=source_id,
-                            section_id=row['section_id'],
-                            book_type=row['type_of_document'],
-                            book_name=row['book_name'],
-                            section_name=row['section_name'],
-                            content=content
+                            section_id=row.get('section_id', ''),
+                            book_name=row.get('book_name', ''),  # From legislation_registry
+                            section_name=row.get('section_name', ''),
+                            content=content,
+                            
+                            # ONLY the requested metadata fields for OpenSearch
+                            legislation_number=row.get('legislation_number'),
+                            type_of_document=row.get('type_of_document'),
+                            enabling_act=row.get('enabling_act'),
+                            amended_legislation=row.get('amended_legislation'),
+                            administering_agency=row.get('administering_agency'),
+                            affected_sectors=row.get('affected_sectors'),
+                            practice_areas=row.get('practice_areas'),
+                            keywords=row.get('keywords')
                         )
+                        
                         documents_to_index.append(doc.to_dict())
                         successful_source_ids.append({
                             'source_id': source_id,
                             'section_id': row['section_id'],
                             'start_time': start_time
                         })
+                        
+                        # Log sample of metadata being indexed (only for first document in first batch)
+                        if i == 0 and _ == batch.index[0]:
+                            self.logger.info(f"Sample document metadata for {source_id} (section {row['section_id']}):")
+                            doc_dict = doc.to_dict()
+                            # Log only the fields that are actually sent to OpenSearch
+                            sample_fields = [
+                                'book_name', 'section_name', 'legislation_number',
+                                'type_of_document', 'enabling_act', 'amended_legislation',
+                                'administering_agency', 'affected_sectors', 'practice_areas', 'keywords'
+                            ]
+                            for key in sample_fields:
+                                if key in doc_dict and doc_dict[key]:
+                                    value = str(doc_dict[key])[:100] if doc_dict[key] else None
+                                    if value:
+                                        self.logger.info(f"  - {key}: {value}")
                     else:
                         # No content found - mark as failed
                         end_time = datetime.now()
@@ -149,7 +176,7 @@ class LegislationIngestion:
                     end_time = datetime.now()
                     duration = (end_time - start_time).total_seconds()
                     
-                    self.logger.error(f"Error processing legislation record {source_id}, section {row['section_id']}: {str(e)}")
+                    self.logger.error(f"Error processing legislation record {source_id}, section {row.get('section_id', 'unknown')}: {str(e)}")
                     self.db_service.update_ingestion_status(
                         source_id=source_id,
                         status='failed',

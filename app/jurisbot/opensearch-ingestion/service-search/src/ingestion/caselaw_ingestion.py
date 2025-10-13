@@ -7,7 +7,7 @@ from src.services import DatabaseService, S3Service, OpenSearchService
 from utils import get_logger
 
 class CaselawIngestion:
-    """Handler for caselaw document ingestion."""
+    """Handler for caselaw document ingestion with full metadata support."""
     
     def __init__(self, config: dict):
         """Initialize caselaw ingestion handler."""
@@ -27,8 +27,8 @@ class CaselawIngestion:
         self.batch_size = config['ingestion']['caselaw'].get('batch_size', 100)
     
     def ingest(self):
-        """Main ingestion process for caselaw documents."""
-        self.logger.info("Starting caselaw ingestion process...")
+        """Main ingestion process for caselaw documents with full metadata."""
+        self.logger.info("Starting caselaw ingestion process with full metadata...")
         
         # Get status summary first
         status_summary = self.db_service.get_ingestion_status_summary('caselaw')
@@ -55,18 +55,18 @@ class CaselawIngestion:
         years = self.config['ingestion']['caselaw'].get('years', [])
         jurisdiction_codes = self.config['ingestion']['caselaw'].get('jurisdiction_codes', [])
         
-        # Get records to ingest (excluding pass status)
+        # Get records to ingest with ALL metadata
         records = self.db_service.get_caselaw_for_ingestion(
             years=years if years else None,
             jurisdiction_codes=jurisdiction_codes if jurisdiction_codes else None,
-            exclude_pass=True  # Only get records that are not 'pass'
+            exclude_pass=True
         )
         
         if records.empty:
             self.logger.info("No caselaw records found for ingestion after filtering")
             return
         
-        self.logger.info(f"Processing {len(records)} caselaw records (non-pass status)")
+        self.logger.info(f"Processing {len(records)} caselaw records with full metadata")
         
         # Log status breakdown of records to be processed
         status_counts = records['current_status'].value_counts()
@@ -81,8 +81,8 @@ class CaselawIngestion:
         for i in range(0, len(records), self.batch_size):
             batch = records.iloc[i:i+self.batch_size]
             documents_to_index = []
-            successful_source_ids = []  # Track which documents were successfully prepared
-            failed_source_ids = []      # Track which documents failed preparation
+            successful_source_ids = []
+            failed_source_ids = []
             
             for _, row in batch.iterrows():
                 source_id = row['source_id']
@@ -108,18 +108,64 @@ class CaselawIngestion:
                     content = self.s3_service.read_file(file_path)
                     
                     if content:
-                        # Create document
+                        # Create document with ONLY the requested metadata fields
                         doc = CaselawDocument(
+                            # Required fields from registry
                             source_id=source_id,
-                            book_name=row['book_name'],
-                            neutral_citation=row['neutral_citation'],
-                            content=content
+                            book_name=row.get('book_name', ''),
+                            neutral_citation=row.get('neutral_citation', ''),
+                            content=content,
+                            
+                            # ONLY the requested metadata fields from caselaw_metadata table
+                            file_no=row.get('file_no'),
+                            presiding_officer=row.get('presiding_officer'),
+                            counsel=row.get('counsel'),  # Using 'counsel' as per DB schema
+                            law_firm_agency=row.get('law_firm_agency'),
+                            court_type=row.get('court_type'),
+                            hearing_location=row.get('hearing_location'),
+                            keywords=row.get('keywords'),
+                            legislation_cited=row.get('legislation_cited'),
+                            affected_sectors=row.get('affected_sectors'),
+                            practice_areas=row.get('practice_areas'),
+                            citation=row.get('citation'),
+                            key_issues=row.get('key_issues'),
+                            panelist=row.get('panelist'),
+                            cases_cited=row.get('cases_cited'),
+                            matter_type=row.get('matter_type'),
+                            category=row.get('category'),
+                            bjs_number=row.get('bjs_number'),
+                            tribunal_name=row.get('tribunal_name'),
+                            panel_or_division_name=row.get('panel_or_division_name'),
+                            year=row.get('year'),
+                            decision_number=row.get('decision_number'),
+                            decision_date=row.get('decision_date'),
+                            members=row.get('members')
                         )
+                        
                         documents_to_index.append(doc.to_dict())
                         successful_source_ids.append({
                             'source_id': source_id,
                             'start_time': start_time
                         })
+                        
+                        # Log sample of metadata being indexed (only for first document in first batch)
+                        if i == 0 and _ == batch.index[0]:
+                            self.logger.info(f"Sample document metadata for {source_id}:")
+                            doc_dict = doc.to_dict()
+                            # Log only the fields that are actually sent to OpenSearch
+                            sample_fields = [
+                                'book_name', 'neutral_citation', 'file_no', 'presiding_officer',
+                                'counsel', 'law_firm_agency', 'court_type', 'hearing_location',
+                                'keywords', 'legislation_cited', 'affected_sectors', 'practice_areas',
+                                'citation', 'key_issues', 'panelist', 'cases_cited', 'matter_type',
+                                'category', 'bjs_number', 'tribunal_name', 'panel_or_division_name',
+                                'year', 'decision_number', 'decision_date', 'members'
+                            ]
+                            for key in sample_fields:
+                                if key in doc_dict and doc_dict[key]:
+                                    value = str(doc_dict[key])[:100] if doc_dict[key] else None
+                                    if value:
+                                        self.logger.info(f"  - {key}: {value}")
                     else:
                         # No content found - mark as failed
                         end_time = datetime.now()
@@ -158,11 +204,9 @@ class CaselawIngestion:
                     success_count, error_count = self.opensearch_service.bulk_index_documents(documents_to_index)
                     self.logger.info(f"Indexed {success_count} documents to OpenSearch, {error_count} errors")
                     
-                    # Check if indexing was successful
                     if success_count > 0 and error_count == 0:
                         indexing_succeeded = True
                     elif success_count > 0:
-                        # Partial success - we'll need more sophisticated handling
                         indexing_succeeded = True
                         self.logger.warning(f"Partial indexing success: {success_count} succeeded, {error_count} failed")
                     else:
@@ -183,7 +227,6 @@ class CaselawIngestion:
                 duration = (end_time - doc_info['start_time']).total_seconds()
                 
                 if indexing_succeeded:
-                    # Mark as pass only if indexing succeeded
                     self.db_service.update_ingestion_status(
                         source_id=doc_info['source_id'],
                         status='pass',
@@ -193,7 +236,6 @@ class CaselawIngestion:
                     )
                     total_success += 1
                 else:
-                    # Mark as failed if indexing failed
                     self.db_service.update_ingestion_status(
                         source_id=doc_info['source_id'],
                         status='failed',
@@ -212,7 +254,7 @@ class CaselawIngestion:
         
         # Final summary
         self.logger.info("="*50)
-        self.logger.info(f"Caselaw ingestion completed:")
+        self.logger.info(f"Caselaw ingestion completed with full metadata:")
         self.logger.info(f"  - Successfully indexed: {total_success}")
         self.logger.info(f"  - Failed (S3/processing): {total_errors}")
         self.logger.info(f"  - Failed (OpenSearch indexing): {total_indexing_errors}")
