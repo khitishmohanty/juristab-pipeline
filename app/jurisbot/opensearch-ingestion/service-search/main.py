@@ -6,14 +6,36 @@ Main entry point for ingesting caselaw and legislation documents into OpenSearch
 
 import sys
 import time
+import boto3
 from datetime import datetime
 from utils import get_logger, ConfigLoader
 from src.ingestion import CaselawIngestion, LegislationIngestion
+
+def check_aws_identity():
+    """Debug function to check AWS identity"""
+    try:
+        sts = boto3.client('sts')
+        identity = sts.get_caller_identity()
+        print("=" * 50)
+        print("AWS CREDENTIALS CHECK")
+        print("=" * 50)
+        print(f"Account: {identity['Account']}")
+        print(f"User ARN: {identity['Arn']}")
+        if 'legal-store-service' in identity['Arn']:
+            print("✓ CORRECT: Using legal-store-service")
+        else:
+            print("✗ ERROR: Not using legal-store-service!")
+            print("Expected: arn:aws:iam::808403558610:user/legal-store-service")
+        print("=" * 50)
+    except Exception as e:
+        print(f"Error checking AWS identity: {e}")
 
 def main():
     """Main execution function."""
     # Initialize logger
     logger = get_logger("main")
+
+    check_aws_identity()
     
     try:
         # Load configuration

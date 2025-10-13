@@ -28,12 +28,24 @@ class S3Service:
         Read a file from S3.
         
         Args:
-            file_path: Path to the file in S3
+            file_path: Path to the file in S3 (may include s3:// prefix)
         
         Returns:
             File content as string
         """
         try:
+            # Clean up the file path
+            # Remove s3:// prefix and bucket name if present
+            if file_path.startswith('s3://'):
+                # Remove s3:// prefix
+                file_path = file_path[5:]
+                
+                # Remove bucket name if it's at the start
+                if file_path.startswith(f'{self.bucket_name}/'):
+                    file_path = file_path[len(self.bucket_name)+1:]
+                elif file_path.startswith('legal-store/'):
+                    file_path = file_path[len('legal-store')+1:]
+            
             # Remove leading slash if present
             if file_path.startswith('/'):
                 file_path = file_path[1:]
@@ -46,10 +58,13 @@ class S3Service:
             )
             
             content = response['Body'].read().decode('utf-8')
-            self.logger.info(f"Successfully read file: {file_path}")
+            self.logger.info(f"Successfully read file: {file_path} ({len(content)} bytes)")
             
             return content
             
+        except self.s3_client.exceptions.NoSuchKey:
+            self.logger.error(f"File not found in S3: {self.bucket_name}/{file_path}")
+            return ""
         except Exception as e:
             self.logger.error(f"Error reading file {file_path} from S3: {str(e)}")
             return ""
@@ -65,6 +80,14 @@ class S3Service:
             True if file exists, False otherwise
         """
         try:
+            # Clean up the file path (same logic as read_file)
+            if file_path.startswith('s3://'):
+                file_path = file_path[5:]
+                if file_path.startswith(f'{self.bucket_name}/'):
+                    file_path = file_path[len(self.bucket_name)+1:]
+                elif file_path.startswith('legal-store/'):
+                    file_path = file_path[len('legal-store')+1:]
+            
             if file_path.startswith('/'):
                 file_path = file_path[1:]
             
