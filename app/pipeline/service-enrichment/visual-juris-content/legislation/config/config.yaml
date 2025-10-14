@@ -85,14 +85,17 @@ audit_log:
     table: "audit_log"
     job_name: "legislation juriscontent generation"
 
+# -- Path to the new heading inference rules --
+headless_rules_path: "config/headless_rules.yaml"
+
+# -- Path to the heading hierarchy rules --
+heading_hierarchy_rules_path: "config/heading_hierarchy_rules.yaml"
+
 # -- Registry details
 tables_registry:
     database: "legal_store"
     table: "legislation_registry"
-    # --- FIX & ADD ---
-    # Corrected the duplicate 'column' key and added the new status column
     year_column: "year"
     download_status_column: "status_content_download" 
-    # --- END FIX & ADD ---
     processing_years: []
     jurisdiction_codes: []

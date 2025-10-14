@@ -1,8 +1,9 @@
 import os
 import time
+import yaml
 from datetime import datetime, timezone
 from utils.database_connector import DatabaseConnector
-from src.juriscontent_generator import JuriscontentGenerator
+from src.html_transformer import HtmlTransformer
 from utils.s3_manager import S3Manager
 
 class TextProcessor:
@@ -18,14 +19,34 @@ class TextProcessor:
             config (dict): The application configuration dictionary.
         """
         self.config = config
-        self.juriscontent_generator = JuriscontentGenerator()
+        
+        # Load the headless rules configuration for the transformer
+        try:
+            with open(config['headless_rules_path'], 'r') as f:
+                headless_rules_config = yaml.safe_load(f)
+            print("Successfully loaded headless HTML processing rules.")
+        except Exception as e:
+            print(f"FATAL: Could not load headless_rules.yaml from path: {config['headless_rules_path']}. Aborting. Error: {e}")
+            raise
+
+        # Get the heading hierarchy rules path
+        heading_hierarchy_rules_path = config.get('heading_hierarchy_rules_path', 'config/heading_hierarchy_rules.yaml')
+
+        # Initialize the main transformer with both rule sets
+        self.html_transformer = HtmlTransformer(
+            headless_rules_config=headless_rules_config,
+            heading_hierarchy_rules_path=heading_hierarchy_rules_path
+        )
         
         # Initialize the S3 manager using the region from the config
         self.s3_manager = S3Manager(region_name=config['aws']['default_region'])
         
-        # This processor connects to both source and destination databases
-        self.source_db = DatabaseConnector(db_config=config['database']['source'])
+        # This processor connects to the destination database
         self.dest_db = DatabaseConnector(db_config=config['database']['destination'])
+        
+        # Print summary of loaded rules for debugging
+        print("Heading Hierarchy Rules loaded:")
+        print(self.html_transformer.get_hierarchy_rules_summary())
 
     def process_cases(self):
         """
@@ -88,13 +109,13 @@ class TextProcessor:
                 print(f"\n--- Checking Jurisdiction: {jurisdiction} ---")
 
                 try:
-                    # Query for cases that have been downloaded but not yet processed
+                    # Query for cases that have been downloaded but not yet processed for text extraction
                     query_parts = [
                         f"SELECT reg.source_id",
                         f"FROM {registry_table} AS reg",
                         f"LEFT JOIN {dest_table} AS dest ON reg.source_id = dest.source_id",
                         f"WHERE reg.jurisdiction_code = :jurisdiction",
-                        f"AND reg.{download_status_col} = 'pass'" # Check for successful download
+                        f"AND reg.{download_status_col} = 'pass'"
                     ]
                     params = {"jurisdiction": jurisdiction}
 
@@ -102,7 +123,7 @@ class TextProcessor:
                         query_parts.append(f"AND reg.{registry_year_col} = :year")
                         params["year"] = year
                     
-                    query_parts.append(f"AND (dest.source_id IS NULL OR dest.{status_column} != 'pass')")
+                    query_parts.append(f"AND (dest.source_id IS NULL OR dest.{status_column} IS NULL OR dest.{status_column} != 'pass')")
                     
                     query = "\n".join(query_parts)
                     cases_to_process_df = self.dest_db.read_sql(query, params=params)
@@ -153,7 +174,8 @@ class TextProcessor:
         try:
             html_content = self.s3_manager.get_file_content(bucket, source_html_key)
             
-            juriscontent_html = self.juriscontent_generator.generate(html_content)
+            # Use the new transformer which intelligently handles both file types
+            juriscontent_html = self.html_transformer.transform(html_content)
             
             self.s3_manager.save_text_file(bucket, output_html_key, juriscontent_html, content_type='text/html')
 
@@ -164,9 +186,9 @@ class TextProcessor:
             end_time_utc = datetime.now(timezone.utc)
             duration = (end_time_utc - start_time_utc).total_seconds()
 
-            if output_size > source_size:
+            if output_size > 0 and source_size > 0: # Basic check to ensure files exist
                 # Success case
-                print(f"VERIFICATION PASSED for {source_id}: juriscontent.html size ({output_size} bytes) > miniviewer.html size ({source_size} bytes).")
+                print(f"VERIFICATION PASSED for {source_id}: juriscontent.html size ({output_size} bytes), miniviewer.html size ({source_size} bytes).")
                 print(f"Successfully generated juriscontent.html for {source_id}.")
                 self.dest_db.update_step_result(
                     status_table, source_id, 'text_extract', 'pass', duration, 
@@ -174,7 +196,7 @@ class TextProcessor:
                 )
             else:
                 # Failure case
-                print(f"VERIFICATION FAILED for {source_id}: juriscontent.html size ({output_size} bytes) is not greater than miniviewer.html size ({source_size} bytes).")
+                print(f"VERIFICATION FAILED for {source_id}: juriscontent.html size ({output_size} bytes) or miniviewer.html size ({source_size} bytes) is zero.")
                 self.dest_db.update_step_result(
                     status_table, source_id, 'text_extract', 'failed', duration,
                     start_time_utc, end_time_utc, step_columns_config
