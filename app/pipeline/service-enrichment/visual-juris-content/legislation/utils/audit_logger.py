@@ -1,12 +1,19 @@
 import os
+import re
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker
+import logging
+
+logger = logging.getLogger(__name__)
 
 class AuditLogger:
     """Handles all logging to the audit_log table."""
+    
+    # Whitelist of valid table name patterns for security
+    VALID_TABLE_PATTERN = re.compile(r'^[a-zA-Z0-9_]+$')
 
     def __init__(self, db_config: dict, table_name: str):
         """
@@ -16,9 +23,23 @@ class AuditLogger:
             db_config (dict): A dictionary containing connection details for the audit log database.
             table_name (str): The name of the audit log table.
         """
+        self._validate_table_name(table_name)
         self.table_name = table_name
         self.engine = self._create_db_engine(db_config)
         self.Session = sessionmaker(bind=self.engine)
+
+    def _validate_table_name(self, table_name: str) -> None:
+        """
+        Validates table name to prevent SQL injection.
+        
+        Args:
+            table_name (str): The table name to validate
+            
+        Raises:
+            ValueError: If table name contains invalid characters
+        """
+        if not self.VALID_TABLE_PATTERN.match(table_name):
+            raise ValueError(f"Invalid table name: {table_name}. Only alphanumeric and underscore allowed.")
 
     def _create_db_engine(self, db_config: dict):
         """Creates a SQLAlchemy engine from the configuration."""
@@ -31,10 +52,14 @@ class AuditLogger:
                 port=db_config['port'],
                 database=db_config['name']
             )
-            print(f"AuditLogger creating database engine for: {db_config['name']}")
-            return create_engine(connection_url)
+            logger.info(f"AuditLogger creating database engine for: {db_config['name']}")
+            return create_engine(
+                connection_url,
+                pool_pre_ping=True,  # Verify connections before using
+                pool_recycle=3600    # Recycle connections after 1 hour
+            )
         except Exception as e:
-            print(f"AuditLogger failed to create database engine: {e}")
+            logger.error(f"AuditLogger failed to create database engine: {e}")
             raise
 
     def log_start(self, job_name: str) -> str:
@@ -63,10 +88,10 @@ class AuditLogger:
                 "created_at": start_time
             })
             session.commit()
-            print(f"Job '{job_name}' started. Log ID: {log_id}")
+            logger.info(f"Job '{job_name}' started. Log ID: {log_id}")
             return log_id
         except Exception as e:
-            print(f"Failed to log job start: {e}")
+            logger.error(f"Failed to log job start: {e}")
             session.rollback()
             raise
         finally:
@@ -91,8 +116,14 @@ class AuditLogger:
             
             job_duration = None
             if result and result.start_time:
-                # FIX: Ensure the start_time from DB is timezone-aware (UTC) before subtraction
-                start_time_aware = result.start_time.replace(tzinfo=timezone.utc)
+                # Ensure the start_time from DB is timezone-aware (UTC) before subtraction
+                start_time_aware = result.start_time
+                if start_time_aware.tzinfo is None:
+                    start_time_aware = start_time_aware.replace(tzinfo=timezone.utc)
+                elif start_time_aware.tzinfo != timezone.utc:
+                    # Convert to UTC if it's in a different timezone
+                    start_time_aware = start_time_aware.astimezone(timezone.utc)
+                    
                 duration_delta = end_time - start_time_aware
                 job_duration = duration_delta.total_seconds()
 
@@ -113,9 +144,9 @@ class AuditLogger:
                 "log_id": log_id
             })
             session.commit()
-            print(f"Job with Log ID '{log_id}' finished with status: {status}")
+            logger.info(f"Job with Log ID '{log_id}' finished with status: {status}")
         except Exception as e:
-            print(f"Failed to log job end for log_id {log_id}: {e}")
+            logger.error(f"Failed to log job end for log_id {log_id}: {e}")
             session.rollback()
             raise
         finally:

@@ -4,14 +4,14 @@ database:
         dialect: "mysql"
         driver: "mysqlconnector"
         host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
-        port: "3306"
+        port: 3306
         name: "legal_source"
 
     destination:
         dialect: "mysql"
         driver: "mysqlconnector"
         host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
-        port: "3306"
+        port: 3306
         name: "legal_store"
 
 # -- AWS connection details --
@@ -68,6 +68,11 @@ tables:
           duration: "duration_juriscontent_html"
           start_time: "start_time_juriscontent_html"
           end_time: "end_time_juriscontent_html"
+        section_extract:
+          status: "status_juriscontent_section_extract"
+          duration: "duration_juriscontent_section_extract"
+          start_time: "start_time_juriscontent_section_extract"
+          end_time: "end_time_juriscontent_section_extract"
   audit_log_table:
     - database: legal_store
       table: audit_log
@@ -91,7 +96,7 @@ headless_rules_path: "config/headless_rules.yaml"
 # -- Path to the heading hierarchy rules --
 heading_hierarchy_rules_path: "config/heading_hierarchy_rules.yaml"
 
-# -- Registry details
+# -- Registry details --
 tables_registry:
     database: "legal_store"
     table: "legislation_registry"
@@ -99,3 +104,17 @@ tables_registry:
     download_status_column: "status_content_download" 
     processing_years: []
     jurisdiction_codes: []
+
+# -- Logging Configuration --
+logging:
+  level: INFO
+  log_directory: logs
+  max_log_size_mb: 10
+  backup_count: 5
+
+# -- Performance Configuration --
+performance:
+  max_file_size_mb: 50
+  database_pool_size: 5
+  database_max_overflow: 10
+  s3_max_retries: 3

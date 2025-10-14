@@ -124,6 +124,17 @@ class JuriscontentGenerator:
             
             heading.replace_with(new_heading)
 
+    def _get_clean_nav_text(self, heading):
+        """
+        Extract navigation text from heading, preserving spaces between elements.
+        This is specifically for the navigation panel.
+        """
+        # Use separator=' ' to preserve spaces between different elements
+        text = heading.get_text(separator=' ', strip=False)
+        # Clean up multiple spaces and strip outer whitespace
+        text = re.sub(r'\s+', ' ', text)
+        return text.strip()
+
     def generate(self, html_content: str) -> str:
         """
         Transforms the raw HTML content into the desired juriscontent.html format.
@@ -196,8 +207,8 @@ class JuriscontentGenerator:
             a = soup.new_tag('a', href=f"#{heading_id}")
             a_strong = soup.new_tag('strong')
             
-            # Get the text content for navigation (preserve structure but just get text for nav)
-            nav_text = heading.get_text(strip=True)
+            # Get the text content for navigation - USE NEW METHOD TO PRESERVE SPACES
+            nav_text = self._get_clean_nav_text(heading)
             a_strong.string = nav_text
             
             a.append(a_strong)
@@ -297,6 +308,12 @@ class JuriscontentGenerator:
                 margin-bottom: 0.8em;
                 padding-bottom: 0.4em;
                 border-bottom: 1px solid #e0e0e0;
+                word-wrap: break-word;
+                line-height: 1.4;
+            }
+            #navigator .nav-title strong {
+                display: block;
+                white-space: normal;
             }
             #navigator .nav-placeholder {
                 font-style: italic;
@@ -318,6 +335,8 @@ class JuriscontentGenerator:
                 border-radius: 4px;
                 transition: background-color 0.2s;
                 position: relative;
+                word-wrap: break-word;
+                white-space: normal;
             }
             #navigator a:hover {
                 background-color: #f0f0f0;
