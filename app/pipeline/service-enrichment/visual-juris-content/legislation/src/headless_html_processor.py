@@ -23,8 +23,18 @@ class HeadlessHtmlProcessor:
         if not style_tag:
             return {}
 
+        # Get the style content, handling None case
+        style_content = style_tag.string
+        if not style_content:
+            # Try getting text content if .string is None
+            style_content = style_tag.get_text()
+        
+        # If still no content, return empty dict
+        if not style_content:
+            return {}
+
         # Use regex to find class definitions and their properties
-        class_definitions = re.findall(r'\.([a-zA-Z0-9_-]+)\s*\{([^}]+)\}', style_tag.string)
+        class_definitions = re.findall(r'\.([a-zA-Z0-9_-]+)\s*\{([^}]+)\}', style_content)
         
         for class_name, styles in class_definitions:
             props = {}

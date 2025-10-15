@@ -64,39 +64,117 @@ heading_hierarchy_rules:
     level: "h2"
     priority: 85
     patterns:
-      - regex: "^Objects?\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?)"
+      # Objects and Purpose
+      - regex: "^Objects?\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?|Policy)"
         case_insensitive: true
-        examples: ["Objects of this Act", "Object of the Bill", "Objects of this Regulation"]
-      - regex: "^Purpose\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?)"
+        examples: ["Objects of this Act", "Object of the Bill", "Objects of this Regulation", "Objects of this Policy"]
+      - regex: "^Purpose\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?|Policy)"
         case_insensitive: true
-        examples: ["Purpose of this Act", "Purpose of the Bill"]
+        examples: ["Purpose of this Act", "Purpose of the Bill", "Purpose of this Policy"]
+      
+      # Definitions and Interpretation
       - regex: "^Definitions?\\s*$"
         case_insensitive: true
-        examples: ["Definitions", "Definition"]
+        examples: ["Definitions", "Definition", "DEFINITIONS"]
       - regex: "^Interpretation\\s*$"
         case_insensitive: true
-        examples: ["Interpretation"]
+        examples: ["Interpretation", "INTERPRETATION"]
+      - regex: "^Dictionary\\s*$"
+        case_insensitive: true
+        examples: ["Dictionary", "DICTIONARY"]
+      
+      # Commencement and Application
       - regex: "^Commencement\\s*$"
         case_insensitive: true
-        examples: ["Commencement"]
-      - regex: "^Application\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?)"
+        examples: ["Commencement", "COMMENCEMENT"]
+      - regex: "^Application\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?|Policy)"
         case_insensitive: true
-        examples: ["Application of this Act", "Application"]
+        examples: ["Application of this Act", "Application", "Application of this Policy"]
+      
+      # Transitional, Savings, and Repeals
       - regex: "^Transitional\\s+provisions?"
         case_insensitive: true
-        examples: ["Transitional provisions", "Transitional provision"]
+        examples: ["Transitional provisions", "Transitional provision", "TRANSITIONAL PROVISIONS"]
       - regex: "^Savings?\\s+provisions?"
         case_insensitive: true
-        examples: ["Savings provisions", "Saving provision"]
+        examples: ["Savings provisions", "Saving provision", "SAVINGS PROVISIONS"]
       - regex: "^Repeals?\\s+(and\\s+amendments?)?"
         case_insensitive: true
-        examples: ["Repeals", "Repeal and amendments"]
+        examples: ["Repeals", "Repeal and amendments", "REPEALS AND AMENDMENTS"]
       - regex: "^Consequential\\s+amendments?"
         case_insensitive: true
-        examples: ["Consequential amendments"]
+        examples: ["Consequential amendments", "Consequential amendment"]
+      
+      # Preliminary and Citation
       - regex: "^Preliminary\\s*$"
         case_insensitive: true
-        examples: ["Preliminary"]
+        examples: ["Preliminary", "PRELIMINARY"]
+      - regex: "^Citation\\s*$"
+        case_insensitive: true
+        examples: ["Citation", "CITATION"]
+      - regex: "^Short\\s+title\\s*$"
+        case_insensitive: true
+        examples: ["Short title", "SHORT TITLE"]
+      
+      # Name and Title
+      - regex: "^Name\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?|Policy)"
+        case_insensitive: true
+        examples: ["Name of this Act", "Name of Act", "Name of this Policy"]
+      - regex: "^Title\\s+(of\\s+)?(this\\s+)?(Act|Bill|Regulation|Rules?|Policy)"
+        case_insensitive: true
+        examples: ["Title of this Act", "Title"]
+      
+      # Principal Act/Policy/Regulation
+      - regex: "^Principal\\s+(Act|Bill|Regulation|Rules?|Policy)"
+        case_insensitive: true
+        examples: ["Principal Policy", "Principal Act", "Principal Regulation"]
+      
+      # Aims and Objectives
+      - regex: "^Aims?(,\\s+objectives?(\\s+etc\\.?)?)?.*$"
+        case_insensitive: true
+        examples: ["Aims", "Aims, objectives etc.", "Aim of this Policy", "Aims and objectives"]
+      - regex: "^Objectives?\\s*$"
+        case_insensitive: true
+        examples: ["Objectives", "Objective", "OBJECTIVES"]
+      
+      # Amendments
+      - regex: "^Amendment(s)?\\s+(of|to)\\s+"
+        case_insensitive: true
+        examples: ["Amendment of Principal Policy", "Amendments to the Act", "Amendment of Act"]
+      - regex: "^Amendment(s)?\\s*$"
+        case_insensitive: true
+        examples: ["Amendments", "Amendment"]
+      
+      # Schedules and Notes
+      - regex: "^Schedules?\\s*$"
+        case_insensitive: true
+        examples: ["Schedule", "Schedules", "SCHEDULE"]
+      - regex: "^Notes?\\s*$"
+        case_insensitive: true
+        examples: ["Notes", "Note", "NOTES"]
+      
+      # Other common headings
+      - regex: "^Contents?\\s*$"
+        case_insensitive: true
+        examples: ["Contents", "Content"]
+      - regex: "^Table\\s+of\\s+contents?\\s*$"
+        case_insensitive: true
+        examples: ["Table of Contents", "Table of contents"]
+      - regex: "^Penalties?\\s*$"
+        case_insensitive: true
+        examples: ["Penalties", "Penalty"]
+      - regex: "^Offences?\\s*$"
+        case_insensitive: true
+        examples: ["Offences", "Offence"]
+      - regex: "^Enforcement\\s*$"
+        case_insensitive: true
+        examples: ["Enforcement", "ENFORCEMENT"]
+      - regex: "^Administration\\s*$"
+        case_insensitive: true
+        examples: ["Administration", "ADMINISTRATION"]
+      - regex: "^Miscellaneous\\s*$"
+        case_insensitive: true
+        examples: ["Miscellaneous", "MISCELLANEOUS"]
 
   # Sub-sections - third level (H3)
   sub_sections:
@@ -126,6 +204,7 @@ heading_hierarchy_rules:
     priority: 75
     patterns:
       # Match single or double digit numbers followed by space and any text
+      # This will match: "1 Name of Act", "2 Commencement", "74 Review of Act"
       - regex: "^\\d{1,3}[A-Z]?\\s+\\w"
         case_insensitive: false
         examples: ["1 Name of Act", "2 Commencement", "2A Proceedings", "74 Review of Act", "100 Definitions"]
@@ -133,6 +212,10 @@ heading_hierarchy_rules:
       - regex: "^\\d{1,3}\\s+[A-Z]"
         case_insensitive: false
         examples: ["1 Name", "2 Commencement", "25 Application"]
+      # Match numbered sections with period (e.g., "1. This Act")
+      - regex: "^\\d{1,3}[A-Z]?\\.\\s+\\w"
+        case_insensitive: false
+        examples: ["1. This Act", "2. Definitions", "3. Purpose"]
 
   # Detailed provisions - fourth level (H4)
   detailed_provisions:
