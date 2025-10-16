@@ -380,7 +380,7 @@ class DatabaseConnector:
     def update_heading_detection_metadata(self, table_name: str, source_id: str, 
                                          heading_metadata: dict):
         """
-        Update heading detection metadata including token usage, pricing, and heading counts.
+        Update heading detection metadata including token usage, pricing, heading counts, and structuring path.
         
         Args:
             table_name: Name of enrichment status table
@@ -392,10 +392,17 @@ class DatabaseConnector:
                 - output_price (float)
                 - before_processing_heading_count (int)
                 - after_processing_heading_count (int)
-                - genai_path_used (bool)
+                - structuring_path (str): 'original', 'genai', 'rulebased', 'no rules applied', 'not started'
         """
         self._validate_table_name(table_name)
         session = self.Session()
+        
+        # Validate structuring_path
+        valid_paths = ['original', 'genai', 'rulebased', 'no rules applied', 'not started']
+        structuring_path = heading_metadata.get('structuring_path', 'not started')
+        if structuring_path not in valid_paths:
+            logger.warning(f"Invalid structuring_path '{structuring_path}', defaulting to 'not started'")
+            structuring_path = 'not started'
         
         try:
             stmt = text(f"""
@@ -406,7 +413,7 @@ class DatabaseConnector:
                     token_output_price_juriscontent_html = :output_price,
                     juriscontent_html_before_processing_heading_count = :before_count,
                     juriscontent_html_after_processing_heading_count = :after_count,
-                    juriscontent_html_genai_path = :genai_path
+                    juriscontent_html_structuring_path = :structuring_path
                 WHERE source_id = :source_id
             """)
             
@@ -417,15 +424,14 @@ class DatabaseConnector:
                 "output_price": heading_metadata.get('output_price', 0.0),
                 "before_count": heading_metadata.get('before_processing_heading_count', 0),
                 "after_count": heading_metadata.get('after_processing_heading_count', 0),
-                "genai_path": 'true' if heading_metadata.get('genai_path_used', False) else 'false',
+                "structuring_path": structuring_path,
                 "source_id": source_id
             })
             
             session.commit()
             
-            genai_status = "USED" if heading_metadata.get('genai_path_used', False) else "NOT USED"
             logger.info(f"Updated heading metadata for source_id: {source_id}")
-            logger.info(f"  - Gemini path: {genai_status}")
+            logger.info(f"  - Structuring path: {structuring_path}")
             logger.info(f"  - Headings before: {heading_metadata.get('before_processing_heading_count', 0)}")
             logger.info(f"  - Headings after: {heading_metadata.get('after_processing_heading_count', 0)}")
             

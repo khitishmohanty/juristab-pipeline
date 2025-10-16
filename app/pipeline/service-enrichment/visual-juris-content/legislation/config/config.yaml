@@ -31,13 +31,20 @@ models:
 heading_detection:
   prompt_path: "config/heading_detection_prompt.txt"
   model_name: "gemini"
-  genai_extract: true
+  genai_extract: false
+  max_input_tokens: 100000  # NEW: Maximum tokens for Gemini processing
+  
+# NEW: Rule-based heading detection configuration
+rule_based_heading_detection:
+  enabled: true
+  heading_hierarchy_rules_path: "config/heading_hierarchy_rules.yaml"
+  headless_rules_path: "config/headless_rules.yaml"
 
 # -- Content verification configuration --
 content_verification:
   enabled: true
-  pass_threshold: 0.90  # Minimum similarity score to mark as 'pass' (0.0-1.0)
-  source_filename: "miniviewer.txt"  # Original source file to compare against
+  pass_threshold: 0.90
+  source_filename: "miniviewer.txt"
   
 # List of tables to be read by the connector
 tables:
@@ -101,11 +108,12 @@ tables:
 enrichment_filenames:
   source_html: "miniviewer.html"
   genai_html: "miniviewer_genai.html"
+  rule_based_html: "miniviewer_rulebased.html"  # NEW: Rule-based intermediate file
   extracted_html: "juriscontent.html"
   gemini_response: "juriscontent_gemini_response.json"
-  source_text: "miniviewer.txt"  # Original text file for verification
-  original_extracted_text: "miniviewer_original.txt"  # NEW: Text extracted from miniviewer.html
-  constructed_text: "miniviewer_constructed.txt"  # NEW: Concatenated section content
+  source_text: "miniviewer.txt"
+  original_extracted_text: "miniviewer_original.txt"
+  constructed_text: "miniviewer_constructed.txt"
 
 # -- Audit log configuration --
 audit_log:

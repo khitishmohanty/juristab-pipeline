@@ -217,15 +217,19 @@ class TextProcessor:
                                        genai_html_key: str, output_html_key: str, 
                                        status_table: str, source_id: str) -> bool:
         """
-        Handles HTML download, transformation with AI heading detection, 
+        Handles HTML download, transformation with multi-tier heading detection, 
         saving to S3, and updating the status database with token metrics.
         
         Pipeline:
         1. Download miniviewer.html
-        2. Transform with Gemini (if needed) → miniviewer_genai.html
+        2. Transform with multi-tier logic:
+           - Original headings → Use as-is
+           - Gemini (if tokens ≤ limit) → miniviewer_genai.html
+           - Rule-based → miniviewer_rulebased.html
+           - No rules applied → Fallback styling
         3. Apply juriscontent styling → juriscontent.html
-        4. Save both intermediate and final files
-        5. Update database
+        4. Save intermediate and final files
+        5. Update database with structuring path
         
         Returns:
             bool: True if successful, False otherwise
@@ -247,10 +251,9 @@ class TextProcessor:
             # Download HTML content
             html_content = self.s3_manager.get_file_content(bucket, source_html_key)
             
-            # Transform HTML with AI-powered heading detection
-            # CRITICAL: Returns 4 values now (not 3!)
-            logger.info("Phase 1: Transforming HTML with intelligent heading detection...")
-            juriscontent_html, intermediate_html, token_info, gemini_response_json = self.html_transformer.transform(html_content)
+            # Transform HTML with multi-tier heading detection
+            logger.info("Phase 1: Transforming HTML with multi-tier heading detection...")
+            juriscontent_html, intermediate_html, token_info, response_json = self.html_transformer.transform(html_content)
             
             # Save final juriscontent.html to S3
             logger.info("Saving juriscontent.html...")
@@ -258,43 +261,65 @@ class TextProcessor:
                 bucket, output_html_key, juriscontent_html, content_type='text/html'
             )
             
-            # Save intermediate miniviewer_genai.html if AI was used
-            if intermediate_html is not None:
-                logger.info("Saving intermediate miniviewer_genai.html...")
-                self.s3_manager.save_text_file(
-                    bucket, genai_html_key, intermediate_html, content_type='text/html'
-                )
-                logger.info("✓ Intermediate miniviewer_genai.html saved")
-            
-            # Save Gemini response to S3 if AI was used
-            if gemini_response_json is not None:
-                # Construct the response file key (same folder as juriscontent.html)
-                case_folder = os.path.dirname(output_html_key)
-                gemini_response_key = os.path.join(case_folder, self.config['enrichment_filenames'].get('gemini_response', 'juriscontent_gemini_response.json'))
+            # Save intermediate file if generated (Gemini or rule-based)
+            if intermediate_html is not None and token_info is not None:
+                structuring_path = token_info.get('structuring_path', 'not started')
                 
-                logger.info(f"Saving Gemini response to S3: {gemini_response_key}")
+                if structuring_path == 'genai':
+                    # Save miniviewer_genai.html
+                    logger.info("Saving intermediate miniviewer_genai.html...")
+                    self.s3_manager.save_text_file(
+                        bucket, genai_html_key, intermediate_html, content_type='text/html'
+                    )
+                    logger.info("✓ Intermediate miniviewer_genai.html saved")
+                    
+                elif structuring_path == 'rulebased':
+                    # Save miniviewer_rulebased.html
+                    case_folder = os.path.dirname(output_html_key)
+                    rule_based_key = os.path.join(case_folder, 
+                                                  self.config['enrichment_filenames'].get('rule_based_html', 
+                                                                                         'miniviewer_rulebased.html'))
+                    logger.info("Saving intermediate miniviewer_rulebased.html...")
+                    self.s3_manager.save_text_file(
+                        bucket, rule_based_key, intermediate_html, content_type='text/html'
+                    )
+                    logger.info("✓ Intermediate miniviewer_rulebased.html saved")
+            
+            # Save processing response to S3 if available
+            if response_json is not None:
+                case_folder = os.path.dirname(output_html_key)
+                response_key = os.path.join(case_folder, 
+                                           self.config['enrichment_filenames'].get('gemini_response', 
+                                                                                  'juriscontent_processing_response.json'))
+                
+                logger.info(f"Saving processing response to S3: {response_key}")
                 self.s3_manager.save_text_file(
-                    bucket, gemini_response_key, gemini_response_json, 
+                    bucket, response_key, response_json, 
                     content_type='application/json'
                 )
-                logger.info("✓ Gemini response saved successfully")
+                logger.info("✓ Processing response saved successfully")
             
-            # Log token usage if AI was used
+            # Log token usage and structuring path
             if token_info is not None:
+                structuring_path = token_info.get('structuring_path', 'not started')
+                logger.info(f"Structuring path used: {structuring_path.upper()}")
+                
                 if token_info.get('generation_success', False):
-                    total_cost = token_info['input_price'] + token_info['output_price']
-                    logger.info(
-                        f"AI Heading Detection - Tokens: {token_info['input_tokens']} input, "
-                        f"{token_info['output_tokens']} output | Cost: ${total_cost:.6f}"
-                    )
+                    if structuring_path == 'genai':
+                        total_cost = token_info['input_price'] + token_info['output_price']
+                        logger.info(
+                            f"Gemini - Tokens: {token_info['input_tokens']} input, "
+                            f"{token_info['output_tokens']} output | Cost: ${total_cost:.6f}"
+                        )
+                    elif structuring_path == 'rulebased':
+                        logger.info("Rule-based detection applied (no token cost)")
+                    elif structuring_path == 'original':
+                        logger.info("Original headings preserved (no token cost)")
                 else:
-                    logger.warning("AI heading detection was attempted but failed. Proceeding without headings.")
-            else:
-                logger.info("Existing headings found - AI detection not required.")
+                    logger.warning(f"Heading detection attempted but used fallback path: {structuring_path}")
             
-            # --- VERIFICATION STEP ---
+            # Verification step
             output_size = self.s3_manager.get_file_size(bucket, output_html_key)
-
             end_time_utc = datetime.now(timezone.utc)
             duration = (end_time_utc - start_time_utc).total_seconds()
 
@@ -308,10 +333,10 @@ class TextProcessor:
                     start_time_utc, end_time_utc, step_columns_config
                 )
                 
-                # Update token metrics if AI was used
+                # Update heading metadata with structuring path
                 if token_info is not None:
                     try:
-                        # Prepare heading metadata dict
+                        # Prepare heading metadata dict with new structuring_path field
                         heading_metadata = {
                             'input_tokens': token_info.get('input_tokens', 0),
                             'output_tokens': token_info.get('output_tokens', 0),
@@ -319,18 +344,16 @@ class TextProcessor:
                             'output_price': token_info.get('output_price', 0.0),
                             'before_processing_heading_count': token_info.get('before_processing_heading_count', 0),
                             'after_processing_heading_count': token_info.get('after_processing_heading_count', 0),
-                            'genai_path_used': token_info.get('genai_path_used', False)
+                            'structuring_path': token_info.get('structuring_path', 'not started')
                         }
                         
                         self.dest_db.update_heading_detection_metadata(
                             status_table, source_id, heading_metadata
                         )
                         
-                        path_desc = token_info.get('path', 'unknown')
-                        logger.info(f"Heading metadata saved to database (path: {path_desc})")
+                        logger.info(f"Heading metadata saved to database")
                         
                     except Exception as e:
-                        # Don't fail the whole process if metadata update fails
                         logger.error(f"Failed to update heading metadata (non-critical): {e}")
                 
                 return True

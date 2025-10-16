@@ -466,6 +466,8 @@ class JuriscontentGenerator:
                 list-style-type: none;
                 padding-left: 1.5em;
             }
+            
+            /* CRITICAL: Unified heading sizes - all 14px with weight-based hierarchy */
             #content h1 {
                 font-size: 14px;
                 font-weight: 600;
@@ -473,12 +475,69 @@ class JuriscontentGenerator:
                 border-bottom: 2px solid #e0e0e0;
                 padding-bottom: 0.4em;
             }
+            #content h2 {
+                font-size: 14px;
+                font-weight: 500;
+                margin-top: 1.2em;
+                margin-bottom: 0.4em;
+            }
+            #content h3 {
+                font-size: 14px;
+                font-weight: 450;
+                margin-top: 1.2em;
+                margin-bottom: 0.4em;
+            }
+            #content h4 {
+                font-size: 14px;
+                font-weight: 400;
+                margin-top: 1em;
+                margin-bottom: 0.4em;
+            }
+            #content h5 {
+                font-size: 14px;
+                font-weight: 400;
+                margin-top: 1em;
+                margin-bottom: 0.4em;
+            }
+            #content h6 {
+                font-size: 14px;
+                font-weight: 400;
+                margin-top: 1em;
+                margin-bottom: 0.4em;
+            }
+            
+            /* Collapsible heading styles - also 14px */
             h1.collapsible-heading { 
                 font-size: 14px; 
                 font-weight: 600; 
                 border-bottom: 2px solid #e0e0e0;
                 padding-bottom: 0.4em;
             }
+            h2.collapsible-heading { 
+                font-size: 14px; 
+                font-weight: 500; 
+            }
+            h3.collapsible-heading { 
+                font-size: 14px; 
+                font-weight: 450; 
+                margin-left: 1.5em; 
+            }
+            h4.collapsible-heading { 
+                font-size: 14px; 
+                font-weight: 400; 
+                margin-left: 3em; 
+            }
+            h5.collapsible-heading { 
+                font-size: 14px; 
+                font-weight: 400; 
+                margin-left: 4.5em; 
+            }
+            h6.collapsible-heading { 
+                font-size: 14px; 
+                font-weight: 350; 
+                margin-left: 6em; 
+            }
+            
             hr {
                 border: none;
                 border-top: 0.5px solid #e0e0e0;
@@ -494,10 +553,6 @@ class JuriscontentGenerator:
                 margin-top: 1.2em;
                 margin-bottom: 0.4em;
             }
-            h2.collapsible-heading { font-size: 14px; font-weight: 500; }
-            h3.collapsible-heading { font-size: 14px; font-weight: 450; margin-left: 1.5em; }
-            h4.collapsible-heading { font-size: 14px; font-weight: 400; margin-left: 3em; }
-            h5.collapsible-heading { font-size: 14px; font-weight: 400; margin-left: 4.5em; }
             .collapsible-heading::before {
                 content: '−';
                 font-weight: bold;
@@ -538,6 +593,10 @@ class JuriscontentGenerator:
             }
             h5.collapsible-heading + .collapsible-content { 
                 margin-left: 4.9em;
+                border-left: 1px solid #d0d0d0;
+            }
+            h6.collapsible-heading + .collapsible-content { 
+                margin-left: 6.4em;
                 border-left: 1px solid #d0d0d0;
             }
         """

@@ -149,11 +149,11 @@ class SectionExtractor:
         """
         Extract ALL text content between start_element and stop_element.
         
-        CRITICAL LOGIC:
-        - If start_element is None: Start from beginning of container
-        - If stop_element is None: Go until end of container
-        - Extract ALL text in between, including from all nested elements
-        - SKIP text that's inside the start_element itself (to avoid duplication)
+        ENHANCED: Now properly extracts ALL content including:
+        - Text in <inline> tags (definition terms, etc.)
+        - Text in <block> tags (subclauses, etc.)
+        - Text in all paragraph and formatting elements
+        - Nested content at any depth
         
         Args:
             container: The container to search in (main content area)
@@ -195,24 +195,40 @@ class SectionExtractor:
             if isinstance(element, Comment):
                 continue
             
-            # Skip structural divs (but descend into them)
-            if hasattr(element, 'name') and element.name in ['div', 'script', 'style', 'nav']:
-                continue
-            
-            # Collect text from NavigableString elements
+            # ENHANCED: Collect text from ALL text-containing elements
             if isinstance(element, NavigableString) and not isinstance(element, Comment):
                 text = str(element).strip()
-                if text and len(text) > 1:
-                    parent = element.parent
-                    if parent and hasattr(parent, 'name'):
-                        # Skip navigation and structural elements
-                        if parent.name in ['nav', 'script', 'style']:
-                            continue
-                        
-                        # Get text from content elements (including ALL heading levels)
-                        if parent.name in ['p', 'span', 'td', 'th', 'li', 'b', 'i', 'strong', 'em', 'a', 
-                                          'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                
+                # Skip empty text nodes
+                if not text or len(text) < 1:
+                    continue
+                
+                parent = element.parent
+                if parent and hasattr(parent, 'name'):
+                    # Skip navigation and structural elements
+                    if parent.name in ['nav', 'script', 'style', 'head']:
+                        continue
+                    
+                    # CRITICAL: Get text from ALL content-bearing elements
+                    # This includes inline elements (for definition terms) and block elements
+                    if parent.name in [
+                        # Paragraph and text elements
+                        'p', 'span', 'div', 'td', 'th', 'li', 
+                        # Formatting elements
+                        'b', 'i', 'strong', 'em', 'a', 'u', 'sub', 'sup',
+                        # Heading elements (for nested content)
+                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                        # CRITICAL: Custom elements used in legislation HTML
+                        'inline',  # For definition terms, labels, etc.
+                        'block',   # For subclauses, clauses, etc.
+                        # Quotes and citations
+                        'blockquote', 'q', 'cite'
+                    ]:
+                        # Clean up the text
+                        text = self._clean_text_node(text)
+                        if text:
                             text_parts.append(text)
+                            logger.debug(f"Extracted from <{parent.name}>: {text[:60]}...")
         
         # Join with newlines to preserve structure
         result = '\n'.join(text_parts)
@@ -221,7 +237,36 @@ class SectionExtractor:
         result = re.sub(r'\n{3,}', '\n\n', result)
         result = re.sub(r' {2,}', ' ', result)
         
+        # Log extraction stats
+        if result:
+            logger.debug(f"Extracted {len(text_parts)} text segments, {len(result)} total chars")
+        
         return result.strip()
+    
+    def _clean_text_node(self, text: str) -> str:
+        """
+        Clean a text node for inclusion in output.
+        
+        Args:
+            text: Raw text from HTML
+            
+        Returns:
+            Cleaned text, or empty string if should be excluded
+        """
+        # Remove excessive whitespace
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
+        
+        # Skip very short fragments (likely formatting artifacts)
+        if len(text) < 2:
+            return ''
+        
+        # Skip common artifacts
+        artifacts = ['...', '›', '»', '«', '‹']
+        if text in artifacts:
+            return ''
+        
+        return text
     
     def _is_inside_element(self, element, container_element) -> bool:
         """
@@ -243,7 +288,7 @@ class SectionExtractor:
         """Check if element should be skipped during text extraction."""
         # Skip if in navigation
         if hasattr(element, 'name'):
-            if element.name in ['nav', 'script', 'style', 'meta', 'link']:
+            if element.name in ['nav', 'script', 'style', 'meta', 'link', 'head']:
                 return True
         
         # Skip if parent is navigation
@@ -266,7 +311,7 @@ class SectionExtractor:
         
         # Clean up artifacts
         text = re.sub(r'^\s*§\s*\d+\s*', '', text)
-        text = re.sub(r'^[-‑–—]\s*', '', text)
+        text = re.sub(r'^[-–—―]\s*', '', text)
         
         return text.strip()
     
