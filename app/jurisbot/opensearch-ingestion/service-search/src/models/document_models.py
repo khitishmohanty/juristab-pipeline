@@ -178,8 +178,10 @@ class LegislationDocument:
     source_id: str
     section_id: str
     book_name: str  # From legislation_registry
-    section_name: str
     content: str
+    
+    # Section name is now optional and will always be blank
+    section_name: str = ''
     
     # ONLY the requested metadata fields from legislation_metadata table
     legislation_number: Optional[str] = None
@@ -199,7 +201,7 @@ class LegislationDocument:
             "section_id": self.section_id,
             "document_type": self.type_of_document if self.type_of_document else "legislation",  # From legislation_metadata
             "book_name": self.book_name,  # From legislation_registry
-            "section_name": self.section_name,
+            "section_name": '',  # Always blank as requested
             "content": self.content,
             "indexed_date": datetime.now().isoformat(),
             "content_length": len(self.content) if self.content else 0
