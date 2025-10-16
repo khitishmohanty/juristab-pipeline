@@ -10,18 +10,32 @@ class JuriscontentGenerator:
 
     def _format_list_items(self, soup_body):
         """
-        Merges list item labels (e.g., '(a)') into the main paragraph
+        Merges list item labels (e.g., '(a)') AND bullet symbols into the main paragraph
         to ensure they appear on the same line and without extra bullets.
         """
         for li in soup_body.find_all('li'):
+            # Handle labeled list items: (a), (b), (c), etc.
             label_tag = li.find('inline', class_='li-label')
+            
+            # Handle bullet list items: •, -, *, etc.
+            bullet_tag = li.find('inline', class_='li-label-bullet')
+            
             p_tag = li.find('p')
 
+            # Process labeled items
             if label_tag and p_tag:
                 label_text = label_tag.get_text(strip=True)
                 if label_text and p_tag.find_parent('li') == li:
                     p_tag.insert(0, f"{label_text} ")
                     label_tag.decompose()
+            
+            # Process bullet items
+            elif bullet_tag and p_tag:
+                bullet_text = bullet_tag.get_text(strip=True)
+                if bullet_text and p_tag.find_parent('li') == li:
+                    # Insert bullet at the beginning of paragraph
+                    p_tag.insert(0, f"{bullet_text} ")
+                    bullet_tag.decompose()
 
     def _format_subclauses(self, soup_body):
         """

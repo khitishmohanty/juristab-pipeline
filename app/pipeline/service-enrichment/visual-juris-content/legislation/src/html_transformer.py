@@ -17,13 +17,15 @@ class HtmlTransformer:
     """
     Orchestrates the HTML transformation pipeline with multi-tier heading detection.
     
-    Flow (3-tier logic):
+    Flow (3-tier logic with character threshold):
     1. Check if miniviewer.html has heading tags
        → YES: Add anchor tags → Generate juriscontent.html (PATH: 'original')
     2. If NO headings and genai_extract=True and tokens <= max_input_tokens:
        → Use Gemini → miniviewer_genai.html → Add anchor tags → Generate juriscontent.html (PATH: 'genai')
     3. If tokens > max_input_tokens OR genai_extract=False:
-       → Apply rule-based detection → miniviewer_rulebased.html → Add anchor tags → Generate juriscontent.html (PATH: 'rulebased')
+       → Check character count from legislation_metadata
+       → If char_count < min_char_threshold: Skip rules (PATH: 'no rules applied')
+       → If char_count >= min_char_threshold: Apply rule-based detection (PATH: 'rulebased')
     4. If all fails:
        → Apply styling only → Generate juriscontent.html (PATH: 'no rules applied')
     """
@@ -46,6 +48,7 @@ class HtmlTransformer:
         # Initialize rule-based processors
         rule_config = config.get('rule_based_heading_detection', {})
         self.rule_based_enabled = rule_config.get('enabled', True)
+        self.min_char_threshold = rule_config.get('min_char_threshold', 5000)  # NEW
         
         if self.rule_based_enabled:
             try:
@@ -64,6 +67,7 @@ class HtmlTransformer:
                 logger.info("Rule-based heading detection initialized")
                 logger.info(f"  - Hierarchy rules: {hierarchy_rules_path}")
                 logger.info(f"  - Headless rules: {headless_rules_path}")
+                logger.info(f"  - Min character threshold: {self.min_char_threshold:,}")  # NEW
             except Exception as e:
                 logger.error(f"Failed to initialize rule-based processors: {e}")
                 self.rule_based_enabled = False
@@ -93,7 +97,9 @@ class HtmlTransformer:
         logger.info("  1. Original headings found → Use as-is")
         if self.genai_extract_enabled:
             logger.info(f"  2. No headings + tokens ≤ {self.max_input_tokens:,} → Gemini AI")
-        logger.info(f"  3. No headings + (tokens > limit OR Gemini disabled) → Rule-based")
+        logger.info(f"  3. No headings + (tokens > limit OR Gemini disabled):")
+        logger.info(f"     - If char_count < {self.min_char_threshold:,} → Skip rule-based")
+        logger.info(f"     - If char_count ≥ {self.min_char_threshold:,} → Rule-based detection")
         logger.info("  4. All methods fail → No heading structure")
         logger.info("="*70)
     
@@ -272,9 +278,11 @@ class HtmlTransformer:
         
         return response_data
     
-    def transform(self, html_content: str) -> Tuple[str, Optional[str], Optional[dict], Optional[str]]:
+    def transform(self, html_content: str, char_count: Optional[int] = None) -> Tuple[str, Optional[str], Optional[dict], Optional[str]]:
         """
         Process HTML with multi-tier heading detection + anchor tags.
+        
+        NEW: Character count threshold check for rule-based path
         
         3-Tier Flow:
         1. Check if headings already exist
@@ -282,9 +290,15 @@ class HtmlTransformer:
         2. If NO headings:
            a. Check token count and genai_extract setting
               → tokens ≤ max AND genai_extract=True: Use Gemini (PATH: 'genai')
-              → tokens > max OR genai_extract=False: Use rule-based (PATH: 'rulebased')
+              → tokens > max OR genai_extract=False: Check character threshold
+                 → char_count < min_threshold: Skip rules (PATH: 'no rules applied')
+                 → char_count >= min_threshold: Use rule-based (PATH: 'rulebased')
         3. If all methods fail or produce no headings:
            → Apply styling only (PATH: 'no rules applied')
+        
+        Args:
+            html_content: HTML content to transform
+            char_count: Optional character count from legislation_metadata.count_char
         
         Returns:
             Tuple of (transformed_html, intermediate_html, token_info, response_json)
@@ -303,6 +317,10 @@ class HtmlTransformer:
         # Count H1 headings BEFORE processing
         before_h1_count = self._count_h1_headings(html_content)
         logger.info(f"H1 headings in source HTML (before processing): {before_h1_count}")
+        
+        # Log character count if provided
+        if char_count is not None:
+            logger.info(f"Character count from metadata: {char_count:,}")
         
         # ==================== TIER 1: ORIGINAL HEADINGS ====================
         if self._has_headings(soup):
@@ -432,54 +450,18 @@ class HtmlTransformer:
                     # Fall through to rule-based
                     use_gemini = False
             
-            # ==================== TIER 3: RULE-BASED ====================
+            # ==================== TIER 3: CHARACTER THRESHOLD CHECK ====================
             if not use_gemini:
                 if not use_gemini and self.genai_extract_enabled:
                     logger.info(f"→ Tokens ({estimated_tokens:,}) > limit ({self.max_input_tokens:,}) OR Gemini failed")
                 else:
                     logger.info("→ Gemini disabled (genai_extract=False)")
                 
-                if self.rule_based_enabled:
-                    logger.info("→ Using rule-based heading detection...")
-                    
-                    rule_based_html, heading_count = self._apply_rule_based_heading_detection(html_content)
-                    
-                    if rule_based_html and heading_count > 0:
-                        # Rule-based success
-                        intermediate_html = rule_based_html
-                        logger.info("→ Adding anchor tags to rule-based headings...")
-                        processed_html = self._add_anchor_tags_to_headings(rule_based_html)
-                        
-                        after_h1_count = self._count_h1_headings(processed_html)
-                        structuring_path = 'rulebased'
-                        
-                        response_data = self._create_response_data(
-                            html_output=rule_based_html,
-                            input_tokens=0,
-                            output_tokens=0,
-                            generation_success=True,
-                            structuring_path=structuring_path
-                        )
-                        response_json = json.dumps(response_data, indent=2)
-                        
-                        token_info = {
-                            'input_tokens': 0,
-                            'output_tokens': 0,
-                            'input_price': 0.0,
-                            'output_price': 0.0,
-                            'generation_success': True,
-                            'headings_found': after_h1_count,
-                            'before_processing_heading_count': before_h1_count,
-                            'after_processing_heading_count': after_h1_count,
-                            'structuring_path': structuring_path,
-                            'path': 'rulebased_success'
-                        }
-                        
-                        logger.info("✓ Rule-based heading detection complete")
-                    else:
-                        # Rule-based failed
-                        logger.warning("⚠ Rule-based detection produced no headings")
-                        logger.info("→ Proceeding with no heading structure")
+                # NEW: Check character count threshold
+                if char_count is not None:
+                    if char_count < self.min_char_threshold:
+                        logger.info(f"→ Character count ({char_count:,}) < threshold ({self.min_char_threshold:,})")
+                        logger.info("→ Skipping rule-based detection for short document")
                         
                         processed_html = html_content
                         structuring_path = 'no rules applied'
@@ -490,7 +472,7 @@ class HtmlTransformer:
                             output_tokens=0,
                             generation_success=False,
                             structuring_path=structuring_path,
-                            error="Rule-based detection produced no headings"
+                            error=f"Document too short ({char_count:,} < {self.min_char_threshold:,})"
                         )
                         response_json = json.dumps(response_data, indent=2)
                         
@@ -504,38 +486,116 @@ class HtmlTransformer:
                             'before_processing_heading_count': before_h1_count,
                             'after_processing_heading_count': before_h1_count,
                             'structuring_path': structuring_path,
-                            'path': 'no_rules_applied'
+                            'path': 'char_threshold_not_met'
                         }
+                        
+                        # Skip to final styling
+                        use_gemini = None  # Mark to skip rule-based section
+                    else:
+                        logger.info(f"→ Character count ({char_count:,}) ≥ threshold ({self.min_char_threshold:,})")
+                        logger.info("→ Proceeding with rule-based detection")
                 else:
-                    # Rule-based disabled
-                    logger.warning("⚠ Rule-based detection disabled in configuration")
-                    logger.info("→ Proceeding with no heading structure")
-                    
-                    processed_html = html_content
-                    structuring_path = 'no rules applied'
-                    
-                    response_data = self._create_response_data(
-                        html_output=None,
-                        input_tokens=0,
-                        output_tokens=0,
-                        generation_success=False,
-                        structuring_path=structuring_path,
-                        error="Rule-based detection disabled"
-                    )
-                    response_json = json.dumps(response_data, indent=2)
-                    
-                    token_info = {
-                        'input_tokens': 0,
-                        'output_tokens': 0,
-                        'input_price': 0.0,
-                        'output_price': 0.0,
-                        'generation_success': False,
-                        'headings_found': 0,
-                        'before_processing_heading_count': before_h1_count,
-                        'after_processing_heading_count': before_h1_count,
-                        'structuring_path': structuring_path,
-                        'path': 'rule_based_disabled'
-                    }
+                    logger.warning("→ Character count not provided - proceeding with rule-based detection")
+                
+                # ==================== TIER 3B: RULE-BASED (if threshold met) ====================
+                if use_gemini is False:  # Not None (which means skip)
+                    if self.rule_based_enabled:
+                        logger.info("→ Using rule-based heading detection...")
+                        
+                        rule_based_html, heading_count = self._apply_rule_based_heading_detection(html_content)
+                        
+                        if rule_based_html and heading_count > 0:
+                            # Rule-based success
+                            intermediate_html = rule_based_html
+                            logger.info("→ Adding anchor tags to rule-based headings...")
+                            processed_html = self._add_anchor_tags_to_headings(rule_based_html)
+                            
+                            after_h1_count = self._count_h1_headings(processed_html)
+                            structuring_path = 'rulebased'
+                            
+                            response_data = self._create_response_data(
+                                html_output=rule_based_html,
+                                input_tokens=0,
+                                output_tokens=0,
+                                generation_success=True,
+                                structuring_path=structuring_path
+                            )
+                            response_json = json.dumps(response_data, indent=2)
+                            
+                            token_info = {
+                                'input_tokens': 0,
+                                'output_tokens': 0,
+                                'input_price': 0.0,
+                                'output_price': 0.0,
+                                'generation_success': True,
+                                'headings_found': after_h1_count,
+                                'before_processing_heading_count': before_h1_count,
+                                'after_processing_heading_count': after_h1_count,
+                                'structuring_path': structuring_path,
+                                'path': 'rulebased_success'
+                            }
+                            
+                            logger.info("✓ Rule-based heading detection complete")
+                        else:
+                            # Rule-based failed
+                            logger.warning("⚠ Rule-based detection produced no headings")
+                            logger.info("→ Proceeding with no heading structure")
+                            
+                            processed_html = html_content
+                            structuring_path = 'no rules applied'
+                            
+                            response_data = self._create_response_data(
+                                html_output=None,
+                                input_tokens=0,
+                                output_tokens=0,
+                                generation_success=False,
+                                structuring_path=structuring_path,
+                                error="Rule-based detection produced no headings"
+                            )
+                            response_json = json.dumps(response_data, indent=2)
+                            
+                            token_info = {
+                                'input_tokens': 0,
+                                'output_tokens': 0,
+                                'input_price': 0.0,
+                                'output_price': 0.0,
+                                'generation_success': False,
+                                'headings_found': 0,
+                                'before_processing_heading_count': before_h1_count,
+                                'after_processing_heading_count': before_h1_count,
+                                'structuring_path': structuring_path,
+                                'path': 'no_rules_applied'
+                            }
+                    else:
+                        # Rule-based disabled
+                        logger.warning("⚠ Rule-based detection disabled in configuration")
+                        logger.info("→ Proceeding with no heading structure")
+                        
+                        processed_html = html_content
+                        structuring_path = 'no rules applied'
+                        
+                        response_data = self._create_response_data(
+                            html_output=None,
+                            input_tokens=0,
+                            output_tokens=0,
+                            generation_success=False,
+                            structuring_path=structuring_path,
+                            error="Rule-based detection disabled"
+                        )
+                        response_json = json.dumps(response_data, indent=2)
+                        
+                        token_info = {
+                            'input_tokens': 0,
+                            'output_tokens': 0,
+                            'input_price': 0.0,
+                            'output_price': 0.0,
+                            'generation_success': False,
+                            'headings_found': 0,
+                            'before_processing_heading_count': before_h1_count,
+                            'after_processing_heading_count': before_h1_count,
+                            'structuring_path': structuring_path,
+                            'path': 'rule_based_disabled'
+                        }
         
         # ==================== APPLY JURISCONTENT STYLING ====================
         logger.info("→ Applying juriscontent styling (collapsible sections + navigation)...")

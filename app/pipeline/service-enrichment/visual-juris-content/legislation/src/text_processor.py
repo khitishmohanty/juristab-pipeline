@@ -220,16 +220,20 @@ class TextProcessor:
         Handles HTML download, transformation with multi-tier heading detection, 
         saving to S3, and updating the status database with token metrics.
         
+        NEW: Fetches character count from legislation_metadata for threshold check
+        
         Pipeline:
         1. Download miniviewer.html
-        2. Transform with multi-tier logic:
+        2. Fetch character count from legislation_metadata.count_char
+        3. Transform with multi-tier logic:
            - Original headings → Use as-is
            - Gemini (if tokens ≤ limit) → miniviewer_genai.html
+           - Character threshold check → Skip or apply rule-based
            - Rule-based → miniviewer_rulebased.html
            - No rules applied → Fallback styling
-        3. Apply juriscontent styling → juriscontent.html
-        4. Save intermediate and final files
-        5. Update database with structuring path
+        4. Apply juriscontent styling → juriscontent.html
+        5. Save intermediate and final files
+        6. Update database with structuring path
         
         Returns:
             bool: True if successful, False otherwise
@@ -248,12 +252,35 @@ class TextProcessor:
             if source_size > self.MAX_FILE_SIZE_BYTES:
                 logger.warning(f"Large file detected ({source_size} bytes) for {source_id}. Processing may be slow.")
             
+            # NEW: Fetch character count from legislation_metadata
+            char_count = None
+            try:
+                metadata_query = """
+                    SELECT count_char 
+                    FROM legislation_metadata 
+                    WHERE source_id = :source_id
+                    LIMIT 1
+                """
+                metadata_df = self.dest_db.read_sql(metadata_query, params={"source_id": source_id})
+                
+                if not metadata_df.empty and 'count_char' in metadata_df.columns:
+                    char_count = int(metadata_df['count_char'].iloc[0])
+                    logger.info(f"Retrieved character count from metadata: {char_count:,}")
+                else:
+                    logger.warning(f"Character count not found in legislation_metadata for {source_id}")
+            except Exception as e:
+                logger.warning(f"Could not fetch character count from metadata: {e}")
+                # Continue without char_count - rule-based will still be attempted
+            
             # Download HTML content
             html_content = self.s3_manager.get_file_content(bucket, source_html_key)
             
-            # Transform HTML with multi-tier heading detection
+            # Transform HTML with multi-tier heading detection (pass char_count)
             logger.info("Phase 1: Transforming HTML with multi-tier heading detection...")
-            juriscontent_html, intermediate_html, token_info, response_json = self.html_transformer.transform(html_content)
+            juriscontent_html, intermediate_html, token_info, response_json = self.html_transformer.transform(
+                html_content, 
+                char_count=char_count  # NEW: Pass character count
+            )
             
             # Save final juriscontent.html to S3
             logger.info("Saving juriscontent.html...")

@@ -37,6 +37,7 @@ heading_detection:
 # NEW: Rule-based heading detection configuration
 rule_based_heading_detection:
   enabled: true
+  min_char_threshold: 7000
   heading_hierarchy_rules_path: "config/heading_hierarchy_rules.yaml"
   headless_rules_path: "config/headless_rules.yaml"
 
@@ -108,7 +109,7 @@ tables:
 enrichment_filenames:
   source_html: "miniviewer.html"
   genai_html: "miniviewer_genai.html"
-  rule_based_html: "miniviewer_rulebased.html"  # NEW: Rule-based intermediate file
+  rule_based_html: "miniviewer_rulebased.html"  
   extracted_html: "juriscontent.html"
   gemini_response: "juriscontent_gemini_response.json"
   source_text: "miniviewer.txt"
