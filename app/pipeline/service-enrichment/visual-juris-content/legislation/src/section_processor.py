@@ -1,9 +1,11 @@
 import os
 import time
+import re
 from datetime import datetime, timezone
 from utils.database_connector import DatabaseConnector
 from src.section_extractor import SectionExtractor
 from src.content_verifier import ContentVerifier
+from src.html_content_extractor import HtmlContentExtractor
 from utils.s3_manager import S3Manager
 import logging
 
@@ -159,9 +161,9 @@ class SectionProcessor:
                     # Verify content if enabled and sections were saved
                     if sections_saved and self.verification_enabled:
                         logger.info(f"- Verifying content for case: {source_id}")
-                        source_text_key = os.path.join(case_folder, filenames.get('source_text', 'miniviewer.txt'))
+                        source_html_key = os.path.join(case_folder, filenames['source_html'])
                         self._verify_section_content(
-                            s3_bucket, source_text_key, sections_folder,
+                            s3_bucket, source_html_key, sections_folder,
                             dest_table, source_id
                         )
         
@@ -259,14 +261,20 @@ class SectionProcessor:
             
             return False
     
-    def _verify_section_content(self, bucket: str, source_text_key: str,
+    def _verify_section_content(self, bucket: str, source_html_key: str,
                                 sections_folder: str, status_table: str, source_id: str):
         """
-        Verify that concatenated section content matches the original miniviewer.txt.
+        Verify that concatenated section content matches the original miniviewer.html content.
+        
+        NEW BEHAVIOR:
+        1. Extract text from miniviewer.html (excluding notes)
+        2. Concatenate all section .txt files
+        3. Save both as miniviewer_original.txt and miniviewer_constructed.txt
+        4. Compare the two for verification
         
         Args:
             bucket (str): S3 bucket name
-            source_text_key (str): S3 key for original miniviewer.txt
+            source_html_key (str): S3 key for original miniviewer.html
             sections_folder (str): S3 folder containing section files
             status_table (str): Name of status table
             source_id (str): Source ID being processed
@@ -274,29 +282,44 @@ class SectionProcessor:
         try:
             logger.info(f"Starting content verification for {source_id}")
             
-            # Step 1: Check if original text file exists
-            if not self.s3_manager.check_file_exists(bucket, source_text_key):
-                logger.warning(f"Source text file not found: s3://{bucket}/{source_text_key}")
+            # Initialize HTML content extractor
+            html_extractor = HtmlContentExtractor()
+            
+            # Step 1: Check if source HTML file exists
+            if not self.s3_manager.check_file_exists(bucket, source_html_key):
+                logger.warning(f"Source HTML file not found: s3://{bucket}/{source_html_key}")
                 logger.warning("Skipping content verification - marking as 'not started'")
                 
-                # Update status to 'not started'
                 self.dest_db.update_content_verification(
                     status_table, source_id, 0.0, 'not started'
                 )
                 return
             
-            # Step 2: Download original text
-            logger.info(f"Downloading original text: {source_text_key}")
-            original_text = self.s3_manager.get_file_content(bucket, source_text_key)
+            # Step 2: Download and extract text from miniviewer.html
+            logger.info(f"Downloading source HTML: {source_html_key}")
+            html_content = self.s3_manager.get_file_content(bucket, source_html_key)
+            
+            logger.info("Extracting text content from HTML (excluding notes)...")
+            original_text = html_extractor.extract_text_from_html(html_content)
             
             if not original_text.strip():
-                logger.warning("Original text file is empty")
+                logger.warning("Extracted text from HTML is empty")
                 self.dest_db.update_content_verification(
                     status_table, source_id, 0.0, 'failed'
                 )
                 return
             
-            # Step 3: Get all section files from S3
+            logger.info(f"Extracted {len(original_text)} characters from miniviewer.html")
+            
+            # Step 3: Save original extracted text as miniviewer_original.txt
+            original_text_key = os.path.join(sections_folder, 'miniviewer_original.txt')
+            logger.info(f"Saving original extracted text to: {original_text_key}")
+            self.s3_manager.save_text_file(
+                bucket, original_text_key, original_text, content_type='text/plain'
+            )
+            logger.info("✓ miniviewer_original.txt saved successfully")
+            
+            # Step 4: Get all section files from S3
             logger.info(f"Retrieving section files from: {sections_folder}")
             section_files = self._list_section_files(bucket, sections_folder)
             
@@ -309,7 +332,7 @@ class SectionProcessor:
             
             logger.info(f"Found {len(section_files)} section files")
             
-            # Step 4: Download and concatenate all section contents
+            # Step 5: Download and concatenate all section contents
             section_contents = []
             for section_file in sorted(section_files):  # Sort to ensure correct order
                 section_key = os.path.join(sections_folder, section_file)
@@ -338,13 +361,23 @@ class SectionProcessor:
                 )
                 return
             
-            # Step 5: Perform verification
-            logger.info("Comparing original text with concatenated sections...")
+            logger.info(f"Concatenated {len(section_contents)} sections into {len(concatenated_text)} characters")
+            
+            # Step 6: Save concatenated text as miniviewer_constructed.txt
+            constructed_text_key = os.path.join(sections_folder, 'miniviewer_constructed.txt')
+            logger.info(f"Saving constructed text to: {constructed_text_key}")
+            self.s3_manager.save_text_file(
+                bucket, constructed_text_key, concatenated_text, content_type='text/plain'
+            )
+            logger.info("✓ miniviewer_constructed.txt saved successfully")
+            
+            # Step 7: Perform verification
+            logger.info("Comparing original HTML-extracted text with concatenated sections...")
             similarity_score, status = self.content_verifier.verify_content(
                 original_text, concatenated_text
             )
             
-            # Step 6: Update database
+            # Step 8: Update database
             self.dest_db.update_content_verification(
                 status_table, source_id, similarity_score, status
             )
@@ -362,6 +395,9 @@ class SectionProcessor:
                     logger.error(f"Failed to generate detailed comparison: {e}")
             
             logger.info(f"✅ Content verification complete for {source_id}")
+            logger.info(f"   - Original text: {len(original_text)} chars (from HTML)")
+            logger.info(f"   - Constructed text: {len(concatenated_text)} chars (from sections)")
+            logger.info(f"   - Files saved: miniviewer_original.txt, miniviewer_constructed.txt")
             
         except Exception as e:
             logger.error(f"Error during content verification for {source_id}: {e}", exc_info=True)
@@ -376,6 +412,9 @@ class SectionProcessor:
     def _list_section_files(self, bucket: str, sections_folder: str) -> list:
         """
         List all section files (miniviewer_*.txt) in the S3 folder.
+        
+        CRITICAL: Only returns numbered section files (miniviewer_1.txt, miniviewer_2.txt, etc.)
+        Excludes miniviewer_original.txt and miniviewer_constructed.txt
         
         Args:
             bucket (str): S3 bucket name
@@ -397,16 +436,23 @@ class SectionProcessor:
             if 'Contents' not in response:
                 return []
             
-            # Extract filenames matching pattern miniviewer_*.txt
+            # Pattern to match ONLY numbered section files: miniviewer_1.txt, miniviewer_2.txt, etc.
+            # This excludes miniviewer_original.txt and miniviewer_constructed.txt
+            section_pattern = re.compile(r'^miniviewer_\d+\.txt$')
+            
             section_files = []
             for obj in response['Contents']:
                 key = obj['Key']
                 filename = os.path.basename(key)
                 
-                # Match pattern: miniviewer_1.txt, miniviewer_2.txt, etc.
-                if filename.startswith('miniviewer_') and filename.endswith('.txt'):
+                # Match only numbered section files
+                if section_pattern.match(filename):
                     section_files.append(filename)
+                    logger.debug(f"Found section file: {filename}")
+                else:
+                    logger.debug(f"Skipping non-section file: {filename}")
             
+            logger.info(f"Found {len(section_files)} numbered section files (excluding original/constructed)")
             return section_files
             
         except Exception as e:

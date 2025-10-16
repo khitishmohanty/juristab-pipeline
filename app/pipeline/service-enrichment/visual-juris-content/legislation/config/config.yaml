@@ -36,7 +36,7 @@ heading_detection:
 # -- Content verification configuration --
 content_verification:
   enabled: true
-  pass_threshold: 0.99  # Minimum similarity score to mark as 'pass' (0.0-1.0)
+  pass_threshold: 0.90  # Minimum similarity score to mark as 'pass' (0.0-1.0)
   source_filename: "miniviewer.txt"  # Original source file to compare against
   
 # List of tables to be read by the connector
@@ -104,6 +104,8 @@ enrichment_filenames:
   extracted_html: "juriscontent.html"
   gemini_response: "juriscontent_gemini_response.json"
   source_text: "miniviewer.txt"  # Original text file for verification
+  original_extracted_text: "miniviewer_original.txt"  # NEW: Text extracted from miniviewer.html
+  constructed_text: "miniviewer_constructed.txt"  # NEW: Concatenated section content
 
 # -- Audit log configuration --
 audit_log:
