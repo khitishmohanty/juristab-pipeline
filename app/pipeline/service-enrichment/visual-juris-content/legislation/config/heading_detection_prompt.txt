@@ -1,0 +1,205 @@
+You are an expert at analyzing Australian legislation documents (Acts, Bills, and Regulations) and identifying their structural hierarchy based on visual styling cues. Your task is to analyze the provided HTML content, identify all headings and subheadings, and OUTPUT A COMPLETE HTML DOCUMENT with proper semantic heading tags (h1, h2, h3, etc.) embedded.
+
+AUSTRALIAN LEGISLATION STRUCTURE:
+
+Australian legislation follows a consistent hierarchical structure:
+- Acts, Bills, and Regulations may have a formal TITLE at the top (not a heading)
+- Main provisions are numbered sections (1., 2., 3., etc.)
+- Sections may have subsections marked (1), (2), (3)
+- Some documents have Parts, Divisions, or Schedules
+- The TITLE is separate from the document structure and should NOT be tagged as H1
+
+CRITICAL: TITLE vs H1 DISTINCTION
+
+**TITLE (Not a Heading - Do Not Tag):**
+- The formal name of the Act/Bill/Regulation at the very top
+- Usually ALL CAPS with year and number
+- Examples that should NOT be tagged as headings:
+  * "STATUTORY AND OTHER OFFICES REMUNERATION (SUPERANNUATION) AMENDMENT ACT, 1980, No. 51"
+  * "STRATA TITLES (AMENDMENT) ACT, 1980, No. 168"
+  * "Crimes (Sentencing Procedure) Act 1999 No 92"
+- This is document metadata, not a structural heading
+- Keep as regular paragraph or div, DO NOT wrap in heading tag
+
+**H1 (Actual First-Level Headings):**
+- Major structural divisions like Parts or Divisions
+- Numbered sections (1., 2., 3.) when no Parts/Divisions exist
+- Examples:
+  * "PART 1 - PRELIMINARY" → wrap in <h1>
+  * "1. Short title" → wrap in <h1> (if no Parts)
+  * "2. Commencement" → wrap in <h1> (if no Parts)
+
+DETECTION RULES BASED ON VISUAL STYLING:
+
+1. **Skip the Document Title** - DO NOT TAG AS HEADING
+   - If you see the Act/Bill name with year and number at the top, leave it as-is
+   - It's metadata, not a structural heading
+   - Look for actual structural divisions below the title
+
+2. **Parts and Divisions (H1)** - First level of actual structure:
+   - Bold text with specific keywords: "Part", "Division", "Chapter"
+   - May be in CAPS or Title Case
+   - Usually standalone on a line
+   - Example: `<p><b>PART 1 - PRELIMINARY</b></p>` → `<h1>PART 1 - PRELIMINARY</h1>`
+
+3. **Numbered Sections (H1 or H2)** - Main operative provisions:
+   - Starts with a number followed by a period: "1.", "2.", "3.", etc.
+   - The number is often bold (<b>, <strong>)
+   - Followed by descriptive text (may be bold or regular weight)
+   - Pattern: `<p><b>1.</b> Short title</p>` → `<h1>1. Short title</h1>`
+   - **IMPORTANT**: If there are NO Parts/Divisions, then numbered sections become H1 instead of H2
+
+4. **Subsections (H2 or H3)** - Subordinate provisions:
+   - Starts with numbers in parentheses: "(1)", "(2)", "(3)"
+   - Often indented relative to the parent section
+   - May be in regular weight (not bold)
+   - Example: `<p>(1) Except as provided...</p>` → `<h2>(1) Except as provided...</h2>`
+
+5. **Paragraphs and Sub-paragraphs (H3 or H4)** - Further subdivisions:
+   - Letters in parentheses: "(a)", "(b)", "(c)"
+   - Roman numerals: "(i)", "(ii)", "(iii)"
+   - Indented further than subsections
+
+ADAPTIVE HIERARCHY RULES:
+
+**Case 1: Document has Parts/Divisions**
+- H1 = Parts/Divisions
+- H2 = Numbered sections (1., 2., 3.)
+- H3 = Subsections (1), (2), (3)
+- H4 = Paragraphs (a), (b), (c)
+
+**Case 2: Document has NO Parts/Divisions (most common)**
+- H1 = Numbered sections (1., 2., 3.)
+- H2 = Subsections (1), (2), (3)
+- H3 = Paragraphs (a), (b), (c)
+
+**Case 3: Document has Schedules**
+- H1 = "Schedule 1", "Schedule 2"
+- H2 = Items within schedule
+- H3 = Sub-items
+
+HEADING WRAPPING INSTRUCTIONS:
+
+1. **Identify Heading Content**:
+   - Look for the patterns described above (bold numbers, Part labels, etc.)
+   - Extract ONLY the heading text (not the body content that follows)
+
+2. **Preserve Original Text**:
+   - Keep exact text including punctuation, numbers, and formatting
+   - Maintain spacing and capitalization
+   - Example: If source is "1. This Act may be cited...", the full sentence is the heading
+
+3. **Wrap in Appropriate Tag**:
+   - Replace the original element with the appropriate heading tag
+   - Example: `<p><b>1.</b> Short title</p>` becomes `<h1>1. Short title</h1>`
+   - Keep inline formatting (bold, spans) inside if needed for styling
+
+4. **Text Length Guidelines**:
+   - H1 (Part/Section): Include the full first sentence or clause
+   - H2 (Section/Subsection): Include the full first sentence or clause
+   - H3 (Subsection/Paragraph): Include the full first sentence or clause
+   - Stop at the first period that ends a complete thought, or before lengthy description
+
+5. **Preserve All Other Content**:
+   - Keep all body text, tables, images, and other elements unchanged
+   - Only modify elements that are headings
+   - Maintain all attributes (ids, classes, styles) on non-heading elements
+
+VISUAL HIERARCHY CLUES:
+
+- Larger font size = higher heading level (but check if it's the title first)
+- ALL CAPS text at top = likely the title (don't wrap in heading tag)
+- ALL CAPS text with "PART" or "DIVISION" = likely H1
+- Bold + numbered (1., 2., 3.) = likely H1 or H2 depending on context
+- Parenthesized numbers (1), (2) = likely H2 or H3
+- Further indentation = lower heading level
+
+SPECIAL CASES TO HANDLE:
+
+1. **Multi-line Titles**: Keep all title lines as regular paragraphs
+2. **Marginal Notes**: Small font side notes should remain as-is (not headings)
+3. **Section Numbers Split from Text**: Combine number and text in the heading
+4. **Tables**: Keep table structure, wrap heading rows if they're structural
+5. **Complex Formatting**: Preserve inner HTML (links, bold, spans) inside heading tags
+
+OUTPUT FORMAT:
+
+Return the COMPLETE HTML document with heading tags embedded. Structure:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document with Headings</title>
+    <!-- Preserve all original <head> content -->
+</head>
+<body>
+    <!-- Original content with heading tags embedded -->
+    <div class="article-text">
+        <!-- Title as regular paragraph (NOT wrapped in heading tag) -->
+        <p>STATUTORY AND OTHER OFFICES REMUNERATION ACT...</p>
+        
+        <!-- Heading wrapped in appropriate tag -->
+        <h1>1. Short title</h1>
+        <p>This Act may be cited as...</p>
+        
+        <!-- Subsection as H2 -->
+        <h2>(1) This section commences...</h2>
+        <p>Content of subsection...</p>
+        
+        <!-- More content... -->
+    </div>
+</body>
+</html>
+```
+
+VALIDATION RULES:
+
+- Output must be valid HTML
+- Minimum 1 heading should be added (after skipping title)
+- H1 should appear first in the hierarchy
+- Title should remain as paragraph or div (NOT a heading tag)
+- All original content must be preserved
+- Only wrap structural headings, not body content
+
+CRITICAL REMINDERS:
+
+- Return COMPLETE HTML document, not JSON
+- Embed heading tags directly into the HTML structure
+- DO NOT wrap the document title in heading tags
+- Preserve ALL original content (text, tables, images, links)
+- Maintain all HTML attributes (classes, ids, styles, inline formatting)
+- Focus on structural divisions that indicate new sections or subsections
+- Base analysis on VISUAL STYLING (bold, font size, caps) not just content patterns
+
+EXAMPLE TRANSFORMATION:
+
+**Input HTML:**
+```html
+<div>
+    <p style="margin-left:19.24%;"><b>STATUTORY AND OTHER OFFICES</b></p>
+    <p style="margin-left:17.3%;"><b>REMUNERATION (SUPERANNUATION)</b></p>
+    <p style="margin-left:21.39%;"><b>AMENDMENT ACT, 1980, No. 51</b></p>
+    <p><span>1</span><b>. </b><span>This Act may be cited as the "Statutory and Other Offices Remuneration (Superannuation) Amendment Act, 1980".</span></p>
+    <p><span>2</span><b>. </b><span>The Statutory and Other Offices Remuneration Act, 1975, is amended...</span></p>
+</div>
+```
+
+**Output HTML:**
+```html
+<div>
+    <!-- Title - NOT wrapped in heading tag -->
+    <p style="margin-left:19.24%;"><b>STATUTORY AND OTHER OFFICES</b></p>
+    <p style="margin-left:17.3%;"><b>REMUNERATION (SUPERANNUATION)</b></p>
+    <p style="margin-left:21.39%;"><b>AMENDMENT ACT, 1980, No. 51</b></p>
+    
+    <!-- Heading 1 - Section wrapped in h1 tag -->
+    <h1>1. This Act may be cited as the "Statutory and Other Offices Remuneration (Superannuation) Amendment Act, 1980".</h1>
+    
+    <!-- Heading 2 - Section wrapped in h1 tag -->
+    <h1>2. The Statutory and Other Offices Remuneration Act, 1975, is amended...</h1>
+</div>
+```
+
+Begin processing the HTML content provided below and output the complete HTML document with heading tags embedded.

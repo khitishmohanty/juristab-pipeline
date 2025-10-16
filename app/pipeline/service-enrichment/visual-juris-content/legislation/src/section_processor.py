@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timezone
 from utils.database_connector import DatabaseConnector
 from src.section_extractor import SectionExtractor
+from src.content_verifier import ContentVerifier
 from utils.s3_manager import S3Manager
 import logging
 
@@ -29,6 +30,18 @@ class SectionProcessor:
         
         # Connect to destination database
         self.dest_db = DatabaseConnector(db_config=config['database']['destination'])
+        
+        # Initialize content verifier if enabled
+        verification_config = config.get('content_verification', {})
+        self.verification_enabled = verification_config.get('enabled', True)
+        
+        if self.verification_enabled:
+            pass_threshold = verification_config.get('pass_threshold', 0.85)
+            self.content_verifier = ContentVerifier(pass_threshold=pass_threshold)
+            logger.info(f"Content verification ENABLED (threshold={pass_threshold})")
+        else:
+            self.content_verifier = None
+            logger.info("Content verification DISABLED")
     
     def process_sections(self):
         """
@@ -138,18 +151,30 @@ class SectionProcessor:
                     juriscontent_key = os.path.join(case_folder, filenames['extracted_html'])
                     sections_folder = os.path.join(case_folder, 'section-level-content')
                     
-                    self._extract_and_save_sections(
+                    sections_saved = self._extract_and_save_sections(
                         s3_bucket, juriscontent_key, sections_folder, 
                         dest_table, source_id
                     )
+                    
+                    # Verify content if enabled and sections were saved
+                    if sections_saved and self.verification_enabled:
+                        logger.info(f"- Verifying content for case: {source_id}")
+                        source_text_key = os.path.join(case_folder, filenames.get('source_text', 'miniviewer.txt'))
+                        self._verify_section_content(
+                            s3_bucket, source_text_key, sections_folder,
+                            dest_table, source_id
+                        )
         
         logger.info("--- Section extraction completed for all configured years and jurisdictions. ---")
     
     def _extract_and_save_sections(self, bucket: str, juriscontent_key: str, 
-                               sections_folder: str, status_table: str, source_id: str):
+                               sections_folder: str, status_table: str, source_id: str) -> bool:
         """
         Extracts sections from juriscontent.html and saves them to S3,
         then updates both legislation_sections and enrichment status tables.
+        
+        Returns:
+            bool: True if successful, False if failed
         """
         start_time_utc = datetime.now(timezone.utc)
         
@@ -219,13 +244,171 @@ class SectionProcessor:
                 start_time_utc, end_time_utc, step_columns_config
             )
             
+            return True
+            
         except Exception as e:
             end_time_utc = datetime.now(timezone.utc)
             duration = (end_time_utc - start_time_utc).total_seconds()
-            logger.error(f"❌ Section extraction FAILED: {type(e).__name__}: {str(e)}")
+            logger.error(f"✗ Section extraction FAILED: {type(e).__name__}: {str(e)}")
             
             # Update status to 'failed'
             self.dest_db.update_step_result(
                 status_table, source_id, 'section_extract', 'failed', duration,
                 start_time_utc, end_time_utc, step_columns_config
             )
+            
+            return False
+    
+    def _verify_section_content(self, bucket: str, source_text_key: str,
+                                sections_folder: str, status_table: str, source_id: str):
+        """
+        Verify that concatenated section content matches the original miniviewer.txt.
+        
+        Args:
+            bucket (str): S3 bucket name
+            source_text_key (str): S3 key for original miniviewer.txt
+            sections_folder (str): S3 folder containing section files
+            status_table (str): Name of status table
+            source_id (str): Source ID being processed
+        """
+        try:
+            logger.info(f"Starting content verification for {source_id}")
+            
+            # Step 1: Check if original text file exists
+            if not self.s3_manager.check_file_exists(bucket, source_text_key):
+                logger.warning(f"Source text file not found: s3://{bucket}/{source_text_key}")
+                logger.warning("Skipping content verification - marking as 'not started'")
+                
+                # Update status to 'not started'
+                self.dest_db.update_content_verification(
+                    status_table, source_id, 0.0, 'not started'
+                )
+                return
+            
+            # Step 2: Download original text
+            logger.info(f"Downloading original text: {source_text_key}")
+            original_text = self.s3_manager.get_file_content(bucket, source_text_key)
+            
+            if not original_text.strip():
+                logger.warning("Original text file is empty")
+                self.dest_db.update_content_verification(
+                    status_table, source_id, 0.0, 'failed'
+                )
+                return
+            
+            # Step 3: Get all section files from S3
+            logger.info(f"Retrieving section files from: {sections_folder}")
+            section_files = self._list_section_files(bucket, sections_folder)
+            
+            if not section_files:
+                logger.error("No section files found in S3")
+                self.dest_db.update_content_verification(
+                    status_table, source_id, 0.0, 'failed'
+                )
+                return
+            
+            logger.info(f"Found {len(section_files)} section files")
+            
+            # Step 4: Download and concatenate all section contents
+            section_contents = []
+            for section_file in sorted(section_files):  # Sort to ensure correct order
+                section_key = os.path.join(sections_folder, section_file)
+                try:
+                    section_content = self.s3_manager.get_file_content(bucket, section_key)
+                    section_contents.append(section_content)
+                    logger.debug(f"Downloaded section: {section_file} ({len(section_content)} chars)")
+                except Exception as e:
+                    logger.error(f"Failed to download section {section_file}: {e}")
+                    # Continue with other sections
+            
+            if not section_contents:
+                logger.error("Failed to download any section content")
+                self.dest_db.update_content_verification(
+                    status_table, source_id, 0.0, 'failed'
+                )
+                return
+            
+            # Concatenate sections
+            concatenated_text = self.content_verifier.concatenate_section_contents(section_contents)
+            
+            if not concatenated_text.strip():
+                logger.error("Concatenated text is empty")
+                self.dest_db.update_content_verification(
+                    status_table, source_id, 0.0, 'failed'
+                )
+                return
+            
+            # Step 5: Perform verification
+            logger.info("Comparing original text with concatenated sections...")
+            similarity_score, status = self.content_verifier.verify_content(
+                original_text, concatenated_text
+            )
+            
+            # Step 6: Update database
+            self.dest_db.update_content_verification(
+                status_table, source_id, similarity_score, status
+            )
+            
+            # Log detailed comparison if verification failed
+            if status == 'failed':
+                logger.warning("Content verification FAILED - generating detailed comparison")
+                try:
+                    diff_report = self.content_verifier.get_detailed_comparison(
+                        original_text, concatenated_text, context_lines=5
+                    )
+                    # Log first 2000 characters of diff
+                    logger.debug(f"Diff report (first 2000 chars):\n{diff_report[:2000]}")
+                except Exception as e:
+                    logger.error(f"Failed to generate detailed comparison: {e}")
+            
+            logger.info(f"✅ Content verification complete for {source_id}")
+            
+        except Exception as e:
+            logger.error(f"Error during content verification for {source_id}: {e}", exc_info=True)
+            # Update to failed status on error
+            try:
+                self.dest_db.update_content_verification(
+                    status_table, source_id, 0.0, 'failed'
+                )
+            except Exception as db_error:
+                logger.error(f"Failed to update verification status: {db_error}")
+    
+    def _list_section_files(self, bucket: str, sections_folder: str) -> list:
+        """
+        List all section files (miniviewer_*.txt) in the S3 folder.
+        
+        Args:
+            bucket (str): S3 bucket name
+            sections_folder (str): S3 folder path
+            
+        Returns:
+            list: List of section filenames (not full paths)
+        """
+        try:
+            # Ensure folder path ends with '/'
+            if not sections_folder.endswith('/'):
+                sections_folder += '/'
+            
+            response = self.s3_manager.s3_client.list_objects_v2(
+                Bucket=bucket,
+                Prefix=sections_folder
+            )
+            
+            if 'Contents' not in response:
+                return []
+            
+            # Extract filenames matching pattern miniviewer_*.txt
+            section_files = []
+            for obj in response['Contents']:
+                key = obj['Key']
+                filename = os.path.basename(key)
+                
+                # Match pattern: miniviewer_1.txt, miniviewer_2.txt, etc.
+                if filename.startswith('miniviewer_') and filename.endswith('.txt'):
+                    section_files.append(filename)
+            
+            return section_files
+            
+        except Exception as e:
+            logger.error(f"Error listing section files: {e}")
+            return []

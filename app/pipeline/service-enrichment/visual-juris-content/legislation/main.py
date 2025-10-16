@@ -84,6 +84,13 @@ def main():
     try:
         config_manager = ConfigManager(config_path=config_path, env_path=env_path)
         config = config_manager.get_config()
+        
+        # Verify Gemini configuration
+        gemini_config = config_manager.get_model_config('gemini')
+        logger.info(f"Gemini model configured: {gemini_config['model']}")
+        logger.info(f"Gemini pricing - Input: ${gemini_config['pricing']['input_per_million']}/M tokens")
+        logger.info(f"Gemini pricing - Output: ${gemini_config['pricing']['output_per_million']}/M tokens")
+        
     except Exception as e:
         logger.critical(f"Failed to load configuration. Aborting. Error: {e}")
         sys.exit(1)

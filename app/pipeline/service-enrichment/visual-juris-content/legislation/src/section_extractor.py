@@ -1,10 +1,17 @@
-from bs4 import BeautifulSoup, NavigableString
-from typing import List, Dict
+from bs4 import BeautifulSoup, NavigableString, Comment
+from typing import List, Dict, Optional
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SectionExtractor:
     """
-    Extracts sections from juriscontent.html based on collapsible sections.
+    Extracts sections from juriscontent.html based on heading structure.
+    
+    CORE LOGIC (OPTION A):
+    1. Content BEFORE first H1 heading → Section 1 (extract until first H1 or EOF)
+    2. Each H1 + ALL content until next H1 → Separate sections (extract until next H1 or EOF)
     """
     
     def __init__(self):
@@ -12,289 +19,283 @@ class SectionExtractor:
     
     def extract_sections(self, html_content: str) -> List[Dict[str, any]]:
         """
-        Extracts sections from HTML content.
+        Extract sections from HTML.
         
         Logic:
-        1. Extract content before first H1 (if exists) → Section 1
-        2. For each H1: Extract H1 heading + all its content → Separate sections
-        
-        Args:
-            html_content (str): The juriscontent.html content
-            
-        Returns:
-            List[Dict]: List of sections with their content and metadata
+        1. Find all H1 headings
+        2. Extract content BEFORE first H1 (from start until first H1) → Section 1
+        3. For each H1: extract H1 text + ALL content until next H1 (or EOF) → Sections 2, 3, etc.
+        4. If no H1 headings: return entire document as one section
         """
         soup = BeautifulSoup(html_content, 'html.parser')
+        main_content = self._find_main_content(soup)
         
-        # Find the main content area
-        main_content = soup.find('main', id='content')
-        if not main_content:
-            body = soup.find('body')
-            if body:
-                main_content = body
+        # Find H1 headings (primary sections for Option A)
+        h1_headings = self._find_content_headings(main_content, ['h1'])
+        
+        if h1_headings:
+            logger.info(f"Found {len(h1_headings)} H1 headings")
+            return self._extract_sections_from_h1(main_content, h1_headings)
+        else:
+            # No H1 headings - try H2
+            h2_headings = self._find_content_headings(main_content, ['h2'])
+            if h2_headings:
+                logger.info(f"Found {len(h2_headings)} H2 headings")
+                return self._extract_sections_from_h1(main_content, h2_headings)
             else:
-                main_content = soup
+                # No headings at all - return entire document
+                logger.warning("No H1 or H2 headings found - extracting entire document as one section")
+                return self._extract_entire_document(main_content)
+    
+    def _find_main_content(self, soup: BeautifulSoup):
+        """Find the main content area, excluding navigation."""
+        main = soup.find('main', id='content')
+        if main:
+            return main
         
-        print(f"DEBUG: Main content tag: {main_content.name if hasattr(main_content, 'name') else 'root'}")
+        body = soup.find('body')
+        if body:
+            return body
         
-        # Find all H1 tags in the entire document
-        all_h1s = main_content.find_all('h1')
-        print(f"DEBUG: Found {len(all_h1s)} H1 tags in main content")
+        return soup
+    
+    def _find_content_headings(self, main_content, heading_tags: List[str]) -> List:
+        """Find headings, excluding those in navigation."""
+        all_headings = main_content.find_all(heading_tags)
         
-        # Print first few H1 texts for debugging
-        for idx, h1 in enumerate(all_h1s[:3]):
-            h1_text = h1.get_text(strip=True)[:50]
-            print(f"DEBUG: H1 #{idx+1}: {h1_text}")
-            # Check parent structure
-            parent = h1.parent
-            print(f"DEBUG: H1 #{idx+1} parent: {parent.name if hasattr(parent, 'name') else 'unknown'}")
-            if hasattr(parent, 'get'):
-                print(f"DEBUG: H1 #{idx+1} parent id: {parent.get('id')}")
-                print(f"DEBUG: H1 #{idx+1} parent class: {parent.get('class')}")
+        content_headings = []
+        for heading in all_headings:
+            # Skip if inside navigation
+            is_in_nav = False
+            for parent in heading.parents:
+                if hasattr(parent, 'name') and parent.name == 'nav':
+                    is_in_nav = True
+                    break
+                if hasattr(parent, 'get') and parent.get('id') == 'navigator':
+                    is_in_nav = True
+                    break
+            
+            if not is_in_nav:
+                content_headings.append(heading)
         
+        return content_headings
+    
+    def _extract_sections_from_h1(self, main_content, h1_headings: List) -> List[Dict]:
+        """
+        Extract sections based on H1 headings (Option A).
+        
+        CRITICAL LOGIC:
+        - Section 1: ALL content from start until first H1
+        - Section 2: First H1 text + ALL content until second H1 (or EOF)
+        - Section 3: Second H1 text + ALL content until third H1 (or EOF)
+        - etc.
+        """
         sections = []
         section_id = 1
         
-        # Filter out H1s that are in the navigator
-        h1_headings = []
-        for h1 in all_h1s:
-            # Check if this H1 is inside a nav element or has navigator as ancestor
-            is_in_nav = False
-            for parent in h1.parents:
-                if hasattr(parent, 'name'):
-                    if parent.name == 'nav':
-                        is_in_nav = True
-                        break
-                    if hasattr(parent, 'get') and parent.get('id') == 'navigator':
-                        is_in_nav = True
-                        break
-            
-            if not is_in_nav:
-                h1_headings.append(h1)
-        
-        print(f"DEBUG: After filtering navigator, {len(h1_headings)} H1 tags remain")
-        
-        if not h1_headings:
-            # No H1 found, try H2 as fallback
-            print("INFO: No H1 headings found. Falling back to H2 headings.")
-            h1_headings = main_content.find_all('h2')
-        
-        if not h1_headings:
-            # No headings found at all, extract entire document as single section
-            print("WARNING: No headings found. Extracting entire document as single section.")
-            content_text = self._extract_text_content(main_content)
-            if content_text.strip():
-                sections.append({
-                    'section_id': section_id,
-                    'content': content_text,
-                    'heading': None
-                })
-            return sections
-        
-        print(f"INFO: Found {len(h1_headings)} H1 headings for extraction.")
-        
-        # STEP 1: Extract content BEFORE first H1 heading (if any)
+        # STEP 1: Extract ALL content BEFORE first H1 heading
+        # Extract from start of main_content until first H1
         first_h1 = h1_headings[0]
-        first_h1_text = first_h1.get_text(strip=True)
-        print(f"DEBUG: First H1 text: {first_h1_text[:100]}")
+        content_before = self._extract_text_between_elements(main_content, None, first_h1)
         
-        # Get position of first H1 in the document
-        # We need to extract everything that comes before it in document order
-        content_before_first_h1 = self._extract_content_before_element(main_content, first_h1)
-        
-        print(f"DEBUG: Content before first H1 length: {len(content_before_first_h1)}")
-        if content_before_first_h1.strip():
-            print(f"INFO: Found content before first H1, saving as section {section_id}")
-            print(f"DEBUG: Content preview: {content_before_first_h1[:300]}")
+        if content_before.strip():
+            content_length = len(content_before.strip())
+            logger.info(f"Found content before first H1 heading ({content_length} chars)")
+            
             sections.append({
                 'section_id': section_id,
-                'content': content_before_first_h1,
+                'content': content_before,
                 'heading': None
             })
             section_id += 1
         else:
-            print("INFO: No content found before first H1 heading")
+            logger.info("No content before first H1 heading")
         
-        # STEP 2: Extract each H1 heading + its content
-        for i, h1_heading in enumerate(h1_headings):
-            # Get the heading text
-            heading_text = self._extract_heading_text(h1_heading)
+        # STEP 2: For each H1, extract H1 text + ALL content until next H1 (or EOF)
+        for i, h1 in enumerate(h1_headings):
+            # Get H1 text
+            h1_text = self._get_heading_text(h1)
             
-            # Find next H1 (or None if this is the last one)
+            # Determine the next H1 (or None if this is the last one)
             next_h1 = h1_headings[i + 1] if i + 1 < len(h1_headings) else None
             
-            # Extract this H1's content (including the heading itself)
-            section_content = self._extract_h1_section_content(h1_heading, next_h1)
+            # Extract ALL content from after this H1 until next H1 (or EOF)
+            content = self._extract_text_between_elements(main_content, h1, next_h1)
             
-            if section_content.strip():
-                print(f"INFO: Extracted section {section_id}: {heading_text[:50]}...")
-                sections.append({
-                    'section_id': section_id,
-                    'content': section_content,
-                    'heading': heading_text
-                })
-                section_id += 1
+            # Combine heading + content
+            full_content = h1_text + '\n\n' + content if content.strip() else h1_text
+            
+            sections.append({
+                'section_id': section_id,
+                'content': full_content,
+                'heading': h1_text
+            })
+            
+            content_length = len(content) if content else 0
+            logger.debug(f"Section {section_id}: H1 '{h1_text[:40]}...' + {content_length} chars content")
+            section_id += 1
+        
+        if not sections:
+            logger.warning("No sections extracted - falling back to entire document")
+            return self._extract_entire_document(main_content)
+        
+        # Verify we have all content
+        total_chars = sum(len(s['content']) for s in sections)
+        logger.info(f"Extracted {len(sections)} sections with {total_chars} total characters")
         
         return sections
     
-    def _extract_content_before_element(self, container, target_element) -> str:
+    def _extract_text_between_elements(self, container, start_element: Optional, stop_element: Optional) -> str:
         """
-        Extract all text content that appears before target_element in document order.
-        This uses a simple approach: get all text, then stop when we hit the target.
-        """
-        content_parts = []
+        Extract ALL text content between start_element and stop_element.
         
-        # Walk through all descendants in order
-        for element in container.descendants:
-            # Stop when we hit the target element
-            if element == target_element:
-                break
-            
-            # Skip if we're inside a nav element
-            if hasattr(element, 'name') and element.name == 'nav':
-                # Skip this entire subtree
-                continue
-            
-            # Check if this element is inside nav
-            is_in_nav = False
-            if hasattr(element, 'parents'):
-                for parent in element.parents:
-                    if hasattr(parent, 'name'):
-                        if parent.name == 'nav':
-                            is_in_nav = True
-                            break
-                        if hasattr(parent, 'get') and parent.get('id') == 'navigator':
-                            is_in_nav = True
-                            break
-            
-            if is_in_nav:
-                continue
-            
-            # Only collect direct text nodes, not from nested elements
-            if isinstance(element, NavigableString):
-                text = str(element).strip()
-                if text and len(text) > 1:  # Ignore single characters
-                    # Make sure this text is not inside the nav
-                    parent = element.parent
-                    if parent and hasattr(parent, 'name'):
-                        # Skip if parent is nav or inside nav
-                        skip = False
-                        if parent.name == 'nav':
-                            skip = True
-                        if hasattr(parent, 'get') and parent.get('id') == 'navigator':
-                            skip = True
-                        
-                        if not skip:
-                            content_parts.append(text)
-        
-        return '\n'.join(content_parts)
-    
-    def _extract_h1_section_content(self, h1_heading, next_h1) -> str:
-        """
-        Extracts content for one H1 section (heading + all content until next H1).
+        CRITICAL LOGIC:
+        - If start_element is None: Start from beginning of container
+        - If stop_element is None: Go until end of container
+        - Extract ALL text in between, including from all nested elements
+        - SKIP text that's inside the start_element itself (to avoid duplication)
         
         Args:
-            h1_heading: The current H1 heading element
-            next_h1: The next H1 heading element (or None if last section)
+            container: The container to search in (main content area)
+            start_element: Element to start AFTER (None = start from beginning)
+            stop_element: Element to STOP AT (None = go to end)
             
         Returns:
-            str: The heading text + all section content
+            All text content between start and stop
         """
-        content_parts = []
+        text_parts = []
+        started = (start_element is None)  # If no start element, begin immediately
         
-        # 1. Add the H1 heading text itself
-        heading_text = self._extract_heading_text(h1_heading)
-        if heading_text:
-            content_parts.append(heading_text)
-        
-        # 2. Check if this H1 has a collapsible-content sibling
-        collapsible_content = h1_heading.find_next_sibling('div', class_='collapsible-content')
-        
-        if collapsible_content:
-            # Extract from collapsible div
-            content = self._extract_text_content(collapsible_content)
-            if content:
-                content_parts.append(content)
-        else:
-            # No collapsible div, extract all siblings until next H1
-            current = h1_heading.next_sibling
+        # Walk through EVERY element in the container in document order
+        for element in container.descendants:
             
-            while current:
-                # Stop if we reach the next H1
-                if current == next_h1:
-                    break
-                
-                # Skip NavigableString whitespace
-                if isinstance(current, NavigableString):
-                    text = str(current).strip()
-                    if text:
-                        content_parts.append(text)
-                    current = current.next_sibling
-                    continue
-                
-                # Skip if not a tag
-                if not hasattr(current, 'name'):
-                    current = current.next_sibling
-                    continue
-                
-                # Stop if we hit another H1
-                if current.name == 'h1':
-                    break
-                
-                # Extract text from this sibling
-                text = self._extract_text_content(current)
-                if text:
-                    content_parts.append(text)
-                
-                current = current.next_sibling
+            # Check if we should start collecting
+            if not started:
+                if element == start_element:
+                    started = True
+                    continue  # Skip the start element itself
+                else:
+                    continue  # Haven't reached start yet
+            
+            # Check if we should stop collecting
+            if stop_element and element == stop_element:
+                # We've hit the next H1 - stop here
+                break
+            
+            # CRITICAL: Skip text that's inside the start_element 
+            # (to avoid duplicating the H1 heading text)
+            if start_element and self._is_inside_element(element, start_element):
+                continue
+            
+            # Skip navigation elements
+            if self._should_skip_element(element):
+                continue
+            
+            # Skip HTML comments
+            if isinstance(element, Comment):
+                continue
+            
+            # Skip structural divs (but descend into them)
+            if hasattr(element, 'name') and element.name in ['div', 'script', 'style', 'nav']:
+                continue
+            
+            # Collect text from NavigableString elements
+            if isinstance(element, NavigableString) and not isinstance(element, Comment):
+                text = str(element).strip()
+                if text and len(text) > 1:
+                    parent = element.parent
+                    if parent and hasattr(parent, 'name'):
+                        # Skip navigation and structural elements
+                        if parent.name in ['nav', 'script', 'style']:
+                            continue
+                        
+                        # Get text from content elements (including ALL heading levels)
+                        if parent.name in ['p', 'span', 'td', 'th', 'li', 'b', 'i', 'strong', 'em', 'a', 
+                                          'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                            text_parts.append(text)
         
-        return '\n\n'.join(content_parts)
-    
-    def _extract_heading_text(self, heading_element) -> str:
-        """
-        Extracts clean heading text, removing section numbers and markup.
-        """
-        if not heading_element:
-            return ""
-        
-        # Clone to avoid modifying original
-        heading_copy = BeautifulSoup(str(heading_element), 'html.parser')
-        
-        # Remove section number spans
-        for span in heading_copy.find_all('span', class_='section-number'):
-            span.decompose()
-        
-        # Remove section separator inlines
-        for inline in heading_copy.find_all('inline', class_='section-separator'):
-            inline.decompose()
-        
-        # Get text
-        text = heading_copy.get_text(strip=True)
-        
-        # Clean up common artifacts
-        text = re.sub(r'^\s*§\s*\d+\s*', '', text)
-        text = re.sub(r'^\s*\d+\s*[-—]\s*', '', text)
-        
-        return text.strip()
-    
-    def _extract_text_content(self, element) -> str:
-        """
-        Extracts clean text from an element, preserving paragraph structure.
-        """
-        if not element:
-            return ""
-        
-        # Get text with line breaks between elements
-        text = element.get_text(separator='\n', strip=True)
+        # Join with newlines to preserve structure
+        result = '\n'.join(text_parts)
         
         # Clean up excessive whitespace
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        text = re.sub(r' {2,}', ' ', text)
+        result = re.sub(r'\n{3,}', '\n\n', result)
+        result = re.sub(r' {2,}', ' ', result)
+        
+        return result.strip()
+    
+    def _is_inside_element(self, element, container_element) -> bool:
+        """
+        Check if element is a child/descendant of container_element.
+        This is used to skip text inside the H1 heading itself.
+        """
+        if element == container_element:
+            return True
+        
+        # Check if any parent is the container_element
+        if hasattr(element, 'parents'):
+            for parent in element.parents:
+                if parent == container_element:
+                    return True
+        
+        return False
+    
+    def _should_skip_element(self, element) -> bool:
+        """Check if element should be skipped during text extraction."""
+        # Skip if in navigation
+        if hasattr(element, 'name'):
+            if element.name in ['nav', 'script', 'style', 'meta', 'link']:
+                return True
+        
+        # Skip if parent is navigation
+        if hasattr(element, 'parents'):
+            for parent in element.parents:
+                if hasattr(parent, 'name') and parent.name == 'nav':
+                    return True
+                if hasattr(parent, 'get') and parent.get('id') == 'navigator':
+                    return True
+        
+        return False
+    
+    def _get_heading_text(self, heading) -> str:
+        """Extract clean heading text."""
+        if not heading:
+            return ""
+        
+        # Get text content
+        text = heading.get_text(strip=True)
+        
+        # Clean up artifacts
+        text = re.sub(r'^\s*§\s*\d+\s*', '', text)
+        text = re.sub(r'^[-‑–—]\s*', '', text)
         
         return text.strip()
     
+    def _extract_entire_document(self, main_content) -> List[Dict]:
+        """Extract entire document as single section."""
+        content = self._extract_text_between_elements(main_content, None, None)
+        
+        if not content.strip():
+            content = "No content found in document."
+        
+        logger.info(f"Created single section with {len(content)} characters")
+        
+        return [{
+            'section_id': 1,
+            'content': content,
+            'heading': None
+        }]
+    
     def format_section_content(self, section: Dict[str, any]) -> str:
-        """
-        Formats section content for saving.
-        """
+        """Format section content for saving."""
         return section['content']
+    
+    def get_section_summary(self, section: Dict[str, any]) -> str:
+        """Get section summary for logging."""
+        section_id = section['section_id']
+        heading = section.get('heading')
+        content_length = len(section['content'])
+        
+        if heading:
+            return f"Section {section_id}: '{heading[:50]}...' ({content_length} chars)"
+        else:
+            return f"Section {section_id}: Pre-heading content ({content_length} chars)"

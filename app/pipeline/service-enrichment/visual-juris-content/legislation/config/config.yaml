@@ -20,6 +20,25 @@ aws:
     s3:
         bucket_name: "legal-store"
 
+models:
+  gemini:
+    model: "models/gemini-2.5-pro-preview-05-06"
+    base_url: "https://generativelanguage.googleapis.com/v1beta"
+    pricing:
+      input_per_million: 2.50
+      output_per_million: 15.00
+
+heading_detection:
+  prompt_path: "config/heading_detection_prompt.txt"
+  model_name: "gemini"
+  genai_extract: true
+
+# -- Content verification configuration --
+content_verification:
+  enabled: true
+  pass_threshold: 0.99  # Minimum similarity score to mark as 'pass' (0.0-1.0)
+  source_filename: "miniviewer.txt"  # Original source file to compare against
+  
 # List of tables to be read by the connector
 tables:
   tables_to_read:
@@ -81,7 +100,10 @@ tables:
 # -- File naming conventions for the enrichment service --
 enrichment_filenames:
   source_html: "miniviewer.html"
+  genai_html: "miniviewer_genai.html"
   extracted_html: "juriscontent.html"
+  gemini_response: "juriscontent_gemini_response.json"
+  source_text: "miniviewer.txt"  # Original text file for verification
 
 # -- Audit log configuration --
 audit_log:
@@ -89,12 +111,6 @@ audit_log:
     database: "legal_store"
     table: "audit_log"
     job_name: "legislation juriscontent generation"
-
-# -- Path to the new heading inference rules --
-headless_rules_path: "config/headless_rules.yaml"
-
-# -- Path to the heading hierarchy rules --
-heading_hierarchy_rules_path: "config/heading_hierarchy_rules.yaml"
 
 # -- Registry details --
 tables_registry:

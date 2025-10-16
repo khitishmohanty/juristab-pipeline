@@ -335,3 +335,149 @@ class DatabaseConnector:
             raise
         finally:
             session.close()
+            
+    def update_heading_detection_metrics(self, table_name: str, source_id: str, 
+                                     token_info: dict):
+        """
+        Update token usage and pricing information for heading detection.
+        
+        Args:
+            table_name: Name of enrichment status table
+            source_id: Source ID being processed
+            token_info: Dict with token counts and pricing info
+        """
+        self._validate_table_name(table_name)
+        session = self.Session()
+        
+        try:
+            stmt = text(f"""
+                UPDATE {table_name}
+                SET token_input_juriscontent_html = :input_tokens,
+                    token_output_juriscontent_html = :output_tokens,
+                    token_input_price_juriscontent_html = :input_price,
+                    token_output_price_juriscontent_html = :output_price
+                WHERE source_id = :source_id
+            """)
+            
+            session.execute(stmt, {
+                "input_tokens": token_info['input_tokens'],
+                "output_tokens": token_info['output_tokens'],
+                "input_price": token_info['input_price'],
+                "output_price": token_info['output_price'],
+                "source_id": source_id
+            })
+            
+            session.commit()
+            logger.info(f"Updated heading detection metrics for source_id: {source_id}")
+            
+        except Exception as e:
+            logger.error(f"Error updating heading detection metrics: {e}")
+            session.rollback()
+            raise
+        finally:
+            session.close()
+            
+    def update_heading_detection_metadata(self, table_name: str, source_id: str, 
+                                         heading_metadata: dict):
+        """
+        Update heading detection metadata including token usage, pricing, and heading counts.
+        
+        Args:
+            table_name: Name of enrichment status table
+            source_id: Source ID being processed
+            heading_metadata: Dict with all heading detection information:
+                - input_tokens (int)
+                - output_tokens (int)
+                - input_price (float)
+                - output_price (float)
+                - before_processing_heading_count (int)
+                - after_processing_heading_count (int)
+                - genai_path_used (bool)
+        """
+        self._validate_table_name(table_name)
+        session = self.Session()
+        
+        try:
+            stmt = text(f"""
+                UPDATE {table_name}
+                SET token_input_juriscontent_html = :input_tokens,
+                    token_output_juriscontent_html = :output_tokens,
+                    token_input_price_juriscontent_html = :input_price,
+                    token_output_price_juriscontent_html = :output_price,
+                    juriscontent_html_before_processing_heading_count = :before_count,
+                    juriscontent_html_after_processing_heading_count = :after_count,
+                    juriscontent_html_genai_path = :genai_path
+                WHERE source_id = :source_id
+            """)
+            
+            session.execute(stmt, {
+                "input_tokens": heading_metadata.get('input_tokens', 0),
+                "output_tokens": heading_metadata.get('output_tokens', 0),
+                "input_price": heading_metadata.get('input_price', 0.0),
+                "output_price": heading_metadata.get('output_price', 0.0),
+                "before_count": heading_metadata.get('before_processing_heading_count', 0),
+                "after_count": heading_metadata.get('after_processing_heading_count', 0),
+                "genai_path": 'true' if heading_metadata.get('genai_path_used', False) else 'false',
+                "source_id": source_id
+            })
+            
+            session.commit()
+            
+            genai_status = "USED" if heading_metadata.get('genai_path_used', False) else "NOT USED"
+            logger.info(f"Updated heading metadata for source_id: {source_id}")
+            logger.info(f"  - Gemini path: {genai_status}")
+            logger.info(f"  - Headings before: {heading_metadata.get('before_processing_heading_count', 0)}")
+            logger.info(f"  - Headings after: {heading_metadata.get('after_processing_heading_count', 0)}")
+            
+        except Exception as e:
+            logger.error(f"Error updating heading detection metadata: {e}")
+            session.rollback()
+            raise
+        finally:
+            session.close()
+    
+    def update_content_verification(self, table_name: str, source_id: str, 
+                                   similarity_score: float, status: str):
+        """
+        Update content verification score and status in the database.
+        
+        Args:
+            table_name (str): Name of enrichment status table
+            source_id (str): Source ID being processed
+            similarity_score (float): Similarity score between 0.0 and 1.0
+            status (str): Verification status ('pass', 'failed', or 'not started')
+        """
+        self._validate_table_name(table_name)
+        session = self.Session()
+        
+        valid_statuses = ['pass', 'failed', 'not started']
+        if status not in valid_statuses:
+            raise ValueError(f"Invalid status value. Must be one of {valid_statuses}")
+        
+        try:
+            stmt = text(f"""
+                UPDATE {table_name}
+                SET juriscontent_html_content_verification_score = :score,
+                    juriscontent_html_content_verification_status = :status
+                WHERE source_id = :source_id
+            """)
+            
+            session.execute(stmt, {
+                "score": similarity_score,
+                "status": status,
+                "source_id": source_id
+            })
+            
+            session.commit()
+            
+            logger.info(
+                f"Updated content verification for source_id: {source_id} | "
+                f"Score: {similarity_score:.4f} | Status: {status.upper()}"
+            )
+            
+        except Exception as e:
+            logger.error(f"Error updating content verification: {e}")
+            session.rollback()
+            raise
+        finally:
+            session.close()

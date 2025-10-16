@@ -110,6 +110,10 @@ class JuriscontentGenerator:
             new_tag_name = f'h{promoted_level}'
             new_heading = soup.new_tag(new_tag_name)
             
+            # Preserve existing id attribute if present
+            if heading.get('id'):
+                new_heading['id'] = heading['id']
+            
             # Check if heading has complex content (links, etc.) or just text
             if len(list(heading.children)) == 1 and isinstance(list(heading.children)[0], str):
                 # Simple text content
@@ -193,44 +197,99 @@ class JuriscontentGenerator:
 
         # --- BUILD NAVIGATOR & ADD IDs TO HEADINGS ---
         nav_ul = soup.new_tag('ul')
-        headings_in_main = main_content.find_all(['h1', 'h2', 'h3', 'h4', 'h5'])
         
-        # After standardization, H1s should exist (promoted from H2 if needed)
-        # So we always show H1 headings in the navigator
+        # Find all H1 and H2 headings for navigation
         h1_headings = main_content.find_all('h1')
         
-        for i, heading in enumerate(h1_headings):
-            heading_id = f"section-nav-{i}"
-            heading['id'] = heading_id
+        for i, h1 in enumerate(h1_headings):
+            # Generate section_id for H1 if not already present
+            if not h1.get('id'):
+                h1['id'] = f"section_{i + 1}"
             
+            heading_id = h1['id']
+            
+            # Create H1 navigation item
             li = soup.new_tag('li', **{'class': 'nav-title'})
             a = soup.new_tag('a', href=f"#{heading_id}")
             a_strong = soup.new_tag('strong')
             
-            # Get the text content for navigation - USE NEW METHOD TO PRESERVE SPACES
-            nav_text = self._get_clean_nav_text(heading)
+            nav_text = self._get_clean_nav_text(h1)
             a_strong.string = nav_text
             
             a.append(a_strong)
             li.append(a)
+            
+            # Find all H2 headings that are children of this H1
+            h2_ul = soup.new_tag('ul')
+            has_h2_children = False
+            
+            # Get all H2s between this H1 and the next H1 (or end of document)
+            next_h1 = h1_headings[i + 1] if i + 1 < len(h1_headings) else None
+            current_element = h1.find_next_sibling()
+            
+            while current_element:
+                if current_element == next_h1:
+                    break
+                
+                # Check if this is an H2 or contains an H2
+                h2_list = []
+                if current_element.name == 'h2':
+                    h2_list.append(current_element)
+                else:
+                    h2_list = current_element.find_all('h2', recursive=True)
+                
+                for h2 in h2_list:
+                    if not h2.get('id'):
+                        h2['id'] = f"section-h2-{i}-{len(h2_ul.find_all('li'))}"
+                    
+                    h2_li = soup.new_tag('li')
+                    h2_a = soup.new_tag('a', href=f"#{h2['id']}")
+                    h2_a.string = self._get_clean_nav_text(h2)
+                    h2_li.append(h2_a)
+                    h2_ul.append(h2_li)
+                    has_h2_children = True
+                
+                current_element = current_element.find_next_sibling()
+            
+            # Check if H1 has any actual content (text or child headings)
+            # Look for the collapsible-content div that was added to this H1
+            h1_content_div = h1.find_next_sibling('div', class_='collapsible-content')
+            h1_has_content = False
+            
+            if h1_content_div:
+                # Check if the div has meaningful content
+                content_text = h1_content_div.get_text(strip=True)
+                if content_text or h1_content_div.find_all():
+                    h1_has_content = True
+            
+            # Add H2 submenu if there are H2 children and mark as collapsible
+            if has_h2_children:
+                li['class'] = li.get('class', []) + ['nav-collapsible']
+                li.append(h2_ul)
+            elif h1_has_content:
+                # H1 has content but no H2 children - still make it collapsible in nav
+                # but don't add the nav-collapsible class (no submenu to show)
+                pass
+            
             nav_ul.append(li)
         
-        # If still no headings (rare case), add a placeholder
+        # If no headings, add a placeholder
         if not h1_headings:
             li = soup.new_tag('li', **{'class': 'nav-placeholder'})
             li.string = "No sections available"
             nav_ul.append(li)
         
-        # Add IDs to all headings for internal navigation
-        for i, heading in enumerate(headings_in_main):
-            if not heading.get('id'):  # Don't override ids already set
-                heading['id'] = f"section-{i}"
+        # Add IDs to remaining headings for internal navigation
+        all_headings = main_content.find_all(re.compile(r'^h[1-5]$'))
+        for idx, heading in enumerate(all_headings):
+            if not heading.get('id'):
+                heading['id'] = f"section-{idx}"
         
         navigator.append(nav_ul)
 
         # --- HIERARCHY-BUILDING STEP ---
         # All headings H1-H5 are now collapsible
-        headings = main_content.find_all(re.compile('^h[1-5]$'))
+        headings = main_content.find_all(re.compile(r'^h[1-5]$'))
 
         # Handle intro content (between title and first collapsible heading)
         if headings:
@@ -240,7 +299,7 @@ class JuriscontentGenerator:
             
             # For each H1, check if there's content between it and the next heading
             for h1_tag in h1_tags:
-                next_heading = h1_tag.find_next_sibling(re.compile('^h[1-5]$'))
+                next_heading = h1_tag.find_next_sibling(re.compile(r'^h[1-5]$'))
                 if next_heading and next_heading in headings:
                     # There's content between this H1 and a collapsible heading
                     intro_wrapper = soup.new_tag('div', **{'class': 'intro-content'})
@@ -251,21 +310,33 @@ class JuriscontentGenerator:
                     if intro_wrapper.contents:
                         next_heading.insert_before(intro_wrapper)
 
-        # Make H1-H5 collapsible
+        # Make H1-H5 collapsible (but only if they have content)
         for heading in reversed(headings):
-            heading['class'] = heading.get('class', []) + ['collapsible-heading']
             content_wrapper = soup.new_tag('div', **{'class': 'collapsible-content'})
             current_level = int(heading.name[1])
             
+            # Collect content between this heading and the next same-or-higher-level heading
             for sibling in list(heading.find_next_siblings()):
                 # Stop at the next heading of same or higher level
-                if sibling.name and re.match('^h[1-5]$', sibling.name):
+                if sibling.name and re.match(r'^h[1-5]$', sibling.name):
                     sibling_level = int(sibling.name[1])
                     if sibling_level <= current_level:
                         break
                 content_wrapper.append(sibling.extract())
             
-            heading.insert_after(content_wrapper)
+            # Only make it collapsible if there's actual content
+            # Check if content_wrapper has any meaningful content (not just whitespace)
+            has_content = False
+            if content_wrapper.contents:
+                # Check if there's any text content or child elements
+                content_text = content_wrapper.get_text(strip=True)
+                if content_text or content_wrapper.find_all():
+                    has_content = True
+            
+            if has_content:
+                heading['class'] = heading.get('class', []) + ['collapsible-heading']
+                heading.insert_after(content_wrapper)
+            # If no content, don't add the wrapper or collapsible class
             
         # --- ADD HORIZONTAL LINES AFTER H2 SECTIONS ---
         main_headings = main_content.find_all('h2', recursive=False)
@@ -320,7 +391,16 @@ class JuriscontentGenerator:
                 color: #999;
                 padding: 0.5em;
             }
-            #navigator ul ul { padding-left: 1.5em; }
+            #navigator ul ul { 
+                padding-left: 1.5em;
+                margin-top: 0.5em;
+            }
+            #navigator ul ul li {
+                font-size: 0.9em;
+                font-weight: 400;
+                margin-bottom: 0.3em;
+                border-bottom: none;
+            }
             #navigator li { margin-bottom: 0.2em; }
             #navigator .nav-collapsible {
                 border-bottom: 1px solid #e0e0e0;
@@ -345,15 +425,16 @@ class JuriscontentGenerator:
             #navigator .nav-collapsible > a {
                 font-weight: 500;
                 cursor: pointer;
+                padding-left: 1.2em;
             }
             #navigator .nav-collapsible > a::before {
                 content: '+';
                 position: absolute;
-                left: 0.2em;
-                top: 50%;
-                transform: translateY(-50%);
-                font-weight: bold;
-                color: #555;
+                left: 0;
+                top: 0.2em;
+                font-weight: normal;
+                font-size: 1.2em;
+                color: #666;
                 width: 1em;
                 text-align: center;
             }
@@ -375,6 +456,17 @@ class JuriscontentGenerator:
                 border-left: 1px solid #e0e0e0;
                 padding-left: 2rem;
                 font-size: 14px;
+            }
+            #content * {
+                text-align: left !important;
+                margin-left: 0 !important;
+            }
+            #content table {
+                margin-left: 0 !important;
+            }
+            #content p {
+                margin-left: 0 !important;
+                text-indent: 0 !important;
             }
             #content ul {
                 list-style-type: none;
@@ -423,6 +515,7 @@ class JuriscontentGenerator:
             .intro-content {
                 padding-left: 1.5em;
                 margin-left: 0.4em;
+                border-left: 2px solid #d0d0d0;
             }
             .collapsible-content {
                 overflow: hidden;
@@ -430,12 +523,28 @@ class JuriscontentGenerator:
                 max-height: 5000px;
                 padding-left: 1.5em;
                 margin-left: 0.4em;
+                border-left: 2px solid #d0d0d0;
             }
-            h1.collapsible-heading + .collapsible-content { margin-left: 0.4em; }
-            h2.collapsible-heading + .collapsible-content { margin-left: 0.4em; }
-            h3.collapsible-heading + .collapsible-content { margin-left: 1.9em; }
-            h4.collapsible-heading + .collapsible-content { margin-left: 3.4em; }
-            h5.collapsible-heading + .collapsible-content { margin-left: 4.9em; }
+            h1.collapsible-heading + .collapsible-content { 
+                margin-left: 0.4em;
+                border-left: 2px solid #d0d0d0;
+            }
+            h2.collapsible-heading + .collapsible-content { 
+                margin-left: 0.4em;
+                border-left: 2px solid #d0d0d0;
+            }
+            h3.collapsible-heading + .collapsible-content { 
+                margin-left: 1.9em;
+                border-left: 2px solid #d0d0d0;
+            }
+            h4.collapsible-heading + .collapsible-content { 
+                margin-left: 3.4em;
+                border-left: 2px solid #d0d0d0;
+            }
+            h5.collapsible-heading + .collapsible-content { 
+                margin-left: 4.9em;
+                border-left: 2px solid #d0d0d0;
+            }
         """
         head.append(style_tag)
         
@@ -460,38 +569,85 @@ class JuriscontentGenerator:
                     });
                 });
                 
+                function getFullHeight(element) {
+                    // Get the total height including all nested expanded content
+                    let height = element.scrollHeight;
+                    
+                    // Find all nested expanded collapsible content
+                    const nestedExpanded = element.querySelectorAll('.collapsible-content.expanded');
+                    nestedExpanded.forEach(nested => {
+                        // Add the full scroll height of nested expanded sections
+                        height += nested.scrollHeight;
+                    });
+                    
+                    return height;
+                }
+                
+                function updateParentHeights(element) {
+                    // Update all parent collapsible sections to accommodate the change
+                    let parent = element.parentElement.closest('.collapsible-content');
+                    while (parent) {
+                        if (parent.classList.contains('expanded') || parent.style.maxHeight !== '0px') {
+                            parent.style.maxHeight = getFullHeight(parent) + 'px';
+                        }
+                        parent = parent.parentElement.closest('.collapsible-content');
+                    }
+                }
+                
                 function toggleSection(heading) {
                     heading.classList.toggle('collapsed');
                     const content = heading.nextElementSibling;
                     if (content && content.classList.contains('collapsible-content')) {
                         if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                            // Collapsing
                             content.style.maxHeight = '0px';
                             content.classList.remove('expanded');
                         } else {
-                            content.style.maxHeight = content.scrollHeight + 'px';
+                            // Expanding - use full height calculation
                             content.classList.add('expanded');
+                            const fullHeight = getFullHeight(content);
+                            content.style.maxHeight = fullHeight + 'px';
                         }
-                        const updateParentHeights = () => {
-                            let parent = content.parentElement.closest('.collapsible-content');
-                            while (parent) {
-                                if (parent.style.maxHeight && parent.style.maxHeight !== '0px') {
-                                    parent.style.maxHeight = parent.scrollHeight + 'px';
-                                }
-                                parent = parent.parentElement.closest('.collapsible-content');
-                            }
-                        };
-                        content.addEventListener('transitionend', updateParentHeights, { once: true });
+                        
+                        // Update parent heights after a short delay to ensure transitions complete
+                        setTimeout(() => {
+                            updateParentHeights(content);
+                        }, 50);
                     }
                 }
                 
-                // --- Simplified Navigator for H1 only ---
+                // --- Navigator Collapse/Expand for H1 sections (only those with children) ---
+                const navCollapsibles = document.querySelectorAll('#navigator .nav-collapsible');
+                navCollapsibles.forEach(navItem => {
+                    const subMenu = navItem.querySelector('ul');
+                    if (subMenu) {
+                        const navLink = navItem.querySelector('a');
+                        navLink.addEventListener('click', function(e) {
+                            // Only toggle if clicking on the H1 link itself and there are sub-items
+                            if (e.target === navLink || e.target.parentElement === navLink) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navItem.classList.toggle('nav-expanded');
+                                return false;
+                            }
+                        });
+                    }
+                });
+                
+                // --- Navigator Links Scrolling & Auto-Expand ---
                 const navLinks = document.querySelectorAll('#navigator a');
                 navLinks.forEach(link => {
                     link.addEventListener('click', function(e) {
-                        e.preventDefault();
                         const targetId = this.getAttribute('href');
                         const targetElement = document.querySelector(targetId);
-                        if (targetElement) {
+                        
+                        // If this is a sub-item link or H1 without children, allow navigation
+                        const parentLi = this.parentElement;
+                        const hasChildren = parentLi.classList.contains('nav-collapsible');
+                        
+                        if (targetElement && (!hasChildren || !parentLi.classList.contains('nav-title'))) {
+                            e.preventDefault();
+                            
                             // First, expand the target if it's collapsed
                             if (targetElement.classList.contains('collapsible-heading') && targetElement.classList.contains('collapsed')) {
                                 toggleSection(targetElement);
@@ -513,7 +669,7 @@ class JuriscontentGenerator:
                                     behavior: 'smooth',
                                     block: 'start'
                                 });
-                            }, 300);
+                            }, 400);
                         }
                     });
                 });
