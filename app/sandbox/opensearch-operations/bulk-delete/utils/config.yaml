@@ -1,0 +1,9 @@
+opensearch:
+  host: "5cl8kigyy51ybng8oe6j.ap-southeast-2.aoss.amazonaws.com"
+  port: 443
+  index_name: "legal-store-search"
+  use_ssl: true
+  verify_certs: true
+  ssl_assert_hostname: false
+  ssl_show_warn: false
+  region: "ap-southeast-2"
