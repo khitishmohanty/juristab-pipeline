@@ -1,0 +1,49 @@
+# -- Database connection details --
+database:
+    destination:
+        dialect: "mysql"
+        driver: "mysqlconnector"
+        host: "juris-data.crkmq80swpic.ap-southeast-2.rds.amazonaws.com"
+        port: "3306"
+        name: "legal_store"
+
+# -- AWS connection details (not used in versioning but kept for consistency) --
+aws:
+    default_region: "ap-southeast-2"
+
+# -- Registry details for versioning --
+tables_registry:
+    database: "legal_store"
+    table: "legislation_registry"
+    book_name_column: "book_name"
+    book_version_column: "book_version"
+    date_column: "start_date"  # CORRECTED: Changed from date_published to start_date
+    status_column: "status_registration"
+    year_column: "year"
+    jurisdiction_column: "jurisdiction_code"
+    
+    # Filter configuration - empty arrays mean process all
+    # Examples:
+    # processing_years: [2023, 2024]
+    # jurisdiction_codes: ['NSW', 'VIC', 'QLD', 'TAS', 'SA', 'WA', 'NT', 'ACT', 'FED']
+    processing_years: []
+    jurisdiction_codes: []
+
+# -- Status tracking table configuration --
+tables:
+  tables_to_write:
+    - database: legal_store
+      table: legislation_enrichment_status
+      step_columns:
+        book_versioning:
+          status: "status_book_versioning"
+          duration: "duration_book_versioning"
+          start_time: "start_time_book_versioning"
+          end_time: "end_time_book_versioning"
+
+# -- Audit log configuration --
+audit_log:
+    versioning_job:
+        database: "legal_store"
+        table: "audit_log"
+        job_name: "legislation_versioning_assignment"
